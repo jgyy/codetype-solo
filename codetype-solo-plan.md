@@ -18,12 +18,28 @@ A daily code-snippet typing trainer for a single developer. User picks a languag
 
 ## Stack
 
-- **Frontend:** Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui
-- **Backend:** Next.js Route Handlers + Supabase (Postgres + Auth)
-- **Auth:** Supabase email magic link (optional — guest mode also works)
+- **Frontend:** Next.js 16 (static export) + TypeScript + Tailwind + shadcn/ui
+- **Backend:** AWS Lambda (Node.js) behind API Gateway HTTP API
+- **Database:** DynamoDB (on-demand billing — pay-per-request, no idle cost)
+- **Auth:** Amazon Cognito User Pool (free tier: 50k MAUs) — guest mode also works
 - **Charts:** Recharts (stats over time)
-- **Deploy:** Vercel
+- **Hosting:** S3 (static site) + CloudFront (CDN + HTTPS)
+- **IaC:** AWS SAM or plain CloudFormation (single stack)
 - **AI tool:** opencode
+
+### Why this is the cheapest viable AWS stack
+
+| Component | Cost at demo scale | Notes |
+|---|---|---|
+| S3 static hosting | ~$0.02/mo | A few MB of assets |
+| CloudFront | Free tier 1 TB/mo egress for 12 mo, then ~$0.085/GB | Negligible for personal demo |
+| API Gateway HTTP API | $1.00 per million requests | HTTP API, *not* REST API (REST is 3.5×) |
+| Lambda | Free tier: 1M requests + 400k GB-s/mo forever | Stays free for personal use |
+| DynamoDB on-demand | $1.25 per million writes, $0.25 per million reads | No provisioned throughput → no idle cost |
+| Cognito | Free up to 50k MAU | Effectively free |
+| **Total expected** | **< $1/month** for personal use | Most months: $0 within free tier |
+
+Avoid: RDS (≥$13/mo for smallest db.t4g.micro), Amplify Hosting (fine but pricier than S3+CF), ECS/Fargate (always-on cost), API Gateway REST (3.5× HTTP API cost).
 
 ---
 
@@ -45,17 +61,20 @@ A daily code-snippet typing trainer for a single developer. User picks a languag
 
 ---
 
-## Data model (Supabase / Postgres)
+## Data model (DynamoDB — single-table design)
 
-```sql
-profiles      (id uuid pk, email text, created_at)
-snippets      (id uuid pk, language text, title text, code text, difficulty int)
-attempts      (id uuid pk, user_id fk, snippet_id fk, wpm float, accuracy float,
-               errors int, duration_ms int, completed_at)
-daily_seeds   (date date pk, snippet_id fk)   -- precomputed daily challenge
-```
+One table `codetype` with composite key `(PK, SK)`:
 
-RLS: a user can only read/write their own `attempts` and `profiles` row.
+| Entity | PK | SK | Attributes |
+|---|---|---|---|
+| Profile | `USER#<sub>` | `PROFILE` | email, created_at |
+| Attempt | `USER#<sub>` | `ATTEMPT#<iso_ts>` | snippet_id, wpm, accuracy, errors, duration_ms, language |
+| Snippet | `SNIPPET#<lang>` | `SNIPPET#<id>` | title, code, difficulty |
+| Daily seed | `DAILY` | `DATE#<yyyy-mm-dd>` | snippet_id |
+
+**GSI1** (`GSI1PK = USER#<sub>`, `GSI1SK = DATE#<yyyy-mm-dd>`) for streak/history queries by date range.
+
+Authorisation: Lambda extracts `sub` from the Cognito JWT (validated by API Gateway JWT authorizer) and uses it as the partition key — users physically cannot read another user's items because their PK isn't in the query.
 
 ---
 
@@ -68,16 +87,21 @@ codetype-solo/
 ├── .gitignore
 ├── package.json
 ├── src/
-│   ├── app/                # Next.js App Router pages
+│   ├── app/                # Next.js App Router pages (static export)
 │   ├── components/         # UI components (shadcn + custom)
-│   ├── lib/                # supabase client, helpers
-│   └── server/             # route handlers, server actions
+│   └── lib/                # api client, cognito helper, dynamo helpers
+├── lambda/                 # Lambda handlers (one per route)
+│   ├── attempts-post.ts
+│   ├── attempts-list.ts
+│   └── daily-get.ts
+├── infra/
+│   └── template.yaml       # AWS SAM template (S3+CF+APIGW+Lambda+Dynamo+Cognito)
 ├── tests/                  # vitest unit + playwright e2e (smoke only)
 ├── docs/
 │   ├── ai-log.md           # prompt log + decision log (B1 deliverable)
 │   └── architecture.md
 ├── scripts/
-│   └── seed-snippets.ts    # populate snippets table
+│   └── seed-snippets.ts    # batch-write snippets into DynamoDB
 ├── assets/                 # screenshots, demo gif
 └── data/
     └── snippets/           # raw .json files per language
@@ -89,10 +113,10 @@ codetype-solo/
 
 | Day | Goal | Deliverable |
 |---|---|---|
-| 1 | Scaffold + auth + DB schema | Project boots, can sign in, empty dashboard renders |
-| 2 | Core typing engine | Can complete a snippet, WPM/accuracy computed correctly |
-| 3 | History + daily + streaks | Full game loop persisted; daily challenge works |
-| 4 | Polish + dashboard charts + README + deploy | Shippable demo on Vercel |
+| 1 | Scaffold Next.js + typing engine (guest mode, localStorage) | Can complete a snippet locally; WPM/accuracy correct |
+| 2 | SAM template: Dynamo + Lambda + API Gateway + Cognito | `sam deploy` succeeds; can POST/GET attempts via curl with JWT |
+| 3 | Wire frontend to API; history + daily + streaks | Full game loop persisted in DynamoDB |
+| 4 | S3 + CloudFront deploy, dashboard chart, README, demo gif | Shippable demo on a CloudFront URL |
 
 ---
 
@@ -115,7 +139,9 @@ This directly answers the README rubric (lines 117–119 of the programme doc): 
 |---|---|
 | Typing engine perf janky on long snippets | Cap snippets at 400 chars; use uncontrolled input + ref |
 | Stats computation off-by-one (common in WPM) | Write unit tests for WPM calc *first* (TDD on this module only) |
-| Supabase auth flow eats half a day | Have a "guest mode" fallback that uses localStorage so the demo still works without auth |
+| Cognito + JWT authorizer eats half a day | Guest-mode fallback with localStorage so demo works without auth; wire Cognito on Day 3 only if Day 2 finishes early |
+| AWS bill surprise | DynamoDB on-demand + Lambda + HTTP API are all pay-per-request; set a $5 AWS Budgets alert; never use RDS or provisioned capacity |
+| CloudFront cache makes JS updates invisible | Use versioned filenames (Next.js does this) + invalidate `/index.html` on deploy |
 | Scope creep on charts | One chart only (WPM over time); skip the rest unless Day 4 is free |
 
 ---
