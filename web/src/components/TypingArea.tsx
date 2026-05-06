@@ -16,7 +16,7 @@ type Props = {
 };
 
 export function TypingArea({ target, onComplete }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [typed, setTyped] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [done, setDone] = useState(false);
@@ -74,7 +74,7 @@ export function TypingArea({ target, onComplete }: Props) {
           </span>
         ))}
       </pre>
-      <input
+      <textarea
         ref={inputRef}
         value={typed}
         onChange={(e) => handleChange(e.target.value)}
