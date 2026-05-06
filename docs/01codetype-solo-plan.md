@@ -25,6 +25,8 @@ A daily code-snippet typing trainer for a single developer. User picks a languag
 - **Charts:** Recharts (stats over time)
 - **Hosting:** S3 (static site) + CloudFront (CDN + HTTPS)
 - **IaC:** AWS SAM or plain CloudFormation (single stack)
+- **Package manager / runtime:** Bun (install, scripts, test runner)
+- **AWS profile:** `jgyy` (all `aws` / `sam` / `cdk` commands use `--profile jgyy`)
 - **AI tool:** opencode
 
 ### Why this is the cheapest viable AWS stack
@@ -46,7 +48,7 @@ Avoid: RDS (≥$13/mo for smallest db.t4g.micro), Amplify Hosting (fine but pric
 ## Core features (must-have for submission)
 
 1. **Snippet runner** — fetch a snippet, type it, live diff highlighting (correct char = green, wrong = red).
-2. **Per-attempt stats** — WPM, accuracy %, time, error count, per-character timing.
+2. **Per-attempt stats** — WPM (all three formulas: Gross, Net, Accuracy-scaled), accuracy %, time, error count, per-character timing. Result UI shows all three WPM numbers side-by-side so the user can see speed vs. error-adjusted speed.
 3. **Daily challenge** — same snippet for all users on a given UTC date (seeded by date).
 4. **Personal history** — list of past attempts with sortable columns.
 5. **Streak counter** — consecutive days with at least one completed attempt.
@@ -68,7 +70,7 @@ One table `codetype` with composite key `(PK, SK)`:
 | Entity | PK | SK | Attributes |
 |---|---|---|---|
 | Profile | `USER#<sub>` | `PROFILE` | email, created_at |
-| Attempt | `USER#<sub>` | `ATTEMPT#<iso_ts>` | snippet_id, wpm, accuracy, errors, duration_ms, language |
+| Attempt | `USER#<sub>` | `ATTEMPT#<iso_ts>` | snippet_id, wpm_gross, wpm_net, wpm_scaled, accuracy, errors, duration_ms, language |
 | Snippet | `SNIPPET#<lang>` | `SNIPPET#<id>` | title, code, difficulty |
 | Daily seed | `DAILY` | `DATE#<yyyy-mm-dd>` | snippet_id |
 
@@ -138,7 +140,7 @@ This directly answers the README rubric (lines 117–119 of the programme doc): 
 | Risk | Mitigation |
 |---|---|
 | Typing engine perf janky on long snippets | Cap snippets at 400 chars; use uncontrolled input + ref |
-| Stats computation off-by-one (common in WPM) | Write unit tests for WPM calc *first* (TDD on this module only) |
+| Stats computation off-by-one (common in WPM) | Write unit tests for WPM calc *first* (TDD on this module only). Module exports `grossWpm`, `netWpm`, `accuracyScaledWpm` — all three are stored on each attempt so we can change the "headline" number later without re-computing history. |
 | Cognito + JWT authorizer eats half a day | Guest-mode fallback with localStorage so demo works without auth; wire Cognito on Day 3 only if Day 2 finishes early |
 | AWS bill surprise | DynamoDB on-demand + Lambda + HTTP API are all pay-per-request; set a $5 AWS Budgets alert; never use RDS or provisioned capacity |
 | CloudFront cache makes JS updates invisible | Use versioned filenames (Next.js does this) + invalidate `/index.html` on deploy |
