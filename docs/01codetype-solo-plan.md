@@ -2,7 +2,7 @@
 
 **Programme:** B1 Builders — Project 1 of 2
 **Submission deadline:** 15 May 2026
-**Target build window:** ~3–4 days
+**Target build window:** ~4 tasks (day numbers are unreliable; tasks are the unit of progress)
 
 ---
 
@@ -240,14 +240,100 @@ codetype-solo/
 
 ---
 
-## Build sequence (4 days)
+## Build sequence (4 tasks)
 
-| Day | Goal | Deliverable |
+Tasks are the unit of progress, not days. Each task is a coherent slice with a verifiable deliverable; do them in order, but elapsed time is whatever it is.
+
+| Task | Goal | Deliverable |
 |---|---|---|
 | 1 | Init Bun workspace (`bun init` + workspaces in root `package.json`); TDD `shared/wpm.ts`; scaffold `web/` with `bun create next-app` + Tailwind + shadcn; build typing engine in guest mode (localStorage) | `bun test` green for WPM; can complete a snippet locally and see all three WPM numbers |
 | 2 | Build `api/` workspace handlers with mocked DynamoDB tests; author `infra/template.yaml` (DDB + Lambda + APIGW HTTP API + Cognito); `bun run --filter @codetype/infra deploy` | `sam deploy` succeeds; `bun run --filter @codetype/infra seed` populates snippets; curl + JWT round-trips POST/GET `/attempts` |
 | 3 | Wire `web/` to API via `web/src/lib/api.ts`; implement history + daily + streaks; flip guest-mode flag off when signed in | Full game loop persisted to DynamoDB; streak counter increments correctly across UTC date boundaries |
 | 4 | Add S3 + CloudFront to SAM template; `bun run --filter @codetype/web build` → `sync-web.ts` → `invalidate.ts`; dashboard WPM chart; README + demo gif | Shippable demo on a CloudFront URL; one-command deploy: `bun run deploy` from repo root |
+
+---
+
+## Implementation choices (locked)
+
+These are the design decisions that have multiple valid answers. They're locked here so the implementation doesn't quietly drift and so the unit tests below are unambiguous.
+
+### 1. WPM formulas — `shared/src/wpm.ts`
+
+Convention: **1 word = 5 characters**, including spaces and symbols (the standard typing-test convention; matches monkeytype, typeracer, 10fastfingers).
+
+Inputs to every formula:
+
+```ts
+type WpmInput = {
+  charsTotal: number;     // total chars in the snippet
+  charsCorrect: number;   // chars typed and matching the target
+  errors: number;         // count of incorrect keystrokes (uncorrected at finish)
+  durationMs: number;     // elapsed time from first keystroke to last
+};
+```
+
+Formulas (all return WPM, rounded to 1 decimal place; `durationMs <= 0` → return 0):
+
+- **`grossWpm`** = `(charsTotal / 5) / (durationMs / 60000)`
+  Speed only. Ignores errors entirely.
+- **`netWpm`** = `grossWpm − (errors / (durationMs / 60000))`
+  Subtracts errors-per-minute from gross. Can be negative — clamp to 0 before returning.
+- **`accuracyScaledWpm`** = `grossWpm × accuracy²` where `accuracy = charsCorrect / charsTotal`
+  Always in `[0, grossWpm]`. Quadratic penalty makes a 90% run feel meaningfully slower than a 99% run.
+
+### 2. Live-diff render strategy — `web/src/components/TypingArea.tsx`
+
+**Char-by-char `<span>` rendering.** Each character of the target snippet is rendered as its own `<span>` with one of three classes: `pending`, `correct`, `incorrect`. A single index pointer (`cursor`) drives styling — only the spans on either side of the cursor re-render on each keystroke (React's reconciler handles this when keys are stable).
+
+Why not range-based: range-based (highlight a `[start, end]` slice) is faster on huge documents but our snippets are capped at 400 chars, so the simpler model wins. Char spans also let us attach per-char timing for the "weakest characters" stat without a second pass.
+
+Input element: a single visually-hidden `<input>` with a `ref` captures keystrokes; the visible spans are pure render output. This keeps the browser's native IME / autocorrect off the rendered text.
+
+### 3. Streak boundary — `shared/src/streak.ts`
+
+**UTC midnight.** A "day" is `YYYY-MM-DD` formatted from the attempt's `created_at` via `toISOString().slice(0, 10)`. Streak = count of consecutive UTC dates ending at *today UTC* with ≥1 completed attempt. A user in UTC+8 finishing at 23:00 local time on 6 May posts to UTC date 6 May (15:00 UTC) — fine. A user finishing at 09:00 local time on 7 May (01:00 UTC) posts to UTC date 7 May. The cost: someone typing at 23:30 local in UTC−5 might "skip" a UTC day from their POV. Accepted — the alternative (per-user timezone) doubles the data model and the test surface for a personal tool.
+
+Signature:
+
+```ts
+function streak(
+  attemptDatesUtc: string[],  // 'YYYY-MM-DD' strings, any order, dups allowed
+  todayUtc: string            // 'YYYY-MM-DD' — injected for testability
+): number
+```
+
+### 4. Unit-test plan
+
+All tests run under `bun test`. Two test files, both in `shared/tests/`.
+
+#### `shared/tests/wpm.test.ts`
+
+| # | Case | Expectation |
+|---|---|---|
+| 1 | 60 correct chars, 0 errors, 60 000 ms | `grossWpm = 12.0`, `netWpm = 12.0`, `accuracyScaledWpm = 12.0` |
+| 2 | 100 chars total, 90 correct, 10 errors, 60 000 ms | `grossWpm = 20.0`, `netWpm = 10.0`, `accuracyScaledWpm = 20.0 × 0.9² = 16.2` |
+| 3 | Errors so high `netWpm` would go negative (50 chars total, 0 correct, 50 errors, 60 000 ms) | `netWpm = 0` (clamped, not negative) |
+| 4 | `durationMs = 0` | all three return `0` (no division by zero) |
+| 5 | `durationMs < 0` (clock skew) | all three return `0` |
+| 6 | Perfect 1-second sprint: 25 chars correct, 0 errors, 1000 ms | `grossWpm = 300.0` (sanity-checks the per-minute scaling) |
+| 7 | Rounding: 7 chars correct, 0 errors, 60 000 ms | `grossWpm = 1.4` (rounded to 1 dp, not `1.4000000000000001`) |
+| 8 | Symbol-heavy snippet (50 chars total = `{}()=>;` etc., 50 correct, 0 errors, 30 000 ms) | `grossWpm = 20.0` (symbols count the same as letters — explicit) |
+
+#### `shared/tests/streak.test.ts`
+
+| # | Case | Expectation |
+|---|---|---|
+| 1 | Empty attempts array, today = `2026-05-06` | `0` |
+| 2 | Today only: `['2026-05-06']`, today = `2026-05-06` | `1` |
+| 3 | Today + yesterday: `['2026-05-06', '2026-05-05']` | `2` |
+| 4 | Gap of one day: `['2026-05-06', '2026-05-04']` | `1` (today's run alone — yesterday broke it) |
+| 5 | Streak ending yesterday, not today: `['2026-05-05', '2026-05-04']`, today = `2026-05-06` | `0` (must include today) |
+| 6 | Duplicates same day: `['2026-05-06', '2026-05-06', '2026-05-05']` | `2` (dedupe before counting) |
+| 7 | Unsorted input: `['2026-05-04', '2026-05-06', '2026-05-05']`, today = `2026-05-06` | `3` |
+| 8 | Long streak across month boundary: every date from `2026-04-25` to `2026-05-06` inclusive | `12` |
+| 9 | Future-dated attempts (clock skew): `['2026-05-07', '2026-05-06']`, today = `2026-05-06` | `1` (future dates ignored, not counted) |
+
+Both files use Bun's built-in `test` and `expect` from `bun:test`. No external test runner. Coverage target: 100% of lines in `wpm.ts` and `streak.ts` — these are pure functions, there is no excuse.
 
 ---
 
@@ -270,10 +356,10 @@ This directly answers the README rubric (lines 117–119 of the programme doc): 
 |---|---|
 | Typing engine perf janky on long snippets | Cap snippets at 400 chars; use uncontrolled input + ref |
 | Stats computation off-by-one (common in WPM) | Write unit tests for WPM calc *first* (TDD on this module only). Module exports `grossWpm`, `netWpm`, `accuracyScaledWpm` — all three are stored on each attempt so we can change the "headline" number later without re-computing history. |
-| Cognito + JWT authorizer eats half a day | Guest-mode fallback with localStorage so demo works without auth; wire Cognito on Day 3 only if Day 2 finishes early |
+| Cognito + JWT authorizer eats too much time | Guest-mode fallback with localStorage so demo works without auth; wire Cognito in Task 3 only if Task 2 finishes cleanly |
 | AWS bill surprise | DynamoDB on-demand + Lambda + HTTP API are all pay-per-request; set a $5 AWS Budgets alert; never use RDS or provisioned capacity |
 | CloudFront cache makes JS updates invisible | Use versioned filenames (Next.js does this) + invalidate `/index.html` on deploy |
-| Scope creep on charts | One chart only (WPM over time); skip the rest unless Day 4 is free |
+| Scope creep on charts | One chart only (WPM over time); skip the rest unless Task 4 finishes early |
 
 ---
 
