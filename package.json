@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "workspaces": ["shared", "web", "api", "infra"],
   "scripts": {
+    "dev": "bun --filter @codetype/web dev",
     "test": "bun test",
     "typecheck": "bun run --filter '*' typecheck",
     "deploy": "bun --filter @codetype/infra deploy:all",
