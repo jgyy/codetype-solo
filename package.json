@@ -1,0 +1,23 @@
+{
+  "name": "codetype-solo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["shared", "web", "api", "infra"],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "bun run --filter '*' typecheck",
+    "deploy": "bun --filter @codetype/infra deploy:all",
+    "deploy:stack": "bun --filter @codetype/infra deploy:stack",
+    "deploy:web": "bun --filter @codetype/infra deploy:web",
+    "deploy:guided": "bun --filter @codetype/infra deploy:guided",
+    "seed": "bun --filter @codetype/infra seed",
+    "outputs": "bun --filter @codetype/infra outputs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0"
+  },
+  "overrides": {
+    "caniuse-lite": "1.0.30001700"
+  }
+}

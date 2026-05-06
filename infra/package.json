@@ -1,0 +1,23 @@
+{
+  "name": "@codetype/infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:api": "bun --filter @codetype/api build",
+    "build:web": "bun --filter @codetype/web build",
+    "deploy:stack": "bun run build:api && sam deploy --profile jgyy --config-file samconfig.toml",
+    "deploy:guided": "bun run build:api && sam deploy --guided --profile jgyy --config-file samconfig.toml",
+    "deploy:web": "bun run build:web && bun run scripts/sync-web.ts && bun run scripts/invalidate.ts",
+    "deploy:all": "bun run deploy:stack && bun run seed && bun run deploy:web",
+    "validate": "sam validate --profile jgyy --lint",
+    "seed": "bun run scripts/seed-snippets.ts && bun run scripts/seed-daily.ts",
+    "seed:snippets": "bun run scripts/seed-snippets.ts",
+    "seed:daily": "bun run scripts/seed-daily.ts",
+    "outputs": "aws cloudformation describe-stacks --stack-name codetype-solo --profile jgyy --query 'Stacks[0].Outputs' --output table"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0"
+  }
+}

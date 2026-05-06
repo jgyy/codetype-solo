@@ -1,0 +1,10 @@
+[
+  { "id": "js-001", "title": "Array reduce sum", "code": "const sum = (xs) => xs.reduce((a, b) => a + b, 0);", "difficulty": 2 },
+  { "id": "js-002", "title": "Debounce", "code": "const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };", "difficulty": 4 },
+  { "id": "js-003", "title": "Filter unique", "code": "const unique = (xs) => [...new Set(xs)];", "difficulty": 1 },
+  { "id": "js-004", "title": "Promise all map", "code": "const fetchAll = async (urls) => Promise.all(urls.map((u) => fetch(u).then((r) => r.json())));", "difficulty": 3 },
+  { "id": "js-005", "title": "Group by key", "code": "const groupBy = (xs, k) => xs.reduce((acc, x) => ({ ...acc, [x[k]]: [...(acc[x[k]] ?? []), x] }), {});", "difficulty": 4 },
+  { "id": "js-006", "title": "Memoize", "code": "const memo = (fn) => { const c = new Map(); return (k) => c.has(k) ? c.get(k) : (c.set(k, fn(k)), c.get(k)); };", "difficulty": 4 },
+  { "id": "js-007", "title": "Range", "code": "const range = (n) => Array.from({ length: n }, (_, i) => i);", "difficulty": 2 },
+  { "id": "js-008", "title": "Pipe", "code": "const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);", "difficulty": 3 }
+]

@@ -1,0 +1,10 @@
+[
+  { "id": "py-001", "title": "List comprehension", "code": "squares = [x * x for x in range(10) if x % 2 == 0]", "difficulty": 2 },
+  { "id": "py-002", "title": "Word count", "code": "def count_words(s):\n    counts = {}\n    for w in s.split():\n        counts[w] = counts.get(w, 0) + 1\n    return counts", "difficulty": 3 },
+  { "id": "py-003", "title": "Fibonacci", "code": "def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a", "difficulty": 2 },
+  { "id": "py-004", "title": "Read JSON file", "code": "import json\nwith open('data.json') as f:\n    data = json.load(f)", "difficulty": 1 },
+  { "id": "py-005", "title": "Decorator", "code": "def trace(fn):\n    def wrap(*a, **kw):\n        print(fn.__name__, a, kw)\n        return fn(*a, **kw)\n    return wrap", "difficulty": 4 },
+  { "id": "py-006", "title": "Dataclass", "code": "from dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: float\n    y: float", "difficulty": 2 },
+  { "id": "py-007", "title": "Enumerate zip", "code": "for i, (a, b) in enumerate(zip(xs, ys)):\n    print(i, a, b)", "difficulty": 2 },
+  { "id": "py-008", "title": "Async gather", "code": "import asyncio\nresults = await asyncio.gather(*[fetch(u) for u in urls])", "difficulty": 3 }
+]

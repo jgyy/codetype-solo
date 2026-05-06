@@ -1,0 +1,8 @@
+[
+  { "id": "go-001", "title": "Goroutine + channel", "code": "ch := make(chan int)\ngo func() { ch <- 42 }()\nfmt.Println(<-ch)", "difficulty": 3 },
+  { "id": "go-002", "title": "Error wrap", "code": "if err != nil {\n    return fmt.Errorf(\"open %s: %w\", path, err)\n}", "difficulty": 2 },
+  { "id": "go-003", "title": "Slice filter", "code": "var out []int\nfor _, x := range xs {\n    if x%2 == 0 { out = append(out, x) }\n}", "difficulty": 2 },
+  { "id": "go-004", "title": "HTTP handler", "code": "http.HandleFunc(\"/\", func(w http.ResponseWriter, r *http.Request) {\n    fmt.Fprintln(w, \"hello\")\n})", "difficulty": 2 },
+  { "id": "go-005", "title": "Defer close", "code": "f, err := os.Open(path)\nif err != nil { return err }\ndefer f.Close()", "difficulty": 2 },
+  { "id": "go-006", "title": "WaitGroup", "code": "var wg sync.WaitGroup\nfor _, u := range urls {\n    wg.Add(1)\n    go func(u string) { defer wg.Done(); fetch(u) }(u)\n}\nwg.Wait()", "difficulty": 4 }
+]

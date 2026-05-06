@@ -1,0 +1,8 @@
+[
+  { "id": "c-001", "title": "strlen", "code": "size_t strlen(const char *s) {\n    const char *p = s;\n    while (*p) p++;\n    return p - s;\n}", "difficulty": 3 },
+  { "id": "c-002", "title": "swap", "code": "void swap(int *a, int *b) {\n    int t = *a;\n    *a = *b;\n    *b = t;\n}", "difficulty": 2 },
+  { "id": "c-003", "title": "memcpy", "code": "void *memcpy(void *d, const void *s, size_t n) {\n    char *dp = d; const char *sp = s;\n    while (n--) *dp++ = *sp++;\n    return d;\n}", "difficulty": 4 },
+  { "id": "c-004", "title": "fizzbuzz", "code": "for (int i = 1; i <= 100; i++) {\n    if (i % 15 == 0) puts(\"FizzBuzz\");\n    else if (i % 3 == 0) puts(\"Fizz\");\n    else if (i % 5 == 0) puts(\"Buzz\");\n    else printf(\"%d\\n\", i);\n}", "difficulty": 3 },
+  { "id": "c-005", "title": "max", "code": "int max(int a, int b) { return a > b ? a : b; }", "difficulty": 1 },
+  { "id": "c-006", "title": "linked list push", "code": "struct Node { int v; struct Node *next; };\nvoid push(struct Node **h, int v) {\n    struct Node *n = malloc(sizeof *n);\n    n->v = v; n->next = *h; *h = n;\n}", "difficulty": 4 }
+]
