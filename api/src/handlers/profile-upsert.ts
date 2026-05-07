@@ -1,40 +1,20 @@
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { apiError, err, ok, type ApiError, type Result } from "@codetype/shared";
-import { ddb, TABLE } from "../lib/dynamo";
+import { apiError, err, isErr, type ApiError, type Result } from "@codetype/shared";
 import { httpAdapter, type HandlerCtx } from "../lib/http";
 
 type ProfileResponse = { created: boolean };
 
-async function upsertProfile(
-  ctx: HandlerCtx,
+export async function upsertProfileLogic(
+    ctx: HandlerCtx,
 ): Promise<Result<ProfileResponse, ApiError>> {
-  if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
+    if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
 
-  const item = {
-    PK: `USER#${ctx.caller.sub}`,
-    SK: "PROFILE",
-    entity: "PROFILE" as const,
-    email: ctx.caller.email ?? null,
-    created_at: new Date().toISOString(),
-  };
-
-  try {
-    await ddb.send(
-      new PutCommand({
-        TableName: TABLE,
-        Item: item,
-        ConditionExpression: "attribute_not_exists(PK)",
-      }),
-    );
-    return ok({ created: true });
-  } catch (e) {
-    if ((e as { name?: string }).name === "ConditionalCheckFailedException") {
-      return ok({ created: false });
-    }
-    throw e;
-  }
+    const r = await ctx.repos.profiles.upsert(ctx.caller.sub, {
+        email: ctx.caller.email ?? null,
+    });
+    if (isErr(r)) return r;
+    return r;
 }
 
-export const handler = httpAdapter(upsertProfile, {
-  successStatus: (v) => (v.created ? 201 : 200),
+export const handler = httpAdapter(upsertProfileLogic, {
+    successStatus: (v) => (v.created ? 201 : 200),
 });
