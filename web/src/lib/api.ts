@@ -1,55 +1,18 @@
 "use client";
 
-import {
-    PostAttemptBody,
-    type Attempt,
-    type Language,
-    type LeaderboardResponse,
+// Thin convenience wrappers over the typed client (web/src/lib/api-client).
+// Endpoint URLs and shapes live in shared/src/schemas/endpoints.ts — never
+// here. Adding/renaming an endpoint touches only the shared registry.
+
+import type {
+    Attempt,
+    Language,
+    LeaderboardResponse,
+    SubmissionDto,
 } from "@codetype/shared";
-import { CONFIG } from "./config";
-import { currentSession } from "./auth";
+import { call, type ResponseFor } from "./api-client/client";
 
-async function authHeaders(): Promise<HeadersInit> {
-    const s = await currentSession();
-    return s ? { authorization: `Bearer ${s.idToken}` } : {};
-}
-
-type Envelope<T> =
-    | { ok: true; data: T }
-    | { ok: false; error: { code: string; message: string; details?: unknown } };
-
-export class ApiError extends Error {
-    constructor(
-        public code: string,
-        message: string,
-        public status: number,
-        public details?: unknown,
-    ) {
-        super(message);
-        this.name = "ApiError";
-    }
-}
-
-async function jsonFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-    const headers = {
-        "content-type": "application/json",
-        ...(await authHeaders()),
-        ...(init.headers ?? {}),
-    };
-    const res = await fetch(`${CONFIG.apiUrl}${path}`, { ...init, headers });
-    let body: unknown;
-    try {
-        body = await res.json();
-    } catch {
-        throw new ApiError("internal", `${res.status} ${res.statusText} on ${path}`, res.status);
-    }
-    if (!body || typeof body !== "object" || !("ok" in body)) {
-        throw new ApiError("internal", `malformed response on ${path}`, res.status);
-    }
-    const env = body as Envelope<T>;
-    if (env.ok) return env.data;
-    throw new ApiError(env.error.code, env.error.message, res.status, env.error.details);
-}
+export { ApiError } from "./api-client/client";
 
 export type AttemptItem = Attempt & {
     PK: string;
@@ -58,37 +21,24 @@ export type AttemptItem = Attempt & {
     wpm_mismatch?: boolean;
 };
 
-export async function postAttempt(
-    a: Attempt,
-): Promise<{
-    sk?: string;
-    wpm_mismatch?: boolean;
-    duplicate?: boolean;
-    leaderboard_updated?: boolean;
-    cheat_score?: number;
-    cheat_reasons?: string[];
-}> {
-    const pre = PostAttemptBody.safeParse(a);
-    if (!pre.success) {
-        throw new ApiError("bad_request", "validation_failed", 0, pre.error.issues);
-    }
-    return jsonFetch("/attempts", { method: "POST", body: JSON.stringify(a) });
+export async function postAttempt(a: Attempt): Promise<ResponseFor<"postAttempt">> {
+    return call("postAttempt", { body: a });
 }
 
 export async function listAttempts(from: string, to: string): Promise<{ items: AttemptItem[] }> {
-    return jsonFetch(`/attempts?from=${from}&to=${to}`);
+    const r = await call("listAttempts", { query: { from, to } });
+    return { items: r.items as unknown as AttemptItem[] };
 }
 
 export type DailySeed = { snippet_id: string; language: Language };
 
 export async function getDaily(date: string): Promise<DailySeed> {
-    return jsonFetch(`/daily?date=${date}`);
+    const r = await call("getDaily", { query: { date } });
+    return { snippet_id: r.snippet_id, language: r.language };
 }
 
 export async function getSnippet(language: Language, id: string) {
-    return jsonFetch<{ code: string; title: string; language: Language }>(
-        `/snippets/${language}/${id}`,
-    );
+    return call("getSnippet", { params: { lang: language, id } });
 }
 
 export type ProfileUpdate = {
@@ -97,30 +47,21 @@ export type ProfileUpdate = {
     display_name?: string;
 };
 
-export type ProfileResponse = {
-    created: boolean;
-    handle?: string;
-    leaderboard_optin?: boolean;
-    display_name?: string;
-};
+export type ProfileResponse = ResponseFor<"upsertProfile">;
 
 export async function upsertProfile(patch: ProfileUpdate = {}): Promise<ProfileResponse> {
-    return jsonFetch("/profile", { method: "POST", body: JSON.stringify(patch) });
+    return call("upsertProfile", { body: patch });
 }
 
-export type SubmissionDtoView = {
-    id: string;
-    status: "PENDING" | "APPROVED" | "REJECTED";
-    language: Language;
-    title: string;
-    code: string;
-    difficulty: number;
-    submitter_sub: string;
-    created_at: string;
-    decided_at?: string;
-    reject_reason?: string;
-    approved_snippet_id?: string;
-};
+export async function getLeaderboard(
+    lang: Language,
+    week?: string,
+): Promise<LeaderboardResponse> {
+    const r = await call("getLeaderboard", { query: { lang, week } });
+    return r as unknown as LeaderboardResponse;
+}
+
+export type SubmissionDtoView = SubmissionDto;
 
 export type NewSubmissionInput = {
     language: Language;
@@ -131,22 +72,12 @@ export type NewSubmissionInput = {
 
 export async function submitSnippet(
     input: NewSubmissionInput,
-): Promise<{ id: string; created_at: string; status: "PENDING" }> {
-    return jsonFetch("/snippets/submissions", {
-        method: "POST",
-        body: JSON.stringify(input),
-    });
+): Promise<ResponseFor<"submitSnippet">> {
+    return call("submitSnippet", { body: input });
 }
 
 export async function listMySubmissions(): Promise<{ items: SubmissionDtoView[] }> {
-    return jsonFetch("/snippets/submissions?mine=true");
+    const r = await call("listSubmissions", { query: { mine: "true" } });
+    return { items: r.items as unknown as SubmissionDtoView[] };
 }
 
-export async function getLeaderboard(
-    lang: Language,
-    week?: string,
-): Promise<LeaderboardResponse> {
-    const qs = new URLSearchParams({ lang });
-    if (week) qs.set("week", week);
-    return jsonFetch(`/leaderboard?${qs.toString()}`);
-}

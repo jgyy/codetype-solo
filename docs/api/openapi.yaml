@@ -1,0 +1,1429 @@
+openapi: 3.1.0
+info:
+  title: CodeType Solo API
+  version: 0.1.0
+  description: Generated from shared Zod schemas. Edit shared/src/schemas/* and run `bun --filter @codetype/shared build:openapi` to regenerate.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - unauthorized
+            - bad_request
+            - not_found
+            - conflict
+            - rate_limited
+            - internal
+        message:
+          type: string
+        details: {}
+      required:
+        - code
+        - message
+    ErrorEnvelope:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          enum:
+            - false
+        error:
+          $ref: "#/components/schemas/ApiError"
+      required:
+        - ok
+        - error
+  parameters: {}
+paths:
+  /attempts:
+    post:
+      operationId: postAttempt
+      description: Record a typing attempt; server recomputes WPM and runs anti-cheat.
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_attempt_id:
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                snippet_id:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                language:
+                  type: string
+                  enum: &a1
+                    - js
+                    - py
+                    - c
+                    - go
+                duration_ms:
+                  type: integer
+                  exclusiveMinimum: 0
+                  maximum: 1800000
+                chars_total:
+                  type: integer
+                  exclusiveMinimum: 0
+                  maximum: 10000
+                chars_correct:
+                  type: integer
+                  minimum: 0
+                errors:
+                  type: integer
+                  minimum: 0
+                  maximum: 100000
+                accuracy:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                wpm_gross:
+                  type: number
+                  minimum: 0
+                  maximum: 10000
+                wpm_net:
+                  type: number
+                  minimum: 0
+                  maximum: 10000
+                wpm_scaled:
+                  type: number
+                  minimum: 0
+                  maximum: 10000
+                timeline:
+                  type: object
+                  properties:
+                    v:
+                      type: number
+                      enum:
+                        - 1
+                    t:
+                      type: array
+                      items:
+                        type: integer
+                        minimum: 0
+                      maxItems: 2000
+                    k:
+                      type: array
+                      items:
+                        type: integer
+                      maxItems: 2000
+                    c:
+                      type: array
+                      items:
+                        anyOf:
+                          - type: number
+                            enum:
+                              - 0
+                          - type: number
+                            enum:
+                              - 1
+                      maxItems: 2000
+                  required:
+                    - v
+                    - t
+                    - k
+                    - c
+              required:
+                - client_attempt_id
+                - snippet_id
+                - language
+                - duration_ms
+                - chars_total
+                - chars_correct
+                - errors
+                - accuracy
+                - wpm_gross
+                - wpm_net
+                - wpm_scaled
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    anyOf:
+                      - type: object
+                        properties:
+                          sk:
+                            type: string
+                          wpm_mismatch:
+                            type: boolean
+                          leaderboard_updated:
+                            type: boolean
+                          cheat_score:
+                            type: number
+                            minimum: 0
+                            maximum: 1
+                          cheat_reasons:
+                            type: array
+                            items:
+                              type: string
+                        required:
+                          - sk
+                          - wpm_mismatch
+                      - type: object
+                        properties:
+                          sk:
+                            type: string
+                          duplicate:
+                            type: boolean
+                            enum:
+                              - true
+                        required:
+                          - sk
+                          - duplicate
+                required:
+                  - ok
+                  - data
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    anyOf:
+                      - type: object
+                        properties:
+                          sk:
+                            type: string
+                          wpm_mismatch:
+                            type: boolean
+                          leaderboard_updated:
+                            type: boolean
+                          cheat_score:
+                            type: number
+                            minimum: 0
+                            maximum: 1
+                          cheat_reasons:
+                            type: array
+                            items:
+                              type: string
+                        required:
+                          - sk
+                          - wpm_mismatch
+                      - type: object
+                        properties:
+                          sk:
+                            type: string
+                          duplicate:
+                            type: boolean
+                            enum:
+                              - true
+                        required:
+                          - sk
+                          - duplicate
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    get:
+      operationId: listAttempts
+      description: List the caller's recent attempts within an optional date range.
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            pattern: ^\d{4}-\d{2}-\d{2}$
+          required: false
+          name: from
+          in: query
+        - schema:
+            type: string
+            pattern: ^\d{4}-\d{2}-\d{2}$
+          required: false
+          name: to
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            PK:
+                              type: string
+                            SK:
+                              type: string
+                            GSI1SK:
+                              type: string
+                            snippet_id:
+                              type: string
+                            language:
+                              type: string
+                              enum: *a1
+                            wpm_gross:
+                              type: number
+                            wpm_net:
+                              type: number
+                            wpm_scaled:
+                              type: number
+                            accuracy:
+                              type: number
+                            errors:
+                              type: number
+                            duration_ms:
+                              type: number
+                            chars_total:
+                              type: number
+                            chars_correct:
+                              type: number
+                            created_at:
+                              type: string
+                            wpm_mismatch:
+                              type: boolean
+                            cheat_score:
+                              type: number
+                            cheat_reasons:
+                              type: array
+                              items:
+                                type: string
+                            timeline:
+                              type: object
+                              properties:
+                                v:
+                                  type: number
+                                  enum:
+                                    - 1
+                                t:
+                                  type: array
+                                  items:
+                                    type: integer
+                                    minimum: 0
+                                  maxItems: 2000
+                                k:
+                                  type: array
+                                  items:
+                                    type: integer
+                                  maxItems: 2000
+                                c:
+                                  type: array
+                                  items:
+                                    anyOf:
+                                      - type: number
+                                        enum:
+                                          - 0
+                                      - type: number
+                                        enum:
+                                          - 1
+                                  maxItems: 2000
+                              required:
+                                - v
+                                - t
+                                - k
+                                - c
+                          required:
+                            - PK
+                            - SK
+                            - GSI1SK
+                            - snippet_id
+                            - language
+                            - wpm_gross
+                            - wpm_net
+                            - wpm_scaled
+                            - accuracy
+                            - errors
+                            - duration_ms
+                            - chars_total
+                            - chars_correct
+                            - created_at
+                    required:
+                      - items
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /daily:
+    get:
+      operationId: getDaily
+      description: Get (or self-seed) the daily-challenge snippet for a given UTC date.
+      tags:
+        - public
+      security: []
+      parameters:
+        - schema:
+            type: string
+            pattern: ^\d{4}-\d{2}-\d{2}$
+          required: false
+          name: date
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      PK:
+                        type: string
+                        enum:
+                          - DAILY
+                      SK:
+                        type: string
+                      entity:
+                        type: string
+                        enum:
+                          - DAILY
+                      snippet_id:
+                        type: string
+                      language:
+                        type: string
+                        enum: *a1
+                    required:
+                      - PK
+                      - SK
+                      - entity
+                      - snippet_id
+                      - language
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/{lang}/{id}:
+    get:
+      operationId: getSnippet
+      description: Fetch a single snippet by language and id.
+      tags:
+        - public
+      security: []
+      parameters:
+        - schema:
+            type: string
+            enum: *a1
+          required: true
+          name: lang
+          in: path
+        - schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          required: true
+          name: id
+          in: path
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      PK:
+                        type: string
+                      SK:
+                        type: string
+                      entity:
+                        type: string
+                        enum:
+                          - SNIPPET
+                          - SNIPPET_RETIRED
+                      id:
+                        type: string
+                      language:
+                        type: string
+                        enum: *a1
+                      title:
+                        type: string
+                      code:
+                        type: string
+                      difficulty:
+                        type: number
+                    required:
+                      - PK
+                      - SK
+                      - entity
+                      - language
+                      - title
+                      - code
+                      - difficulty
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /profile:
+    post:
+      operationId: upsertProfile
+      description: Create or update the caller's profile (handle, leaderboard opt-in).
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                  minLength: 2
+                  maxLength: 24
+                  pattern: ^[a-z0-9_-]+$
+                leaderboard_optin:
+                  type: boolean
+                display_name:
+                  type: string
+                  minLength: 1
+                  maxLength: 48
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      created:
+                        type: boolean
+                      handle:
+                        type: string
+                      leaderboard_optin:
+                        type: boolean
+                      display_name:
+                        type: string
+                    required:
+                      - created
+                required:
+                  - ok
+                  - data
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      created:
+                        type: boolean
+                      handle:
+                        type: string
+                      leaderboard_optin:
+                        type: boolean
+                      display_name:
+                        type: string
+                    required:
+                      - created
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      description: Top 50 entries for a language and ISO week (defaults to current week).
+      tags:
+        - public
+      security: []
+      parameters:
+        - schema:
+            type: string
+            enum: *a1
+          required: true
+          name: lang
+          in: query
+        - schema:
+            type: string
+            pattern: ^\d{4}-W\d{2}$
+          required: false
+          name: week
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      lang:
+                        type: string
+                        enum: *a1
+                      week:
+                        type: string
+                      entries:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            rank:
+                              type: integer
+                              minimum: 0
+                            handle:
+                              type: string
+                            wpm_scaled:
+                              type: number
+                            attempts:
+                              type: integer
+                              minimum: 0
+                          required:
+                            - rank
+                            - handle
+                            - wpm_scaled
+                            - attempts
+                    required:
+                      - lang
+                      - week
+                      - entries
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/submissions:
+    post:
+      operationId: submitSnippet
+      description: Submit a snippet for moderator review (rate-limited per user).
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language:
+                  type: string
+                  enum: *a1
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 80
+                code:
+                  type: string
+                  minLength: 20
+                  maxLength: 400
+                difficulty:
+                  anyOf:
+                    - type: number
+                      enum:
+                        - 1
+                    - type: number
+                      enum:
+                        - 2
+                    - type: number
+                      enum:
+                        - 3
+                    - type: number
+                      enum:
+                        - 4
+                    - type: number
+                      enum:
+                        - 5
+              required:
+                - language
+                - title
+                - code
+                - difficulty
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      created_at:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                          - PENDING
+                    required:
+                      - id
+                      - created_at
+                      - status
+                required:
+                  - ok
+                  - data
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      created_at:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                          - PENDING
+                    required:
+                      - id
+                      - created_at
+                      - status
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    get:
+      operationId: listSubmissions
+      description: List submissions — `?mine=true` for the caller, `?status=PENDING` for mods.
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+          required: false
+          name: mine
+          in: query
+        - schema:
+            type: string
+            enum: &a2
+              - PENDING
+              - APPROVED
+              - REJECTED
+          required: false
+          name: status
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            status:
+                              type: string
+                              enum: *a2
+                            language:
+                              type: string
+                              enum: *a1
+                            title:
+                              type: string
+                            code:
+                              type: string
+                            difficulty:
+                              type: number
+                            submitter_sub:
+                              type: string
+                            created_at:
+                              type: string
+                            decided_at:
+                              type: string
+                            decided_by:
+                              type: string
+                            reject_reason:
+                              type: string
+                            approved_snippet_id:
+                              type: string
+                          required:
+                            - id
+                            - status
+                            - language
+                            - title
+                            - code
+                            - difficulty
+                            - submitter_sub
+                            - created_at
+                    required:
+                      - items
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/submissions/{id}/approve:
+    post:
+      operationId: approveSubmission
+      description: Approve a pending submission; promotes it to a SNIPPET row.
+      tags:
+        - moderation
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+          required: true
+          name: id
+          in: path
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      snippetId:
+                        type: string
+                    required:
+                      - snippetId
+                required:
+                  - ok
+                  - data
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      snippetId:
+                        type: string
+                    required:
+                      - snippetId
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/submissions/{id}/reject:
+    post:
+      operationId: rejectSubmission
+      description: Reject a pending submission with a free-form reason.
+      tags:
+        - moderation
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+          required: true
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  minLength: 1
+                  maxLength: 280
+              required:
+                - reason
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+                        enum:
+                          - true
+                    required:
+                      - ok
+                required:
+                  - ok
+                  - data
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+                        enum:
+                          - true
+                    required:
+                      - ok
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/{lang}/{id}/retract:
+    post:
+      operationId: retractSnippet
+      description: Retire an approved snippet so it stops appearing in listings or daily.
+      tags:
+        - moderation
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            enum: *a1
+          required: true
+          name: lang
+          in: path
+        - schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          required: true
+          name: id
+          in: path
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      retired:
+                        type: boolean
+                        enum:
+                          - true
+                    required:
+                      - retired
+                required:
+                  - ok
+                  - data
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      retired:
+                        type: boolean
+                        enum:
+                          - true
+                    required:
+                      - retired
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+webhooks: {}

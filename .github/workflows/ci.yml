@@ -24,6 +24,10 @@ jobs:
         run: bun run --filter @codetype/web typecheck
       - name: Run unit + handler + repo tests
         run: bun test
+      - name: Regenerate OpenAPI and fail on drift
+        run: |
+          bun run --filter @codetype/shared build:openapi
+          git diff --exit-code docs/api/openapi.yaml
       - name: Build api handlers
         run: cd api && bun run build
       - name: Build web
