@@ -1,11 +1,20 @@
 import {
     DailyQuery,
-    isErr,
     type ApiError,
     type Result,
 } from "@codetype/shared";
-import { httpAdapter, parseWith, type HandlerCtx } from "../lib/http";
-import type { DailySeedRow, SnippetRow } from "../repos";
+import {
+    compose,
+    withAuth,
+    withErrorEnvelope,
+    withLogger,
+    withRepos,
+    withRequestId,
+    withSchema,
+    type Ctx,
+    type DomainHandler,
+} from "../middleware";
+import { composeRepos, type DailySeedRow, type SnippetRow } from "../repos";
 
 function hashDate(s: string): number {
     let h = 2166136261;
@@ -17,19 +26,20 @@ function hashDate(s: string): number {
 }
 
 function pickByDate(date: string) {
-    return (snippets: SnippetRow[]): SnippetRow => {
-        const idx = hashDate(date) % snippets.length;
-        return snippets[idx]!;
-    };
+    return (snippets: SnippetRow[]): SnippetRow => snippets[hashDate(date) % snippets.length]!;
 }
 
-export async function getDailyLogic(
-    ctx: HandlerCtx,
-): Promise<Result<DailySeedRow, ApiError>> {
-    const q = parseWith(DailyQuery, ctx.event.queryStringParameters ?? {});
-    if (isErr(q)) return q;
-    const date = q.value.date ?? new Date().toISOString().slice(0, 10);
-    return ctx.repos.daily.getOrSeed(date, pickByDate(date));
-}
+export const getDailyLogic: DomainHandler<DailySeedRow> = async (ctx: Ctx) => {
+    const q = ctx.body as { date?: string };
+    const date = q.date ?? new Date().toISOString().slice(0, 10);
+    return ctx.repos.daily.getOrSeed(date, pickByDate(date)) as Promise<Result<DailySeedRow, ApiError>>;
+};
 
-export const handler = httpAdapter(getDailyLogic, { successStatus: 200 });
+export const handler = compose<DailySeedRow>(
+    withRequestId(),
+    withLogger(),
+    withErrorEnvelope(),
+    withRepos(composeRepos()),
+    withAuth({ required: false }),
+    withSchema(DailyQuery, "query"),
+)(getDailyLogic, { successStatus: 200 });

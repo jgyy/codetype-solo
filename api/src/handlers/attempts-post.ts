@@ -1,67 +1,79 @@
 import {
-  PostAttemptBody,
-  accuracyScaledWpm,
-  apiError,
-  err,
-  grossWpm,
-  isErr,
-  netWpm,
-  ok,
-  type ApiError,
-  type Result,
-  type WpmInput,
+    PostAttemptBody,
+    accuracyScaledWpm,
+    apiError,
+    err,
+    grossWpm,
+    isErr,
+    netWpm,
+    ok,
+    type ApiError,
+    type Result,
+    type WpmInput,
 } from "@codetype/shared";
-import { httpAdapter, parseJsonBody, type HandlerCtx } from "../lib/http";
+import {
+    compose,
+    withAuth,
+    withErrorEnvelope,
+    withLogger,
+    withRepos,
+    withRequestId,
+    withSchema,
+    type Ctx,
+    type DomainHandler,
+} from "../middleware";
+import { composeRepos } from "../repos";
 
 type AttemptResponse =
-  | { sk: string; wpm_mismatch: boolean; duplicate?: false }
-  | { sk: string; duplicate: true };
+    | { sk: string; wpm_mismatch: boolean; duplicate?: false }
+    | { sk: string; duplicate: true };
 
-export async function postAttemptLogic(
-  ctx: HandlerCtx,
-): Promise<Result<AttemptResponse, ApiError>> {
-  if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
+export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx) => {
+    if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
+    const body = ctx.body as PostAttemptBody;
 
-  const parsed = parseJsonBody(PostAttemptBody, ctx.event.body);
-  if (isErr(parsed)) return parsed;
-  const body = parsed.value;
+    const wpmInput: WpmInput = {
+        charsTotal: body.chars_total,
+        charsCorrect: body.chars_correct,
+        errors: body.errors,
+        durationMs: body.duration_ms,
+    };
+    const serverGross = grossWpm(wpmInput);
+    const serverNet = netWpm(wpmInput);
+    const serverScaled = accuracyScaledWpm(wpmInput);
+    const mismatch =
+        Math.abs(serverGross - body.wpm_gross) > 1 ||
+        Math.abs(serverNet - body.wpm_net) > 1 ||
+        Math.abs(serverScaled - body.wpm_scaled) > 1;
 
-  const wpmInput: WpmInput = {
-    charsTotal: body.chars_total,
-    charsCorrect: body.chars_correct,
-    errors: body.errors,
-    durationMs: body.duration_ms,
-  };
-  const serverGross = grossWpm(wpmInput);
-  const serverNet = netWpm(wpmInput);
-  const serverScaled = accuracyScaledWpm(wpmInput);
-  const mismatch =
-    Math.abs(serverGross - body.wpm_gross) > 1 ||
-    Math.abs(serverNet - body.wpm_net) > 1 ||
-    Math.abs(serverScaled - body.wpm_scaled) > 1;
+    const r = await ctx.repos.attempts.put({
+        sub: ctx.caller.sub,
+        clientAttemptId: body.client_attempt_id,
+        snippetId: body.snippet_id,
+        language: body.language,
+        createdAt: new Date().toISOString(),
+        wpmGross: serverGross,
+        wpmNet: serverNet,
+        wpmScaled: serverScaled,
+        accuracy: body.accuracy,
+        errors: body.errors,
+        durationMs: body.duration_ms,
+        charsTotal: body.chars_total,
+        charsCorrect: body.chars_correct,
+        wpmMismatch: mismatch,
+    });
+    if (isErr(r)) return r as Result<never, ApiError>;
+    if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
+    return ok({ sk: r.value.sk, wpm_mismatch: mismatch });
+};
 
-  const r = await ctx.repos.attempts.put({
-    sub: ctx.caller.sub,
-    clientAttemptId: body.client_attempt_id,
-    snippetId: body.snippet_id,
-    language: body.language,
-    createdAt: new Date().toISOString(),
-    wpmGross: serverGross,
-    wpmNet: serverNet,
-    wpmScaled: serverScaled,
-    accuracy: body.accuracy,
-    errors: body.errors,
-    durationMs: body.duration_ms,
-    charsTotal: body.chars_total,
-    charsCorrect: body.chars_correct,
-    wpmMismatch: mismatch,
-  });
-  if (isErr(r)) return r;
-
-  if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
-  return ok({ sk: r.value.sk, wpm_mismatch: mismatch });
-}
-
-export const handler = httpAdapter(postAttemptLogic, {
-  successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
+export const handler = compose<AttemptResponse>(
+    withRequestId(),
+    withLogger(),
+    withErrorEnvelope(),
+    withRepos(composeRepos()),
+    withAuth({ required: true }),
+    withSchema(PostAttemptBody),
+)(postAttemptLogic, {
+    successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
 });

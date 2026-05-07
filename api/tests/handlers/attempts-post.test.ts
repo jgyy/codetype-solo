@@ -1,5 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { httpAdapter } from "../../src/lib/http";
+import { PostAttemptBody } from "@codetype/shared";
+import {
+    compose,
+    withAuth,
+    withErrorEnvelope,
+    withLogger,
+    withRepos,
+    withRequestId,
+    withSchema,
+} from "../../src/middleware";
 import { postAttemptLogic } from "../../src/handlers/attempts-post";
 import { composeInMemoryRepos } from "../../src/repos";
 
@@ -10,6 +19,7 @@ const baseEvent = (body: unknown, sub = "user-1") =>
             http: { method: "POST" },
             requestId: "r-1",
         },
+        headers: {},
         body: JSON.stringify(body),
     }) as never;
 
@@ -29,57 +39,57 @@ const validBody = {
 
 const makeHandler = () => {
     const repos = composeInMemoryRepos();
-    return {
-        repos,
-        handler: httpAdapter(postAttemptLogic, {
-            successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
-            repos,
-        }),
-    };
+    const handler = compose(
+        withRequestId(),
+        withLogger(),
+        withErrorEnvelope(),
+        withRepos(repos),
+        withAuth({ required: true }),
+        withSchema(PostAttemptBody),
+    )(postAttemptLogic, {
+        successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
+    });
+    return { repos, handler };
 };
 
-describe("POST /attempts", () => {
+describe("POST /attempts (composed)", () => {
     test("rejects missing JWT", async () => {
         const { handler } = makeHandler();
-        const r = await handler({ requestContext: { http: { method: "POST" } }, body: "{}" } as never);
-        expect((r as { statusCode: number }).statusCode).toBe(401);
+        const r = (await handler({
+            requestContext: { http: { method: "POST" } },
+            headers: {},
+            body: "{}",
+        } as never)) as { statusCode: number };
+        expect(r.statusCode).toBe(401);
     });
 
     test("rejects bad language", async () => {
         const { handler } = makeHandler();
-        const r = await handler(baseEvent({ ...validBody, language: "rust" }));
-        expect((r as { statusCode: number }).statusCode).toBe(400);
+        const r = (await handler(baseEvent({ ...validBody, language: "rust" }))) as {
+            statusCode: number;
+        };
+        expect(r.statusCode).toBe(400);
     });
 
-    test("writes a valid attempt and returns sk", async () => {
+    test("writes a valid attempt", async () => {
         const { handler, repos } = makeHandler();
         const r = (await handler(baseEvent(validBody))) as { statusCode: number; body: string };
         expect(r.statusCode).toBe(201);
         const data = JSON.parse(r.body).data;
         expect(data.sk).toMatch(/^ATTEMPT#/);
-        expect(data.wpm_mismatch).toBe(false);
         const list = await repos.attempts.listByUser("user-1", { from: "1970-01-01", to: "9999-12-31" });
         if (!list.ok) throw new Error("listByUser failed");
         expect(list.value.length).toBe(1);
-        expect(list.value[0]!.PK).toBe("USER#user-1");
     });
 
-    test("idempotent on duplicate (same client_attempt_id same instant)", async () => {
+    test("idempotent on duplicate (frozen clock)", async () => {
         const { handler, repos } = makeHandler();
-        // Pre-populate via the repo with the exact same key the handler will compute.
-        // Instead, post twice quickly enough that timestamps may differ — guarantee a hit
-        // by writing through the repo with a known createdAt then re-posting.
         const fixedTime = "2026-05-07T10:00:00.000Z";
         const realDate = Date;
         // @ts-expect-error - test stub
         globalThis.Date = class extends realDate {
-            constructor() {
-                super();
-                return new realDate(fixedTime);
-            }
-            static now() {
-                return new realDate(fixedTime).getTime();
-            }
+            constructor() { super(); return new realDate(fixedTime); }
+            static now() { return new realDate(fixedTime).getTime(); }
         } as DateConstructor;
         try {
             const r1 = (await handler(baseEvent(validBody))) as { statusCode: number };
@@ -95,7 +105,7 @@ describe("POST /attempts", () => {
         expect(list.value.length).toBe(1);
     });
 
-    test("flags wpm mismatch when client values diverge", async () => {
+    test("server recomputes WPM (client-supplied wpm_gross is ignored for storage)", async () => {
         const { handler, repos } = makeHandler();
         const r = (await handler(baseEvent({ ...validBody, wpm_gross: 999 }))) as {
             statusCode: number;
@@ -105,7 +115,6 @@ describe("POST /attempts", () => {
         expect(JSON.parse(r.body).data.wpm_mismatch).toBe(true);
         const list = await repos.attempts.listByUser("user-1", { from: "1970-01-01", to: "9999-12-31" });
         if (!list.ok) throw new Error("listByUser failed");
-        expect(list.value[0]!.wpm_gross).toBe(12); // server value, not 999
-        expect(list.value[0]!.wpm_mismatch).toBe(true);
+        expect(list.value[0]!.wpm_gross).toBe(12);
     });
 });

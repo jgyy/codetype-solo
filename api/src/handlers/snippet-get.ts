@@ -1,18 +1,31 @@
 import {
     GetSnippetParams,
-    isErr,
     type ApiError,
     type Result,
 } from "@codetype/shared";
-import { httpAdapter, parseWith, type HandlerCtx } from "../lib/http";
-import type { SnippetRow } from "../repos";
+import {
+    compose,
+    withAuth,
+    withErrorEnvelope,
+    withLogger,
+    withRepos,
+    withRequestId,
+    withSchema,
+    type Ctx,
+    type DomainHandler,
+} from "../middleware";
+import { composeRepos, type SnippetRow } from "../repos";
 
-export async function getSnippetLogic(
-    ctx: HandlerCtx,
-): Promise<Result<SnippetRow, ApiError>> {
-    const p = parseWith(GetSnippetParams, ctx.event.pathParameters ?? {});
-    if (isErr(p)) return p;
-    return ctx.repos.snippets.get(p.value.lang, p.value.id);
-}
+export const getSnippetLogic: DomainHandler<SnippetRow> = async (ctx: Ctx) => {
+    const p = ctx.body as GetSnippetParams;
+    return ctx.repos.snippets.get(p.lang, p.id) as Promise<Result<SnippetRow, ApiError>>;
+};
 
-export const handler = httpAdapter(getSnippetLogic, { successStatus: 200 });
+export const handler = compose<SnippetRow>(
+    withRequestId(),
+    withLogger(),
+    withErrorEnvelope(),
+    withRepos(composeRepos()),
+    withAuth({ required: false }),
+    withSchema(GetSnippetParams, "path"),
+)(getSnippetLogic, { successStatus: 200 });
