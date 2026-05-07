@@ -5,8 +5,7 @@ cd "$(dirname "$0")/.."
 
 mapfile -t files < <(git ls-files --cached --others --exclude-standard \
     '*.ts' '*.tsx' '*.js' '*.cjs' '*.mjs' \
-    '*.css' '*.html' \
-    '*.yaml' '*.yml' '*.toml' '*.json' '*.sh' \
+    '*.css' '*.html' '*.yml' '*.toml' '*.json' '*.sh' \
     ':!:bun.lock' ':!:**/package-lock.json' \
     ':!:cdk.out/**' ':!:**/cdk.out/**' \
     ':!:**/dist/**' ':!:**/build/**' ':!:**/.next/**' ':!:**/coverage/**' \
