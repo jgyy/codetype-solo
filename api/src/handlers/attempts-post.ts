@@ -1,6 +1,8 @@
 import {
+    CHEAT_THRESHOLD,
     PostAttemptBody,
     accuracyScaledWpm,
+    analyse,
     apiError,
     err,
     grossWpm,
@@ -26,7 +28,14 @@ import { composeRepos } from "../repos";
 import { syncLeaderboardForUser } from "../lib/lb-sync";
 
 type AttemptResponse =
-    | { sk: string; wpm_mismatch: boolean; duplicate?: false; leaderboard_updated?: boolean }
+    | {
+          sk: string;
+          wpm_mismatch: boolean;
+          duplicate?: false;
+          leaderboard_updated?: boolean;
+          cheat_score?: number;
+          cheat_reasons?: string[];
+      }
     | { sk: string; duplicate: true };
 
 export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx) => {
@@ -47,6 +56,14 @@ export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx)
         Math.abs(serverNet - body.wpm_net) > 1 ||
         Math.abs(serverScaled - body.wpm_scaled) > 1;
 
+    const cheatReport = body.timeline
+        ? analyse(body.timeline, {
+              chars: body.chars_total,
+              errors: body.errors,
+              durationMs: body.duration_ms,
+          })
+        : null;
+
     const r = await ctx.repos.attempts.put({
         sub: ctx.caller.sub,
         clientAttemptId: body.client_attempt_id,
@@ -62,22 +79,32 @@ export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx)
         charsTotal: body.chars_total,
         charsCorrect: body.chars_correct,
         wpmMismatch: mismatch,
+        ...(body.timeline ? { timeline: body.timeline } : {}),
+        ...(cheatReport ? { cheatScore: cheatReport.score, cheatReasons: cheatReport.reasons } : {}),
     });
     if (isErr(r)) return r as Result<never, ApiError>;
     if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
 
     let lbUpdated = false;
-    try {
-        const sync = await syncLeaderboardForUser(ctx.repos, ctx.caller.sub, body.language);
-        lbUpdated = sync.kind === "updated";
-    } catch (e) {
-        ctx.log.warn("lb_sync_failed", {
-            err: e instanceof Error ? e.message : String(e),
-            sub: ctx.caller.sub,
-        });
+    const cheatBlocksLb = cheatReport !== null && cheatReport.score >= CHEAT_THRESHOLD;
+    if (!cheatBlocksLb) {
+        try {
+            const sync = await syncLeaderboardForUser(ctx.repos, ctx.caller.sub, body.language);
+            lbUpdated = sync.kind === "updated";
+        } catch (e) {
+            ctx.log.warn("lb_sync_failed", {
+                err: e instanceof Error ? e.message : String(e),
+                sub: ctx.caller.sub,
+            });
+        }
     }
 
-    return ok({ sk: r.value.sk, wpm_mismatch: mismatch, leaderboard_updated: lbUpdated });
+    return ok({
+        sk: r.value.sk,
+        wpm_mismatch: mismatch,
+        leaderboard_updated: lbUpdated,
+        ...(cheatReport ? { cheat_score: cheatReport.score, cheat_reasons: cheatReport.reasons } : {}),
+    });
 };
 
 export const handler = compose<AttemptResponse>(

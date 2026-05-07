@@ -60,7 +60,14 @@ export type AttemptItem = Attempt & {
 
 export async function postAttempt(
     a: Attempt,
-): Promise<{ sk?: string; wpm_mismatch?: boolean; duplicate?: boolean; leaderboard_updated?: boolean }> {
+): Promise<{
+    sk?: string;
+    wpm_mismatch?: boolean;
+    duplicate?: boolean;
+    leaderboard_updated?: boolean;
+    cheat_score?: number;
+    cheat_reasons?: string[];
+}> {
     const pre = PostAttemptBody.safeParse(a);
     if (!pre.success) {
         throw new ApiError("bad_request", "validation_failed", 0, pre.error.issues);

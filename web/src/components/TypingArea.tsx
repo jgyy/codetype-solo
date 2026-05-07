@@ -3,11 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 
+import type { Timeline } from "@codetype/shared";
+
 export type TypingResult = {
   charsTotal: number;
   charsCorrect: number;
   errors: number;
   durationMs: number;
+  timeline: Timeline;
 };
 
 type Props = {
@@ -20,6 +23,9 @@ export function TypingArea({ target, onComplete }: Props) {
   const [typed, setTyped] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [done, setDone] = useState(false);
+  // Keystroke timeline: each entry is one user-visible character change.
+  // Paste produces multiple entries with near-identical t — anticheat picks that up.
+  const tlRef = useRef<{ t: number[]; k: number[]; c: (0 | 1)[] }>({ t: [], k: [], c: [] });
 
   const focus = useCallback(() => inputRef.current?.focus(), []);
   useEffect(() => focus(), [focus]);
@@ -27,18 +33,45 @@ export function TypingArea({ target, onComplete }: Props) {
   const handleChange = (next: string) => {
     if (done) return;
     if (next.length > target.length) return;
-    if (startedAt === null && next.length > 0) setStartedAt(performance.now());
+    const now = performance.now();
+    let begin = startedAt;
+    if (begin === null && next.length > 0) {
+      begin = now;
+      setStartedAt(now);
+    }
+
+    // Diff the previous typed string to recover per-character events.
+    const prev = typed;
+    const t = Math.max(0, Math.round(now - (begin ?? now)));
+    if (next.length > prev.length) {
+      // Forward typing or paste: emit one event per added char.
+      for (let i = prev.length; i < next.length; i++) {
+        const ch = next[i]!;
+        tlRef.current.t.push(t);
+        tlRef.current.k.push(ch.codePointAt(0) ?? 0);
+        tlRef.current.c.push(ch === target[i] ? 1 : 0);
+      }
+    } else if (next.length < prev.length) {
+      // Backspace(s): emit one BACKSPACE event per removed char.
+      for (let i = 0; i < prev.length - next.length; i++) {
+        tlRef.current.t.push(t);
+        tlRef.current.k.push(-1);
+        tlRef.current.c.push(1);
+      }
+    }
+
     setTyped(next);
 
     if (next.length === target.length) {
       const charsCorrect = countCorrect(next, target);
-      const begin = startedAt ?? performance.now();
+      const startedAtFinal = begin ?? now;
       setDone(true);
       onComplete({
         charsTotal: target.length,
         charsCorrect,
         errors: target.length - charsCorrect,
-        durationMs: performance.now() - begin,
+        durationMs: now - startedAtFinal,
+        timeline: { v: 1, t: tlRef.current.t, k: tlRef.current.k, c: tlRef.current.c },
       });
     }
   };

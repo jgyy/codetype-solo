@@ -1,4 +1,4 @@
-import { isoWeek, type Language } from "@codetype/shared";
+import { CHEAT_THRESHOLD, isoWeek, type Language } from "@codetype/shared";
 import type { Repos } from "../repos";
 
 const MIN_ATTEMPTS = 3;
@@ -29,7 +29,13 @@ export async function syncLeaderboardForUser(
 
     const attemptsRes = await repos.attempts.listByUser(sub, { from, to });
     if (!attemptsRes.ok) return { kind: "skipped", reason: "lookup_failed" };
-    const inWindow = attemptsRes.value.filter((a) => a.language === language);
+    const inWindow = attemptsRes.value.filter(
+        (a) =>
+            a.language === language &&
+            // Cheat-flagged attempts never feed the leaderboard; they still
+            // count toward the user's personal stats, just not the public list.
+            (typeof a.cheat_score !== "number" || (a.cheat_score as number) < CHEAT_THRESHOLD),
+    );
     const count = inWindow.length;
 
     if (count < MIN_ATTEMPTS) {

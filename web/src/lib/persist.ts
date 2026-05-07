@@ -9,6 +9,8 @@ import { currentSession } from "./auth";
 export type PersistResult = {
   destination: "api" | "guest";
   leaderboardUpdated: boolean;
+  cheatScore?: number;
+  cheatReasons?: string[];
 };
 
 export async function persistAttempt(a: Attempt): Promise<PersistResult> {
@@ -17,7 +19,12 @@ export async function persistAttempt(a: Attempt): Promise<PersistResult> {
     if (s) {
       try {
         const r = await postAttempt(a);
-        return { destination: "api", leaderboardUpdated: r.leaderboard_updated === true };
+        return {
+          destination: "api",
+          leaderboardUpdated: r.leaderboard_updated === true,
+          cheatScore: r.cheat_score,
+          cheatReasons: r.cheat_reasons,
+        };
       } catch (err) {
         console.error("postAttempt failed; falling back to guest", err);
       }

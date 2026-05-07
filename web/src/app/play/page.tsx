@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { ReplayPlayer } from "@/components/ReplayPlayer";
 import { ResultCard } from "@/components/ResultCard";
 import { TypingArea, type TypingResult } from "@/components/TypingArea";
 import { persistAttempt } from "@/lib/persist";
@@ -38,6 +39,8 @@ function PlayInner() {
   const [result, setResult] = useState<TypingResult | null>(null);
   const [nonce, setNonce] = useState(0);
   const [leaderboardUpdated, setLeaderboardUpdated] = useState(false);
+  const [cheatScore, setCheatScore] = useState<number | undefined>(undefined);
+  const [cheatReasons, setCheatReasons] = useState<string[] | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +81,8 @@ function PlayInner() {
   const onComplete = (r: TypingResult) => {
     setResult(r);
     setLeaderboardUpdated(false);
+    setCheatScore(undefined);
+    setCheatReasons(undefined);
     if (!snippet) return;
     const accuracy = r.charsTotal > 0 ? r.charsCorrect / r.charsTotal : 0;
     const a: Attempt = {
@@ -93,9 +98,12 @@ function PlayInner() {
       chars_correct: r.charsCorrect,
       created_at: new Date().toISOString(),
       client_attempt_id: crypto.randomUUID(),
+      timeline: r.timeline,
     };
     persistAttempt(a).then((res) => {
       setLeaderboardUpdated(res.leaderboardUpdated);
+      setCheatScore(res.cheatScore);
+      setCheatReasons(res.cheatReasons);
     });
   };
 
@@ -121,8 +129,13 @@ function PlayInner() {
         <ResultCard
           {...result}
           leaderboardUpdated={leaderboardUpdated}
+          cheatScore={cheatScore}
+          cheatReasons={cheatReasons}
           onAgain={() => setNonce((n) => n + 1)}
         />
+      )}
+      {result && snippet && (
+        <ReplayPlayer target={snippet.code} timeline={result.timeline} />
       )}
     </main>
   );

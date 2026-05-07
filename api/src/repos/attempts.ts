@@ -1,5 +1,5 @@
 import { PutCommand, QueryCommand, type DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { ok, type ApiError, type Language, type Result } from "@codetype/shared";
+import { ok, type ApiError, type Language, type Result, type Timeline } from "@codetype/shared";
 import { GSI1 } from "./client";
 import { attemptSk, dateGsi1Sk, userPk } from "./keys";
 
@@ -18,6 +18,9 @@ export type NewAttempt = {
   charsTotal: number;
   charsCorrect: number;
   wpmMismatch: boolean;
+  timeline?: Timeline;
+  cheatScore?: number;
+  cheatReasons?: string[];
 };
 
 export type AttemptRow = Record<string, unknown>;
@@ -52,6 +55,9 @@ export function makeDdbAttemptsRepo(client: DynamoDBDocumentClient, table: strin
         chars_correct: a.charsCorrect,
         created_at: a.createdAt,
         ...(a.wpmMismatch ? { wpm_mismatch: true } : {}),
+        ...(a.timeline ? { timeline: a.timeline } : {}),
+        ...(a.cheatScore !== undefined ? { cheat_score: a.cheatScore } : {}),
+        ...(a.cheatReasons && a.cheatReasons.length > 0 ? { cheat_reasons: a.cheatReasons } : {}),
       };
       try {
         await client.send(
@@ -117,6 +123,9 @@ export function makeInMemoryAttemptsRepo(): AttemptsRepo {
         chars_correct: a.charsCorrect,
         created_at: a.createdAt,
         ...(a.wpmMismatch ? { wpm_mismatch: true } : {}),
+        ...(a.timeline ? { timeline: a.timeline } : {}),
+        ...(a.cheatScore !== undefined ? { cheat_score: a.cheatScore } : {}),
+        ...(a.cheatReasons && a.cheatReasons.length > 0 ? { cheat_reasons: a.cheatReasons } : {}),
       };
       return ok({ duplicate: false, sk });
     },

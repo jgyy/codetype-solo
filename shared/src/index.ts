@@ -6,3 +6,4 @@ export * from "./api-error";
 export * from "./schemas";
 export * from "./iso-week";
 export * from "./handle-blocklist";
+export * from "./anticheat";

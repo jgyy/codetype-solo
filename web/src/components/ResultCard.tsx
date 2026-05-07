@@ -1,6 +1,11 @@
 import { accuracyScaledWpm, grossWpm, netWpm, type WpmInput } from "@codetype/shared";
 
-type Props = WpmInput & { onAgain: () => void; leaderboardUpdated?: boolean };
+type Props = WpmInput & {
+  onAgain: () => void;
+  leaderboardUpdated?: boolean;
+  cheatScore?: number;
+  cheatReasons?: string[];
+};
 
 export function ResultCard(props: Props) {
   const accuracy = props.charsTotal > 0 ? props.charsCorrect / props.charsTotal : 0;
@@ -20,6 +25,16 @@ export function ResultCard(props: Props) {
       {props.leaderboardUpdated && (
         <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
           Personal best · submitted to leaderboard
+        </p>
+      )}
+      {props.cheatScore !== undefined && props.cheatScore >= 0.5 && (
+        <p className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+          Flagged ({(props.cheatScore * 100).toFixed(0)}%) · excluded from leaderboard.
+          {props.cheatReasons && props.cheatReasons.length > 0 && (
+            <span className="block text-xs text-rose-400/80 mt-1">
+              {props.cheatReasons.join(", ")}
+            </span>
+          )}
         </p>
       )}
       <button

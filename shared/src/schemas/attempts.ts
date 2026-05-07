@@ -2,6 +2,18 @@ import { z } from "zod";
 
 export const LanguageSchema = z.enum(["js", "py", "c", "go"]);
 
+export const TimelineSchema = z
+  .object({
+    v: z.literal(1),
+    t: z.array(z.number().int().nonnegative()).max(2000),
+    k: z.array(z.number().int()).max(2000),
+    c: z.array(z.union([z.literal(0), z.literal(1)])).max(2000),
+  })
+  .refine((tl) => tl.t.length === tl.k.length && tl.k.length === tl.c.length, {
+    message: "timeline arrays mismatched",
+  });
+export type TimelineSchema = z.infer<typeof TimelineSchema>;
+
 export const PostAttemptBody = z
   .object({
     client_attempt_id: z.string().min(1).max(64),
@@ -15,6 +27,7 @@ export const PostAttemptBody = z
     wpm_gross: z.number().nonnegative().max(10_000),
     wpm_net: z.number().nonnegative().max(10_000),
     wpm_scaled: z.number().nonnegative().max(10_000),
+    timeline: TimelineSchema.optional(),
   })
   .refine((b) => b.chars_correct <= b.chars_total, {
     path: ["chars_correct"],
