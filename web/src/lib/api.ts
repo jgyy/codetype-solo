@@ -9,6 +9,22 @@ async function authHeaders(): Promise<HeadersInit> {
   return s ? { authorization: `Bearer ${s.idToken}` } : {};
 }
 
+type Envelope<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: { code: string; message: string; details?: unknown } };
+
+export class ApiError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+    public status: number,
+    public details?: unknown,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function jsonFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = {
     "content-type": "application/json",
@@ -16,8 +32,18 @@ async function jsonFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
     ...(init.headers ?? {}),
   };
   const res = await fetch(`${CONFIG.apiUrl}${path}`, { ...init, headers });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} on ${path}`);
-  return (await res.json()) as T;
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    throw new ApiError("internal", `${res.status} ${res.statusText} on ${path}`, res.status);
+  }
+  if (!body || typeof body !== "object" || !("ok" in body)) {
+    throw new ApiError("internal", `malformed response on ${path}`, res.status);
+  }
+  const env = body as Envelope<T>;
+  if (env.ok) return env.data;
+  throw new ApiError(env.error.code, env.error.message, res.status, env.error.details);
 }
 
 export type AttemptItem = Attempt & {
@@ -27,7 +53,9 @@ export type AttemptItem = Attempt & {
   wpm_mismatch?: boolean;
 };
 
-export async function postAttempt(a: Attempt): Promise<{ ok: boolean }> {
+export async function postAttempt(
+  a: Attempt,
+): Promise<{ sk?: string; wpm_mismatch?: boolean; duplicate?: boolean }> {
   return jsonFetch("/attempts", { method: "POST", body: JSON.stringify(a) });
 }
 
@@ -47,6 +75,6 @@ export async function getSnippet(language: Language, id: string) {
   );
 }
 
-export async function upsertProfile(): Promise<{ ok: boolean; created: boolean }> {
+export async function upsertProfile(): Promise<{ created: boolean }> {
   return jsonFetch("/profile", { method: "POST", body: "{}" });
 }

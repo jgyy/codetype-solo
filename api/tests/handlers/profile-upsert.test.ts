@@ -17,7 +17,7 @@ describe("POST /profile", () => {
     ddbMock.on(PutCommand).resolves({});
     const r = await handler(evt());
     expect(r.statusCode).toBe(201);
-    expect(JSON.parse(r.body)).toMatchObject({ created: true });
+    expect(JSON.parse(r.body)).toMatchObject({ ok: true, data: { created: true } });
   });
 
   test("returns 200 on conditional-check failure (already exists)", async () => {
@@ -25,6 +25,6 @@ describe("POST /profile", () => {
     ddbMock.on(PutCommand).rejects(err);
     const r = await handler(evt());
     expect(r.statusCode).toBe(200);
-    expect(JSON.parse(r.body)).toMatchObject({ created: false });
+    expect(JSON.parse(r.body)).toMatchObject({ ok: true, data: { created: false } });
   });
 });

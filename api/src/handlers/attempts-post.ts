@@ -1,14 +1,18 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import {
   accuracyScaledWpm,
+  apiError,
+  err,
   grossWpm,
   netWpm,
+  ok,
+  type ApiError,
   type Language,
+  type Result,
   type WpmInput,
 } from "@codetype/shared";
-import type { APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
 import { ddb, TABLE } from "../lib/dynamo";
-import { badRequest, getCaller, json, unauthorized } from "../lib/auth";
+import { httpAdapter, type HandlerCtx } from "../lib/http";
 
 const LANGS = new Set<Language>(["js", "py", "c", "go"]);
 
@@ -26,19 +30,22 @@ type Body = {
   chars_correct: number;
 };
 
-export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
-  const caller = getCaller(event);
-  if (!caller) return unauthorized();
+type AttemptResponse =
+  | { sk: string; wpm_mismatch: boolean; duplicate?: false }
+  | { duplicate: true };
+
+async function postAttempt(ctx: HandlerCtx): Promise<Result<AttemptResponse, ApiError>> {
+  if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
 
   let body: Body;
   try {
-    body = JSON.parse(event.body ?? "{}") as Body;
+    body = JSON.parse(ctx.event.body ?? "{}") as Body;
   } catch {
-    return badRequest("invalid json");
+    return err(apiError("bad_request", "invalid json"));
   }
 
   const v = validate(body);
-  if (v) return badRequest(v);
+  if (v) return err(apiError("bad_request", v));
 
   const wpmInput: WpmInput = {
     charsTotal: body.chars_total,
@@ -58,9 +65,9 @@ export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
   const date = createdAt.slice(0, 10);
   const sk = `ATTEMPT#${createdAt}#${body.client_attempt_id.slice(0, 6)}`;
   const item = {
-    PK: `USER#${caller.sub}`,
+    PK: `USER#${ctx.caller.sub}`,
     SK: sk,
-    GSI1PK: `USER#${caller.sub}`,
+    GSI1PK: `USER#${ctx.caller.sub}`,
     GSI1SK: `DATE#${date}#${createdAt}`,
     entity: "ATTEMPT" as const,
     snippet_id: body.snippet_id,
@@ -85,15 +92,19 @@ export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
         ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
       }),
     );
-  } catch (err) {
-    if ((err as { name?: string }).name === "ConditionalCheckFailedException") {
-      return json(200, { ok: true, duplicate: true });
+  } catch (e) {
+    if ((e as { name?: string }).name === "ConditionalCheckFailedException") {
+      return ok({ duplicate: true });
     }
-    throw err;
+    throw e;
   }
 
-  return json(201, { ok: true, sk, wpm_mismatch: mismatch });
+  return ok({ sk, wpm_mismatch: mismatch });
 }
+
+export const handler = httpAdapter(postAttempt, {
+  successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
+});
 
 function validate(b: Body): string | null {
   if (!b.client_attempt_id || typeof b.client_attempt_id !== "string") return "client_attempt_id required";

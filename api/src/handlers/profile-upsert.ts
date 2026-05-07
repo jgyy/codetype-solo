@@ -1,17 +1,20 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import type { APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
+import { apiError, err, ok, type ApiError, type Result } from "@codetype/shared";
 import { ddb, TABLE } from "../lib/dynamo";
-import { getCaller, json, unauthorized } from "../lib/auth";
+import { httpAdapter, type HandlerCtx } from "../lib/http";
 
-export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
-  const caller = getCaller(event);
-  if (!caller) return unauthorized();
+type ProfileResponse = { created: boolean };
+
+async function upsertProfile(
+  ctx: HandlerCtx,
+): Promise<Result<ProfileResponse, ApiError>> {
+  if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
 
   const item = {
-    PK: `USER#${caller.sub}`,
+    PK: `USER#${ctx.caller.sub}`,
     SK: "PROFILE",
     entity: "PROFILE" as const,
-    email: caller.email ?? null,
+    email: ctx.caller.email ?? null,
     created_at: new Date().toISOString(),
   };
 
@@ -23,11 +26,15 @@ export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
         ConditionExpression: "attribute_not_exists(PK)",
       }),
     );
-    return json(201, { ok: true, created: true });
-  } catch (err) {
-    if ((err as { name?: string }).name === "ConditionalCheckFailedException") {
-      return json(200, { ok: true, created: false });
+    return ok({ created: true });
+  } catch (e) {
+    if ((e as { name?: string }).name === "ConditionalCheckFailedException") {
+      return ok({ created: false });
     }
-    throw err;
+    throw e;
   }
 }
+
+export const handler = httpAdapter(upsertProfile, {
+  successStatus: (v) => (v.created ? 201 : 200),
+});

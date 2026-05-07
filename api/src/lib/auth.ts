@@ -9,19 +9,3 @@ export function getCaller(event: APIGatewayProxyEventV2WithJWTAuthorizer): Calle
   if (!sub) return null;
   return { sub, email: claims.email as string | undefined };
 }
-
-export function unauthorized() {
-  return json(401, { error: "unauthorized" });
-}
-
-export function json(statusCode: number, body: unknown) {
-  return {
-    statusCode,
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  };
-}
-
-export function badRequest(message: string) {
-  return json(400, { error: "bad_request", message });
-}

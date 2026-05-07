@@ -1,14 +1,15 @@
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
-import type { APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
+import { apiError, err, ok, type ApiError, type Result } from "@codetype/shared";
 import { ddb, GSI1, TABLE } from "../lib/dynamo";
-import { getCaller, json, unauthorized } from "../lib/auth";
+import { httpAdapter, type HandlerCtx } from "../lib/http";
 
-export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
-  const caller = getCaller(event);
-  if (!caller) return unauthorized();
+type ListResponse = { items: Record<string, unknown>[] };
 
-  const from = event.queryStringParameters?.from ?? "1970-01-01";
-  const to = event.queryStringParameters?.to ?? "9999-12-31";
+async function listAttempts(ctx: HandlerCtx): Promise<Result<ListResponse, ApiError>> {
+  if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
+
+  const from = ctx.event.queryStringParameters?.from ?? "1970-01-01";
+  const to = ctx.event.queryStringParameters?.to ?? "9999-12-31";
 
   const res = await ddb.send(
     new QueryCommand({
@@ -16,7 +17,7 @@ export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
       IndexName: GSI1,
       KeyConditionExpression: "GSI1PK = :pk AND GSI1SK BETWEEN :from AND :to",
       ExpressionAttributeValues: {
-        ":pk": `USER#${caller.sub}`,
+        ":pk": `USER#${ctx.caller.sub}`,
         ":from": `DATE#${from}`,
         ":to": `DATE#${to}~`,
       },
@@ -25,5 +26,7 @@ export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
     }),
   );
 
-  return json(200, { items: res.Items ?? [] });
+  return ok({ items: (res.Items as Record<string, unknown>[]) ?? [] });
 }
+
+export const handler = httpAdapter(listAttempts, { successStatus: 200 });

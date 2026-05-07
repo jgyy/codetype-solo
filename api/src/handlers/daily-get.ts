@@ -1,22 +1,21 @@
 import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import type { APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
+import { apiError, err, ok, type ApiError, type Result } from "@codetype/shared";
 import { ddb, TABLE } from "../lib/dynamo";
-import { badRequest, json } from "../lib/auth";
+import { httpAdapter, type HandlerCtx } from "../lib/http";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
-  const date = event.queryStringParameters?.date ?? new Date().toISOString().slice(0, 10);
-  if (!DATE_RE.test(date)) return badRequest("invalid date");
+async function getDaily(ctx: HandlerCtx): Promise<Result<Record<string, unknown>, ApiError>> {
+  const date = ctx.event.queryStringParameters?.date ?? new Date().toISOString().slice(0, 10);
+  if (!DATE_RE.test(date)) return err(apiError("bad_request", "invalid date"));
 
   const existing = await ddb.send(
     new GetCommand({ TableName: TABLE, Key: { PK: "DAILY", SK: `DATE#${date}` } }),
   );
-  if (existing.Item) return json(200, existing.Item);
+  if (existing.Item) return ok(existing.Item as Record<string, unknown>);
 
-  // Self-seed deterministically.
   const snippets = await listSnippets();
-  if (snippets.length === 0) return badRequest("no snippets seeded");
+  if (snippets.length === 0) return err(apiError("bad_request", "no snippets seeded"));
   const idx = hashDate(date) % snippets.length;
   const chosen = snippets[idx]!;
   const seed = {
@@ -35,18 +34,20 @@ export async function handler(event: APIGatewayProxyEventV2WithJWTAuthorizer) {
         ConditionExpression: "attribute_not_exists(SK)",
       }),
     );
-    return json(200, seed);
-  } catch (err) {
-    if ((err as { name?: string }).name === "ConditionalCheckFailedException") {
+    return ok(seed);
+  } catch (e) {
+    if ((e as { name?: string }).name === "ConditionalCheckFailedException") {
       const re = await ddb.send(
         new GetCommand({ TableName: TABLE, Key: { PK: "DAILY", SK: `DATE#${date}` } }),
       );
-      if (re.Item) return json(200, re.Item);
+      if (re.Item) return ok(re.Item as Record<string, unknown>);
     }
-    throw err;
+    throw e;
   }
-  return json(500, { error: "seed_failed" });
+  return err(apiError("internal", "seed_failed"));
 }
+
+export const handler = httpAdapter(getDaily, { successStatus: 200 });
 
 type SnippetRow = { SK: string; language: string };
 

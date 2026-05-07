@@ -59,7 +59,7 @@ describe("POST /attempts", () => {
     ddbMock.on(PutCommand).rejects(err);
     const r = await handler(baseEvent(validBody));
     expect(r.statusCode).toBe(200);
-    expect(JSON.parse(r.body)).toMatchObject({ duplicate: true });
+    expect(JSON.parse(r.body)).toMatchObject({ ok: true, data: { duplicate: true } });
   });
 
   test("flags wpm mismatch when client values diverge", async () => {
