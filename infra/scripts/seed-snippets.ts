@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { BatchWriteCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { LanguageSchema, SnippetSeedRow } from "@codetype/shared";
 
 const REGION = process.env.AWS_REGION ?? "ap-southeast-1";
 const TABLE = process.env.TABLE_NAME ?? "codetype";
@@ -11,17 +12,16 @@ const MAX_LEN = 400;
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }));
 
-type Raw = { id: string; title: string; code: string; difficulty: number };
-
 async function main() {
   const files = readdirSync(DATA_DIR).filter((f) => f.endsWith(".json"));
   const items: Record<string, unknown>[] = [];
   let skipped = 0;
 
   for (const file of files) {
-    const lang = file.replace(/\.json$/, "");
-    const rows = JSON.parse(readFileSync(join(DATA_DIR, file), "utf8")) as Raw[];
-    for (const r of rows) {
+    const lang = LanguageSchema.parse(file.replace(/\.json$/, ""));
+    const rows = JSON.parse(readFileSync(join(DATA_DIR, file), "utf8")) as unknown[];
+    for (const raw of rows) {
+      const r = SnippetSeedRow.parse(raw);
       if (r.code.length > MAX_LEN) {
         console.warn(`skip ${r.id}: code length ${r.code.length} > ${MAX_LEN}`);
         skipped++;

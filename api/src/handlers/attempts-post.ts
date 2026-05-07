@@ -1,34 +1,19 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import {
+  PostAttemptBody,
   accuracyScaledWpm,
   apiError,
   err,
   grossWpm,
+  isErr,
   netWpm,
   ok,
   type ApiError,
-  type Language,
   type Result,
   type WpmInput,
 } from "@codetype/shared";
 import { ddb, TABLE } from "../lib/dynamo";
-import { httpAdapter, type HandlerCtx } from "../lib/http";
-
-const LANGS = new Set<Language>(["js", "py", "c", "go"]);
-
-type Body = {
-  client_attempt_id: string;
-  snippet_id: string;
-  language: Language;
-  wpm_gross: number;
-  wpm_net: number;
-  wpm_scaled: number;
-  accuracy: number;
-  errors: number;
-  duration_ms: number;
-  chars_total: number;
-  chars_correct: number;
-};
+import { httpAdapter, parseJsonBody, type HandlerCtx } from "../lib/http";
 
 type AttemptResponse =
   | { sk: string; wpm_mismatch: boolean; duplicate?: false }
@@ -37,15 +22,9 @@ type AttemptResponse =
 async function postAttempt(ctx: HandlerCtx): Promise<Result<AttemptResponse, ApiError>> {
   if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
 
-  let body: Body;
-  try {
-    body = JSON.parse(ctx.event.body ?? "{}") as Body;
-  } catch {
-    return err(apiError("bad_request", "invalid json"));
-  }
-
-  const v = validate(body);
-  if (v) return err(apiError("bad_request", v));
+  const parsed = parseJsonBody(PostAttemptBody, ctx.event.body);
+  if (isErr(parsed)) return parsed;
+  const body = parsed.value;
 
   const wpmInput: WpmInput = {
     charsTotal: body.chars_total,
@@ -105,16 +84,3 @@ async function postAttempt(ctx: HandlerCtx): Promise<Result<AttemptResponse, Api
 export const handler = httpAdapter(postAttempt, {
   successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
 });
-
-function validate(b: Body): string | null {
-  if (!b.client_attempt_id || typeof b.client_attempt_id !== "string") return "client_attempt_id required";
-  if (!b.snippet_id) return "snippet_id required";
-  if (!LANGS.has(b.language)) return "invalid language";
-  if (b.duration_ms <= 0) return "duration_ms must be > 0";
-  if (b.chars_total <= 0) return "chars_total must be > 0";
-  if (b.chars_correct < 0 || b.chars_correct > b.chars_total) return "chars_correct out of range";
-  if (b.accuracy < 0 || b.accuracy > 1) return "accuracy out of range";
-  if (b.errors < 0) return "errors must be >= 0";
-  if (b.wpm_gross < 0 || b.wpm_net < 0 || b.wpm_scaled < 0) return "wpm must be >= 0";
-  return null;
-}

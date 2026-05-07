@@ -17,6 +17,7 @@
     "outputs": "aws cloudformation describe-stacks --stack-name codetype-solo --profile jgyy --query 'Stacks[0].Outputs' --output table"
   },
   "dependencies": {
+    "@codetype/shared": "workspace:*",
     "@aws-sdk/client-dynamodb": "^3.700.0",
     "@aws-sdk/lib-dynamodb": "^3.700.0"
   }

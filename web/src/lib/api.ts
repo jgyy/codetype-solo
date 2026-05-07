@@ -1,6 +1,6 @@
 "use client";
 
-import type { Attempt, Language } from "@codetype/shared";
+import { PostAttemptBody, type Attempt, type Language } from "@codetype/shared";
 import { CONFIG } from "./config";
 import { currentSession } from "./auth";
 
@@ -56,6 +56,11 @@ export type AttemptItem = Attempt & {
 export async function postAttempt(
   a: Attempt,
 ): Promise<{ sk?: string; wpm_mismatch?: boolean; duplicate?: boolean }> {
+  // Pre-flight client validation: surface field errors without a round-trip.
+  const pre = PostAttemptBody.safeParse(a);
+  if (!pre.success) {
+    throw new ApiError("bad_request", "validation_failed", 0, pre.error.issues);
+  }
   return jsonFetch("/attempts", { method: "POST", body: JSON.stringify(a) });
 }
 

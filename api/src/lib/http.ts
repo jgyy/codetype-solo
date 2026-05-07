@@ -2,14 +2,39 @@ import type {
   APIGatewayProxyEventV2WithJWTAuthorizer,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
+import { z } from "zod";
 import {
   apiError,
+  err,
+  ok,
   STATUS_BY_CODE,
   type ApiError,
   type Envelope,
   type Result,
 } from "@codetype/shared";
 import { getCaller, type Caller } from "./auth";
+
+export function parseWith<S extends z.ZodTypeAny>(
+  schema: S,
+  raw: unknown,
+): Result<z.infer<S>, ApiError> {
+  const r = schema.safeParse(raw);
+  if (r.success) return ok(r.data);
+  return err(apiError("bad_request", "validation_failed", r.error.issues));
+}
+
+export function parseJsonBody<S extends z.ZodTypeAny>(
+  schema: S,
+  rawBody: string | null | undefined,
+): Result<z.infer<S>, ApiError> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawBody ?? "{}");
+  } catch {
+    return err(apiError("bad_request", "invalid json"));
+  }
+  return parseWith(schema, parsed);
+}
 
 export type HandlerCtx = {
   event: APIGatewayProxyEventV2WithJWTAuthorizer;

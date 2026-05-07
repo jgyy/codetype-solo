@@ -1,15 +1,25 @@
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { apiError, err, ok, type ApiError, type Result } from "@codetype/shared";
+import {
+  ListAttemptsQuery,
+  apiError,
+  err,
+  isErr,
+  ok,
+  type ApiError,
+  type Result,
+} from "@codetype/shared";
 import { ddb, GSI1, TABLE } from "../lib/dynamo";
-import { httpAdapter, type HandlerCtx } from "../lib/http";
+import { httpAdapter, parseWith, type HandlerCtx } from "../lib/http";
 
 type ListResponse = { items: Record<string, unknown>[] };
 
 async function listAttempts(ctx: HandlerCtx): Promise<Result<ListResponse, ApiError>> {
   if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
 
-  const from = ctx.event.queryStringParameters?.from ?? "1970-01-01";
-  const to = ctx.event.queryStringParameters?.to ?? "9999-12-31";
+  const q = parseWith(ListAttemptsQuery, ctx.event.queryStringParameters ?? {});
+  if (isErr(q)) return q;
+  const from = q.value.from ?? "1970-01-01";
+  const to = q.value.to ?? "9999-12-31";
 
   const res = await ddb.send(
     new QueryCommand({

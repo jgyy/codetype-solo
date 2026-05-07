@@ -1,13 +1,20 @@
 import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { apiError, err, ok, type ApiError, type Result } from "@codetype/shared";
+import {
+  DailyQuery,
+  apiError,
+  err,
+  isErr,
+  ok,
+  type ApiError,
+  type Result,
+} from "@codetype/shared";
 import { ddb, TABLE } from "../lib/dynamo";
-import { httpAdapter, type HandlerCtx } from "../lib/http";
-
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+import { httpAdapter, parseWith, type HandlerCtx } from "../lib/http";
 
 async function getDaily(ctx: HandlerCtx): Promise<Result<Record<string, unknown>, ApiError>> {
-  const date = ctx.event.queryStringParameters?.date ?? new Date().toISOString().slice(0, 10);
-  if (!DATE_RE.test(date)) return err(apiError("bad_request", "invalid date"));
+  const q = parseWith(DailyQuery, ctx.event.queryStringParameters ?? {});
+  if (isErr(q)) return q;
+  const date = q.value.date ?? new Date().toISOString().slice(0, 10);
 
   const existing = await ddb.send(
     new GetCommand({ TableName: TABLE, Key: { PK: "DAILY", SK: `DATE#${date}` } }),
