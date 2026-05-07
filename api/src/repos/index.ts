@@ -14,6 +14,11 @@ import {
     makeInMemoryLeaderboardRepo,
     type LeaderboardRepo,
 } from "./leaderboard";
+import {
+    makeDdbSubmissionsRepo,
+    makeInMemorySubmissionsRepo,
+    type SubmissionsRepo,
+} from "./submissions";
 
 export type Repos = {
     attempts: AttemptsRepo;
@@ -21,6 +26,7 @@ export type Repos = {
     daily: DailyRepo;
     profiles: ProfileRepo;
     leaderboard: LeaderboardRepo;
+    submissions: SubmissionsRepo;
 };
 
 export function composeRepos(
@@ -34,6 +40,7 @@ export function composeRepos(
         daily: makeDdbDailyRepo(client, table, snippets),
         profiles: makeDdbProfileRepo(client, table),
         leaderboard: makeDdbLeaderboardRepo(client, table),
+        submissions: makeDdbSubmissionsRepo(client, table),
     };
 }
 
@@ -45,6 +52,7 @@ export function composeInMemoryRepos(seedSnippets: SnippetRow[] = []): Repos {
         daily: makeInMemoryDailyRepo(snippets),
         profiles: makeInMemoryProfileRepo(),
         leaderboard: makeInMemoryLeaderboardRepo(),
+        submissions: makeInMemorySubmissionsRepo(snippets),
     };
 }
 
@@ -55,7 +63,9 @@ export type {
     ProfileRepo,
     SnippetsRepo,
     SnippetRow,
+    SubmissionsRepo,
 };
+export type { NewSubmission } from "./submissions";
 export type { NewAttempt, AttemptRow } from "./attempts";
 export type { DailySeedRow } from "./daily";
 export type { ProfilePatch, ProfileRow } from "./profile";

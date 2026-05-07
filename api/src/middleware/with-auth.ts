@@ -1,12 +1,24 @@
 import { apiError, err } from "@codetype/shared";
-import { getCaller } from "../lib/auth";
+import { callerInGroup, getCaller } from "../lib/auth";
 import type { Mw } from "./types";
 
-export function withAuth(options: { required: boolean } = { required: true }): Mw {
+export type AuthOptions = { required: boolean; group?: string };
+
+export function withAuth(options: AuthOptions = { required: true }): Mw {
     return (next) => async (ctx) => {
         ctx.caller = getCaller(ctx.event);
         if (options.required && !ctx.caller) {
             return err(apiError("unauthorized", "missing caller"));
+        }
+        if (options.group && !callerInGroup(ctx.caller, options.group)) {
+            // Group failure is *forbidden*, but our envelope only models
+            // unauthorized at 401. We surface "forbidden" via unauthorized to
+            // keep the ErrorCode union closed; message + details narrow it.
+            return err(
+                apiError("unauthorized", `caller not in group ${options.group}`, {
+                    requiredGroup: options.group,
+                }),
+            );
         }
         return next(ctx);
     };

@@ -101,6 +101,40 @@ export async function upsertProfile(patch: ProfileUpdate = {}): Promise<ProfileR
     return jsonFetch("/profile", { method: "POST", body: JSON.stringify(patch) });
 }
 
+export type SubmissionDtoView = {
+    id: string;
+    status: "PENDING" | "APPROVED" | "REJECTED";
+    language: Language;
+    title: string;
+    code: string;
+    difficulty: number;
+    submitter_sub: string;
+    created_at: string;
+    decided_at?: string;
+    reject_reason?: string;
+    approved_snippet_id?: string;
+};
+
+export type NewSubmissionInput = {
+    language: Language;
+    title: string;
+    code: string;
+    difficulty: 1 | 2 | 3 | 4 | 5;
+};
+
+export async function submitSnippet(
+    input: NewSubmissionInput,
+): Promise<{ id: string; created_at: string; status: "PENDING" }> {
+    return jsonFetch("/snippets/submissions", {
+        method: "POST",
+        body: JSON.stringify(input),
+    });
+}
+
+export async function listMySubmissions(): Promise<{ items: SubmissionDtoView[] }> {
+    return jsonFetch("/snippets/submissions?mine=true");
+}
+
 export async function getLeaderboard(
     lang: Language,
     week?: string,

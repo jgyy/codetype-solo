@@ -13,3 +13,8 @@ export const snippetSk = (id: string) => `SNIPPET#${id}`;
 
 export const dailyPk = () => "DAILY";
 export const dailySk = (date: string) => `DATE#${date}`;
+
+export const submissionsPk = () => "SUBMISSIONS";
+export const submissionStatusSk = (status: string, createdAt: string, id: string) =>
+    `STATUS#${status}#${createdAt}#${id}`;
+export const submissionUserGsi1Sk = (createdAt: string) => `SUBMISSION#${createdAt}`;
