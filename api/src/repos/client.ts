@@ -2,9 +2,14 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 const REGION = process.env.AWS_REGION ?? "ap-southeast-1";
+// DDB_ENDPOINT lets tests point the SDK at DynamoDB Local without code changes.
+const ENDPOINT = process.env.DDB_ENDPOINT;
 
 export const ddb = DynamoDBDocumentClient.from(
-  new DynamoDBClient({ region: REGION }),
+  new DynamoDBClient({
+    region: REGION,
+    ...(ENDPOINT ? { endpoint: ENDPOINT } : {}),
+  }),
   { marshallOptions: { removeUndefinedValues: true } },
 );
 

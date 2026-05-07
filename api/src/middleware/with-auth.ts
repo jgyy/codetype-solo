@@ -11,9 +11,6 @@ export function withAuth(options: AuthOptions = { required: true }): Mw {
             return err(apiError("unauthorized", "missing caller"));
         }
         if (options.group && !callerInGroup(ctx.caller, options.group)) {
-            // Group failure is *forbidden*, but our envelope only models
-            // unauthorized at 401. We surface "forbidden" via unauthorized to
-            // keep the ErrorCode union closed; message + details narrow it.
             return err(
                 apiError("unauthorized", `caller not in group ${options.group}`, {
                     requiredGroup: options.group,

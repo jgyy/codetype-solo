@@ -1,0 +1,29 @@
+# Local DynamoDB for repo conformance tests.
+#
+# Start:  docker compose -f infra/test/docker-compose.yml up -d
+# Run:    RUN_DDB_TESTS=1 DDB_ENDPOINT=http://localhost:8000 \
+#           AWS_REGION=us-east-1 AWS_ACCESS_KEY_ID=dummy AWS_SECRET_ACCESS_KEY=dummy \
+#           TABLE_NAME=codetype-test bun test api/tests/repos
+#
+# Admin UI: http://localhost:8001  (browse items, run queries)
+
+services:
+  ddb:
+    image: amazon/dynamodb-local:latest
+    container_name: codetype-ddb-local
+    command: -jar DynamoDBLocal.jar -sharedDb -inMemory
+    ports:
+      - "8000:8000"
+
+  ddb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    container_name: codetype-ddb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: http://ddb:8000
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
+    depends_on:
+      - ddb

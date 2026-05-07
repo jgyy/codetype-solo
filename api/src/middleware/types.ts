@@ -3,13 +3,9 @@ import type { ApiError, Result } from "@codetype/shared";
 import type { Caller } from "../lib/auth";
 import type { Repos } from "../repos";
 
-export type Logger = {
-    info(msg: string, meta?: Record<string, unknown>): void;
-    warn(msg: string, meta?: Record<string, unknown>): void;
-    error(msg: string, meta?: Record<string, unknown>): void;
-};
+export type { Logger } from "../lib/logger";
+import type { Logger } from "../lib/logger";
 
-// Fixed-shape context. Middleware POPULATES fields; it does not extend the type.
 export type Ctx = {
     event: APIGatewayProxyEventV2WithJWTAuthorizer;
     requestId: string;
