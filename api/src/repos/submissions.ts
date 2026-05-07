@@ -17,11 +17,13 @@ import {
 } from "@codetype/shared";
 import { GSI1 } from "./client";
 import {
+    snippetGsi2Pk,
+    snippetGsi2Sk,
+    snippetPk,
+    snippetSk,
     submissionStatusSk,
     submissionUserGsi1Sk,
     submissionsPk,
-    snippetPk,
-    snippetSk,
     userPk,
 } from "./keys";
 import type { SnippetsRepo } from "./snippets";
@@ -216,6 +218,8 @@ export function makeDdbSubmissionsRepo(
                                 Item: {
                                     PK: snippetPk(row.language),
                                     SK: snippetSk(snippetId),
+                                    GSI2PK: snippetGsi2Pk(row.language),
+                                    GSI2SK: snippetGsi2Sk(snippetId),
                                     entity: "SNIPPET",
                                     id: snippetId,
                                     language: row.language,

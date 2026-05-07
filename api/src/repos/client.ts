@@ -15,3 +15,4 @@ export const ddb = DynamoDBDocumentClient.from(
 
 export const TABLE = process.env.TABLE_NAME ?? "codetype";
 export const GSI1 = "GSI1";
+export const GSI2 = "GSI2"; // sparse: per-language snippet listing (spec 009)

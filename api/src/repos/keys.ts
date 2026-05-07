@@ -10,6 +10,9 @@ export const dateGsi1Sk = (createdAt: string) =>
 
 export const snippetPk = (lang: string) => `SNIPPET#${lang}`;
 export const snippetSk = (id: string) => `SNIPPET#${id}`;
+// Sparse GSI2 (spec 009): per-language snippet listing without a Scan.
+export const snippetGsi2Pk = (lang: string) => `LANG#${lang}`;
+export const snippetGsi2Sk = (id: string) => `SNIPPET#${id}`;
 
 export const dailyPk = () => "DAILY";
 export const dailySk = (date: string) => `DATE#${date}`;

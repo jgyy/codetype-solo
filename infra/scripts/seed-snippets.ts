@@ -30,7 +30,10 @@ async function main() {
       items.push({
         PK: `SNIPPET#${lang}`,
         SK: `SNIPPET#${r.id}`,
+        GSI2PK: `LANG#${lang}`,
+        GSI2SK: `SNIPPET#${r.id}`,
         entity: "SNIPPET",
+        id: r.id,
         title: r.title,
         code: r.code,
         difficulty: r.difficulty,
