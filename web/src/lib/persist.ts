@@ -6,18 +6,23 @@ import { apiConfigured } from "./config";
 import { saveAttempt as saveGuest } from "./guest-store";
 import { currentSession } from "./auth";
 
-export async function persistAttempt(a: Attempt): Promise<"api" | "guest"> {
+export type PersistResult = {
+  destination: "api" | "guest";
+  leaderboardUpdated: boolean;
+};
+
+export async function persistAttempt(a: Attempt): Promise<PersistResult> {
   if (apiConfigured()) {
     const s = await currentSession();
     if (s) {
       try {
-        await postAttempt(a);
-        return "api";
+        const r = await postAttempt(a);
+        return { destination: "api", leaderboardUpdated: r.leaderboard_updated === true };
       } catch (err) {
         console.error("postAttempt failed; falling back to guest", err);
       }
     }
   }
   saveGuest(a);
-  return "guest";
+  return { destination: "guest", leaderboardUpdated: false };
 }

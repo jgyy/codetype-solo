@@ -37,6 +37,7 @@ function PlayInner() {
   const [snippet, setSnippet] = useState<Snippet | null>(null);
   const [result, setResult] = useState<TypingResult | null>(null);
   const [nonce, setNonce] = useState(0);
+  const [leaderboardUpdated, setLeaderboardUpdated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +77,7 @@ function PlayInner() {
 
   const onComplete = (r: TypingResult) => {
     setResult(r);
+    setLeaderboardUpdated(false);
     if (!snippet) return;
     const accuracy = r.charsTotal > 0 ? r.charsCorrect / r.charsTotal : 0;
     const a: Attempt = {
@@ -92,7 +94,9 @@ function PlayInner() {
       created_at: new Date().toISOString(),
       client_attempt_id: crypto.randomUUID(),
     };
-    void persistAttempt(a);
+    persistAttempt(a).then((res) => {
+      setLeaderboardUpdated(res.leaderboardUpdated);
+    });
   };
 
   const headline = useMemo(() => (snippet ? `${snippet.title} · ${snippet.language}` : ""), [snippet]);
@@ -113,7 +117,13 @@ function PlayInner() {
       {snippet && !result && (
         <TypingArea key={snippet.id + ":" + nonce} target={snippet.code} onComplete={onComplete} />
       )}
-      {result && <ResultCard {...result} onAgain={() => setNonce((n) => n + 1)} />}
+      {result && (
+        <ResultCard
+          {...result}
+          leaderboardUpdated={leaderboardUpdated}
+          onAgain={() => setNonce((n) => n + 1)}
+        />
+      )}
     </main>
   );
 }

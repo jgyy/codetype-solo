@@ -7,6 +7,7 @@ import { apiConfigured } from "@/lib/config";
 import { loadAttempts } from "@/lib/guest-store";
 import { useSession } from "@/lib/useSession";
 import { WpmChart } from "@/components/WpmChart";
+import { ProfileSettings } from "@/components/ProfileSettings";
 import type { Attempt } from "@codetype/shared";
 
 export default function DashboardPage() {
@@ -49,6 +50,13 @@ export default function DashboardPage() {
         <h2 className="text-sm uppercase tracking-wide text-zinc-500">Net WPM over time</h2>
         <WpmChart attempts={attempts} />
       </section>
+
+      {session.status === "signedIn" && apiConfigured() && (
+        <section className="space-y-2">
+          <h2 className="text-sm uppercase tracking-wide text-zinc-500">Settings</h2>
+          <ProfileSettings />
+        </section>
+      )}
     </main>
   );
 }

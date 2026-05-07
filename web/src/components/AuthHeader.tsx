@@ -12,6 +12,7 @@ export function AuthHeader() {
       <Link href="/" className="font-semibold hover:text-amber-400">CodeType Solo</Link>
       <div className="flex items-center gap-4 text-zinc-400">
         <Link href="/history" className="hover:text-amber-400">History</Link>
+        <Link href="/leaderboard" className="hover:text-amber-400">Leaderboard</Link>
         <Link href="/dashboard" className="hover:text-amber-400">Dashboard</Link>
         {s.status === "loading" ? (
           <span>…</span>

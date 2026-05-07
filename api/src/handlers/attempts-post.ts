@@ -23,9 +23,10 @@ import {
     type DomainHandler,
 } from "../middleware";
 import { composeRepos } from "../repos";
+import { syncLeaderboardForUser } from "../lib/lb-sync";
 
 type AttemptResponse =
-    | { sk: string; wpm_mismatch: boolean; duplicate?: false }
+    | { sk: string; wpm_mismatch: boolean; duplicate?: false; leaderboard_updated?: boolean }
     | { sk: string; duplicate: true };
 
 export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx) => {
@@ -64,7 +65,19 @@ export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx)
     });
     if (isErr(r)) return r as Result<never, ApiError>;
     if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
-    return ok({ sk: r.value.sk, wpm_mismatch: mismatch });
+
+    let lbUpdated = false;
+    try {
+        const sync = await syncLeaderboardForUser(ctx.repos, ctx.caller.sub, body.language);
+        lbUpdated = sync.kind === "updated";
+    } catch (e) {
+        ctx.log.warn("lb_sync_failed", {
+            err: e instanceof Error ? e.message : String(e),
+            sub: ctx.caller.sub,
+        });
+    }
+
+    return ok({ sk: r.value.sk, wpm_mismatch: mismatch, leaderboard_updated: lbUpdated });
 };
 
 export const handler = compose<AttemptResponse>(

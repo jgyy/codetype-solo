@@ -1,6 +1,9 @@
 import { z } from "zod";
+import { HandleSchema } from "./leaderboard";
 
-// Profile upsert has no meaningful body today, but we declare an empty
-// object schema so the validation pipeline is uniform across handlers.
-export const UpsertProfileBody = z.object({}).passthrough();
+export const UpsertProfileBody = z.object({
+    handle: HandleSchema.optional(),
+    leaderboard_optin: z.boolean().optional(),
+    display_name: z.string().min(1).max(48).optional(),
+});
 export type UpsertProfileBody = z.infer<typeof UpsertProfileBody>;
