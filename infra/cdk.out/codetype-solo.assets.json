@@ -1,0 +1,51 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1": {
+      "displayName": "FnPostAttempt/Code",
+      "source": {
+        "path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "223516915733-ap-southeast-1-b6388b37": {
+          "bucketName": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+          "objectKey": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip",
+          "region": "ap-southeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::223516915733:role/cdk-hnb659fds-file-publishing-role-223516915733-ap-southeast-1"
+        }
+      }
+    },
+    "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d": {
+      "displayName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code",
+      "source": {
+        "path": "/home/jegoh/Documents/repo/codetype-solo/node_modules/.bun/aws-cdk-lib@2.253.0+e7139fb0f4384fd5/node_modules/aws-cdk-lib/custom-resource-handlers/dist/aws-logs/log-retention-handler",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "223516915733-ap-southeast-1-333d156a": {
+          "bucketName": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+          "objectKey": "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d.zip",
+          "region": "ap-southeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::223516915733:role/cdk-hnb659fds-file-publishing-role-223516915733-ap-southeast-1"
+        }
+      }
+    },
+    "f40fea6c49669ee007a3ea3e8ccdb3e1ca2ff8b3f5b4bce50911ae4471c353b5": {
+      "displayName": "codetype-solo Template",
+      "source": {
+        "path": "codetype-solo.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "223516915733-ap-southeast-1-e0f65fea": {
+          "bucketName": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+          "objectKey": "f40fea6c49669ee007a3ea3e8ccdb3e1ca2ff8b3f5b4bce50911ae4471c353b5.json",
+          "region": "ap-southeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::223516915733:role/cdk-hnb659fds-file-publishing-role-223516915733-ap-southeast-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

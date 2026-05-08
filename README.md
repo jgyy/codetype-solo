@@ -2,7 +2,7 @@
 
 A daily code-snippet typing trainer for a single developer. Pick a language, type real code against the clock, get **WPM / accuracy / streak** stats, and watch your progress over time.
 
-> **Stack:** Next.js 15 (static export) + TypeScript + Tailwind · Bun workspaces · AWS Lambda + API Gateway HTTP + DynamoDB + Cognito · S3 + CloudFront · AWS SAM.
+> **Stack:** Next.js 15 (static export) + TypeScript + Tailwind · Bun workspaces · AWS Lambda + API Gateway HTTP + DynamoDB + Cognito · S3 + CloudFront · AWS CDK (TypeScript).
 > **Cost:** sits inside the free tier for personal use (~$0/mo).
 
 ---
@@ -14,15 +14,18 @@ codetype-solo/
 ├── shared/   # @codetype/shared — pure-TS WPM + streak (TDD'd)
 ├── web/      # @codetype/web    — Next.js static export
 ├── api/      # @codetype/api    — Lambda handlers (bun build → dist/)
-├── infra/    # @codetype/infra  — SAM template + deploy/seed scripts
+├── infra/    # @codetype/infra  — AWS CDK app + deploy/seed scripts
 └── data/snippets/  # raw snippet JSON per language
 ```
 
 ## Prerequisites
 
 - [Bun](https://bun.sh) ≥ 1.3 (`curl -fsSL https://bun.sh/install | bash`)
-- AWS CLI configured with profile `jgyy` in region `ap-southeast-1`
-- AWS SAM CLI (`pipx install aws-sam-cli` or your distro's package)
+- AWS CLI configured with the profile of your choice
+  (e.g. `aws configure --profile <your-profile>`). No profile is hardcoded — pass
+  `--profile <your-profile>` to the CDK / AWS CLI commands below, or export
+  `AWS_PROFILE` once per shell. Default region: `ap-southeast-1`.
+- AWS CDK is bundled as an `infra/` devDependency, so no global install is needed.
 
 ## Local development
 
@@ -34,17 +37,41 @@ bun --filter @codetype/web dev    # http://localhost:3000 (guest mode, no AWS ne
 
 Without `web/.env.local`, the web app runs in **guest mode**: attempts persist to `localStorage`. Sign-in is hidden until Cognito is configured.
 
-## Deploy to AWS (one command)
+## Deploy to AWS
+
+Each command takes the AWS profile via `--profile <your-profile>` (or read from
+`AWS_PROFILE`). Examples below use `<your-profile>` as a placeholder.
+
+CDK and AWS CLI commands accept `--profile <your-profile>`. Bun forwards anything
+after `--` to the underlying script, so:
 
 ```bash
-bun run deploy:guided    # first time only — interactive SAM bootstrap
-bun run deploy           # subsequent: build api → SAM → seed → build web → S3 sync → CF invalidate
+# First time only — bootstrap CDK assets in this account/region.
+bun run bootstrap -- --profile <your-profile>
+
+# Full deploy: build api → cdk deploy → seed → build web → S3 sync → CF invalidate.
+# (deploy:web reads $AWS_PROFILE for the AWS CLI calls inside its script.)
+AWS_PROFILE=<your-profile> bun run deploy
+```
+
+Stack-only and web-only variants:
+
+```bash
+bun run deploy:stack -- --profile <your-profile>     # cdk deploy only
+AWS_PROFILE=<your-profile> bun run deploy:web        # build web → sync S3 → invalidate
+```
+
+Inspect changes before deploying:
+
+```bash
+bun run synth -- --profile <your-profile>
+bun run diff  -- --profile <your-profile>
 ```
 
 After the first deploy, populate `web/.env.local` from stack outputs:
 
 ```bash
-bun run outputs          # prints ApiUrl, UserPoolId, UserPoolClientId, CloudFrontUrl, …
+bun run outputs -- --profile <your-profile>   # prints ApiUrl, UserPoolId, UserPoolClientId, CloudFrontUrl, …
 ```
 
 ```ini
@@ -66,9 +93,11 @@ bun run deploy:web
 | Command | What it does |
 |---|---|
 | `bun test` | All unit + handler tests (`shared/` + `api/`) |
-| `bun run deploy` | Full deploy: API build → SAM → seed → web build → S3 sync → invalidate |
-| `bun run deploy:stack` | SAM only (Lambda + API + DynamoDB + Cognito + S3/CF) |
+| `bun run deploy` | Full deploy: API build → `cdk deploy` → seed → web build → S3 sync → invalidate |
+| `bun run deploy:stack` | CDK only (Lambda + HTTP API + DynamoDB + Cognito + S3/CF) |
 | `bun run deploy:web` | Build + sync `web/out` to S3 + invalidate CloudFront |
+| `bun run synth` / `diff` | `cdk synth` / `cdk diff` against the deployed stack |
+| `bun run bootstrap` | One-time `cdk bootstrap` for this account/region |
 | `bun run seed` | Seed snippets and 30-day daily-challenge pool into DynamoDB |
 | `bun run outputs` | Print CloudFormation outputs for the current stack |
 

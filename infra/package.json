@@ -6,20 +6,30 @@
   "scripts": {
     "build:api": "bun --filter @codetype/api build",
     "build:web": "bun --filter @codetype/web build",
-    "deploy:stack": "bun run build:api && sam deploy --profile jgyy --config-file samconfig.toml",
-    "deploy:guided": "bun run build:api && sam deploy --guided --profile jgyy --config-file samconfig.toml",
+    "synth": "bun run build:api && cdk synth",
+    "diff": "bun run build:api && cdk diff",
+    "bootstrap": "cdk bootstrap",
+    "deploy:stack": "bun run build:api && cdk deploy --require-approval never",
     "deploy:web": "bun run build:web && bun run scripts/sync-web.ts && bun run scripts/invalidate.ts",
     "deploy:all": "bun run deploy:stack && bun run seed && bun run deploy:web",
-    "validate": "sam validate --profile jgyy --lint",
+    "destroy": "cdk destroy",
     "seed": "bun run scripts/seed-snippets.ts && bun run scripts/seed-daily.ts",
     "seed:snippets": "bun run scripts/seed-snippets.ts",
     "seed:daily": "bun run scripts/seed-daily.ts",
     "backfill:gsi2": "bun run scripts/backfill-gsi2.ts",
-    "outputs": "aws cloudformation describe-stacks --stack-name codetype-solo --profile jgyy --query 'Stacks[0].Outputs' --output table"
+    "outputs": "aws cloudformation describe-stacks --stack-name codetype-solo --query 'Stacks[0].Outputs' --output table",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@codetype/shared": "workspace:*",
     "@aws-sdk/client-dynamodb": "^3.700.0",
-    "@aws-sdk/lib-dynamodb": "^3.700.0"
+    "@aws-sdk/lib-dynamodb": "^3.700.0",
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.170.0",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
   }
 }

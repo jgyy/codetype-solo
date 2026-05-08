@@ -1,11 +1,15 @@
 #!/usr/bin/env bun
 import { spawnSync } from "node:child_process";
 
-const PROFILE = process.env.AWS_PROFILE_NAME ?? "jgyy";
+const PROFILE = process.env.AWS_PROFILE_NAME ?? process.env.AWS_PROFILE;
 const STACK = process.env.STACK_NAME ?? "codetype-solo";
 
+function withProfile(args: string[]): string[] {
+  return PROFILE ? [...args, "--profile", PROFILE] : args;
+}
+
 function aws(args: string[]): string {
-  const r = spawnSync("aws", [...args, "--profile", PROFILE], { encoding: "utf8" });
+  const r = spawnSync("aws", withProfile(args), { encoding: "utf8" });
   if (r.status !== 0) {
     console.error(r.stderr);
     process.exit(r.status ?? 1);
@@ -32,7 +36,7 @@ if (!distId) {
 console.log(`invalidating ${distId} (/index.html, /_next/*)`);
 spawnSync(
   "aws",
-  [
+  withProfile([
     "cloudfront",
     "create-invalidation",
     "--distribution-id",
@@ -40,8 +44,6 @@ spawnSync(
     "--paths",
     "/index.html",
     "/_next/*",
-    "--profile",
-    PROFILE,
-  ],
+  ]),
   { stdio: "inherit" },
 );

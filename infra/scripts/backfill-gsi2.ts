@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-// Idempotent backfill for GSI2 (spec 009): scans every entity=SNIPPET row
-// missing GSI2PK/GSI2SK and patches them in. Safe to re-run.
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {

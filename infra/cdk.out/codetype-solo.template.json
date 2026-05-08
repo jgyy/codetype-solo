@@ -1,0 +1,3231 @@
+{
+ "Resources": {
+  "TableCD117FA1": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "PK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "SK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "GSI1PK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "GSI1SK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "GSI2PK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "GSI2SK",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "GSI1",
+      "KeySchema": [
+       {
+        "AttributeName": "GSI1PK",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "GSI1SK",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "GSI2",
+      "KeySchema": [
+       {
+        "AttributeName": "GSI2PK",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "GSI2SK",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "PK",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "SK",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "TableName": "codetype"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/Table/Resource"
+   }
+  },
+  "UserPool6BA7E5F2": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_email",
+       "Priority": 1
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": false
+    },
+    "AutoVerifiedAttributes": [
+     "email"
+    ],
+    "EmailVerificationMessage": "The verification code to your new account is {####}",
+    "EmailVerificationSubject": "Verify your new account",
+    "Policies": {
+     "PasswordPolicy": {
+      "MinimumLength": 8,
+      "RequireLowercase": true,
+      "RequireNumbers": true
+     }
+    },
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UserPoolName": "codetype-users",
+    "UsernameAttributes": [
+     "email"
+    ],
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "The verification code to your new account is {####}",
+     "EmailSubject": "Verify your new account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/UserPool/Resource"
+   }
+  },
+  "ModsGroup": {
+   "Type": "AWS::Cognito::UserPoolGroup",
+   "Properties": {
+    "Description": "Moderators — approve/reject submissions and retract snippets.",
+    "GroupName": "mods",
+    "UserPoolId": {
+     "Ref": "UserPool6BA7E5F2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/ModsGroup"
+   }
+  },
+  "UserPoolClient2F5918F7": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "openid",
+     "email",
+     "profile"
+    ],
+    "CallbackURLs": [
+     "https://example.com"
+    ],
+    "ExplicitAuthFlows": [
+     "ALLOW_USER_PASSWORD_AUTH",
+     "ALLOW_USER_SRP_AUTH",
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "PreventUserExistenceErrors": "ENABLED",
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "UserPool6BA7E5F2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/UserPoolClient/Resource"
+   }
+  },
+  "FnPostAttemptServiceRoleE8765C0F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnPostAttempt/ServiceRole/Resource"
+   }
+  },
+  "FnPostAttemptServiceRoleDefaultPolicyDBC88F1F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnPostAttemptServiceRoleDefaultPolicyDBC88F1F",
+    "Roles": [
+     {
+      "Ref": "FnPostAttemptServiceRoleE8765C0F"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnPostAttempt/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnPostAttemptA1CA94A4": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "attempts-post.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnPostAttemptServiceRoleE8765C0F",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnPostAttemptServiceRoleDefaultPolicyDBC88F1F",
+    "FnPostAttemptServiceRoleE8765C0F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnPostAttempt/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnPostAttemptLogRetention39A42672": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnPostAttemptA1CA94A4"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnPostAttempt/LogRetention/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:DeleteRetentionPolicy",
+        "logs:PutRetentionPolicy"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+    "Roles": [
+     {
+      "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Handler": "index.handler",
+    "Runtime": "nodejs22.x",
+    "Timeout": 900,
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/node_modules/.bun/aws-cdk-lib@2.253.0+e7139fb0f4384fd5/node_modules/aws-cdk-lib/custom-resource-handlers/dist/aws-logs/log-retention-handler",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnListAttemptsServiceRole0ABAC2F1": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListAttempts/ServiceRole/Resource"
+   }
+  },
+  "FnListAttemptsServiceRoleDefaultPolicyCCCC1F06": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnListAttemptsServiceRoleDefaultPolicyCCCC1F06",
+    "Roles": [
+     {
+      "Ref": "FnListAttemptsServiceRole0ABAC2F1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListAttempts/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnListAttempts6CBF6638": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "attempts-list.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnListAttemptsServiceRole0ABAC2F1",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnListAttemptsServiceRoleDefaultPolicyCCCC1F06",
+    "FnListAttemptsServiceRole0ABAC2F1"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListAttempts/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnListAttemptsLogRetention9DDB5E3A": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnListAttempts6CBF6638"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListAttempts/LogRetention/Resource"
+   }
+  },
+  "FnGetDailyServiceRole9AEF127D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetDaily/ServiceRole/Resource"
+   }
+  },
+  "FnGetDailyServiceRoleDefaultPolicy4591A11C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnGetDailyServiceRoleDefaultPolicy4591A11C",
+    "Roles": [
+     {
+      "Ref": "FnGetDailyServiceRole9AEF127D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetDaily/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnGetDailyC7A56EAE": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "daily-get.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnGetDailyServiceRole9AEF127D",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnGetDailyServiceRoleDefaultPolicy4591A11C",
+    "FnGetDailyServiceRole9AEF127D"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetDaily/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnGetDailyLogRetention8B275151": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnGetDailyC7A56EAE"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetDaily/LogRetention/Resource"
+   }
+  },
+  "FnGetSnippetServiceRole89777B05": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetSnippet/ServiceRole/Resource"
+   }
+  },
+  "FnGetSnippetServiceRoleDefaultPolicy150DD141": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnGetSnippetServiceRoleDefaultPolicy150DD141",
+    "Roles": [
+     {
+      "Ref": "FnGetSnippetServiceRole89777B05"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetSnippet/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnGetSnippet8ABD0C55": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "snippet-get.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnGetSnippetServiceRole89777B05",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnGetSnippetServiceRoleDefaultPolicy150DD141",
+    "FnGetSnippetServiceRole89777B05"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetSnippet/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnGetSnippetLogRetentionA2A18A10": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnGetSnippet8ABD0C55"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetSnippet/LogRetention/Resource"
+   }
+  },
+  "FnUpsertProfileServiceRole5ABC4E59": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnUpsertProfile/ServiceRole/Resource"
+   }
+  },
+  "FnUpsertProfileServiceRoleDefaultPolicyB1015130": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnUpsertProfileServiceRoleDefaultPolicyB1015130",
+    "Roles": [
+     {
+      "Ref": "FnUpsertProfileServiceRole5ABC4E59"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnUpsertProfile/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnUpsertProfile2D0FF237": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "profile-upsert.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnUpsertProfileServiceRole5ABC4E59",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnUpsertProfileServiceRoleDefaultPolicyB1015130",
+    "FnUpsertProfileServiceRole5ABC4E59"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnUpsertProfile/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnUpsertProfileLogRetentionA809B54F": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnUpsertProfile2D0FF237"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnUpsertProfile/LogRetention/Resource"
+   }
+  },
+  "FnGetLeaderboardServiceRoleD2A8B76B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetLeaderboard/ServiceRole/Resource"
+   }
+  },
+  "FnGetLeaderboardServiceRoleDefaultPolicy35623052": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnGetLeaderboardServiceRoleDefaultPolicy35623052",
+    "Roles": [
+     {
+      "Ref": "FnGetLeaderboardServiceRoleD2A8B76B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetLeaderboard/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnGetLeaderboard0A5859C0": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "leaderboard-get.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnGetLeaderboardServiceRoleD2A8B76B",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnGetLeaderboardServiceRoleDefaultPolicy35623052",
+    "FnGetLeaderboardServiceRoleD2A8B76B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetLeaderboard/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnGetLeaderboardLogRetentionF4B411B4": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnGetLeaderboard0A5859C0"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnGetLeaderboard/LogRetention/Resource"
+   }
+  },
+  "FnSubmitSnippetServiceRoleE9981BF0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnSubmitSnippet/ServiceRole/Resource"
+   }
+  },
+  "FnSubmitSnippetServiceRoleDefaultPolicy95AD2E56": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnSubmitSnippetServiceRoleDefaultPolicy95AD2E56",
+    "Roles": [
+     {
+      "Ref": "FnSubmitSnippetServiceRoleE9981BF0"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnSubmitSnippet/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnSubmitSnippetDD8D1BED": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "submissions-post.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnSubmitSnippetServiceRoleE9981BF0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnSubmitSnippetServiceRoleDefaultPolicy95AD2E56",
+    "FnSubmitSnippetServiceRoleE9981BF0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnSubmitSnippet/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnSubmitSnippetLogRetentionBF3C194E": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnSubmitSnippetDD8D1BED"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnSubmitSnippet/LogRetention/Resource"
+   }
+  },
+  "FnListSubmissionsServiceRole72EE2A60": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListSubmissions/ServiceRole/Resource"
+   }
+  },
+  "FnListSubmissionsServiceRoleDefaultPolicy9EF51DF7": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnListSubmissionsServiceRoleDefaultPolicy9EF51DF7",
+    "Roles": [
+     {
+      "Ref": "FnListSubmissionsServiceRole72EE2A60"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListSubmissions/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnListSubmissions1ACC582D": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "submissions-list.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnListSubmissionsServiceRole72EE2A60",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnListSubmissionsServiceRoleDefaultPolicy9EF51DF7",
+    "FnListSubmissionsServiceRole72EE2A60"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListSubmissions/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnListSubmissionsLogRetention8B6E598F": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnListSubmissions1ACC582D"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnListSubmissions/LogRetention/Resource"
+   }
+  },
+  "FnApproveSubmissionServiceRole45AAA495": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnApproveSubmission/ServiceRole/Resource"
+   }
+  },
+  "FnApproveSubmissionServiceRoleDefaultPolicy8ACB2023": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnApproveSubmissionServiceRoleDefaultPolicy8ACB2023",
+    "Roles": [
+     {
+      "Ref": "FnApproveSubmissionServiceRole45AAA495"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnApproveSubmission/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnApproveSubmissionBB09BE39": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "submissions-approve.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnApproveSubmissionServiceRole45AAA495",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnApproveSubmissionServiceRoleDefaultPolicy8ACB2023",
+    "FnApproveSubmissionServiceRole45AAA495"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnApproveSubmission/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnApproveSubmissionLogRetention929098DE": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnApproveSubmissionBB09BE39"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnApproveSubmission/LogRetention/Resource"
+   }
+  },
+  "FnRejectSubmissionServiceRole83D0BC7C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRejectSubmission/ServiceRole/Resource"
+   }
+  },
+  "FnRejectSubmissionServiceRoleDefaultPolicy39319EA5": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnRejectSubmissionServiceRoleDefaultPolicy39319EA5",
+    "Roles": [
+     {
+      "Ref": "FnRejectSubmissionServiceRole83D0BC7C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRejectSubmission/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnRejectSubmissionBEFAA85D": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "submissions-reject.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnRejectSubmissionServiceRole83D0BC7C",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnRejectSubmissionServiceRoleDefaultPolicy39319EA5",
+    "FnRejectSubmissionServiceRole83D0BC7C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRejectSubmission/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnRejectSubmissionLogRetention738B1F5C": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnRejectSubmissionBEFAA85D"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRejectSubmission/LogRetention/Resource"
+   }
+  },
+  "FnRetractSnippetServiceRole500DB6D8": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRetractSnippet/ServiceRole/Resource"
+   }
+  },
+  "FnRetractSnippetServiceRoleDefaultPolicy4BA59413": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TableCD117FA1",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TableCD117FA1",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FnRetractSnippetServiceRoleDefaultPolicy4BA59413",
+    "Roles": [
+     {
+      "Ref": "FnRetractSnippetServiceRole500DB6D8"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRetractSnippet/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "FnRetractSnippet979185AC": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
+     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": "codetype",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "Handler": "snippet-retract.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "FnRetractSnippetServiceRole500DB6D8",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "FnRetractSnippetServiceRoleDefaultPolicy4BA59413",
+    "FnRetractSnippetServiceRole500DB6D8"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRetractSnippet/Resource",
+    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FnRetractSnippetLogRetention23B9EB7C": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "FnRetractSnippet979185AC"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 14
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnRetractSnippet/LogRetention/Resource"
+   }
+  },
+  "HttpApiF5A9A8A7": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "CorsConfiguration": {
+     "AllowHeaders": [
+      "authorization",
+      "content-type"
+     ],
+     "AllowMethods": [
+      "GET",
+      "POST",
+      "OPTIONS"
+     ],
+     "AllowOrigins": [
+      "*"
+     ],
+     "MaxAge": 3600
+    },
+    "Name": "codetype-api",
+    "ProtocolType": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/HttpApi/Resource"
+   }
+  },
+  "HttpApiDefaultStage3EEB07D6": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/HttpApi/DefaultStage/Resource"
+   }
+  },
+  "HttpApiJwtAuthorizer14F16BDB": {
+   "Type": "AWS::ApiGatewayV2::Authorizer",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizerType": "JWT",
+    "IdentitySource": [
+     "$request.header.Authorization"
+    ],
+    "JwtConfiguration": {
+     "Audience": [
+      {
+       "Ref": "UserPoolClient2F5918F7"
+      }
+     ],
+     "Issuer": {
+      "Fn::Join": [
+       "",
+       [
+        "https://cognito-idp.ap-southeast-1.amazonaws.com/",
+        {
+         "Ref": "UserPool6BA7E5F2"
+        }
+       ]
+      ]
+     }
+    },
+    "Name": "JwtAuthorizer"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/HttpApi/JwtAuthorizer/Resource"
+   }
+  },
+  "RoutepostAttemptIntpostAttemptA208D286": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnPostAttemptA1CA94A4",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutepostAttempt/IntpostAttempt/Resource"
+   }
+  },
+  "RoutepostAttemptIntpostAttemptPermission4960A55F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnPostAttemptA1CA94A4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/attempts"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutepostAttempt/IntpostAttempt-Permission"
+   }
+  },
+  "RoutepostAttemptFC0908A6": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "POST /attempts",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutepostAttemptIntpostAttemptA208D286"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutepostAttempt/Resource"
+   }
+  },
+  "RoutelistAttemptsIntlistAttempts4C1D0B7F": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnListAttempts6CBF6638",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutelistAttempts/IntlistAttempts/Resource"
+   }
+  },
+  "RoutelistAttemptsIntlistAttemptsPermissionD4A3BCB3": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnListAttempts6CBF6638",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/attempts"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutelistAttempts/IntlistAttempts-Permission"
+   }
+  },
+  "RoutelistAttempts44814108": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "GET /attempts",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutelistAttemptsIntlistAttempts4C1D0B7F"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutelistAttempts/Resource"
+   }
+  },
+  "RoutegetDailyIntgetDaily3633C85C": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnGetDailyC7A56EAE",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetDaily/IntgetDaily/Resource"
+   }
+  },
+  "RoutegetDailyIntgetDailyPermissionAF697B86": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnGetDailyC7A56EAE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/daily"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetDaily/IntgetDaily-Permission"
+   }
+  },
+  "RoutegetDailyEF8C2925": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /daily",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutegetDailyIntgetDaily3633C85C"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetDaily/Resource"
+   }
+  },
+  "RoutegetSnippetIntgetSnippet7CC6347D": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnGetSnippet8ABD0C55",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetSnippet/IntgetSnippet/Resource"
+   }
+  },
+  "RoutegetSnippetIntgetSnippetPermissionDEF3ACC3": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnGetSnippet8ABD0C55",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/snippets/{lang}/{id}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetSnippet/IntgetSnippet-Permission"
+   }
+  },
+  "RoutegetSnippet09DC95B5": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /snippets/{lang}/{id}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutegetSnippetIntgetSnippet7CC6347D"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetSnippet/Resource"
+   }
+  },
+  "RouteupsertProfileIntupsertProfile982A343A": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnUpsertProfile2D0FF237",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteupsertProfile/IntupsertProfile/Resource"
+   }
+  },
+  "RouteupsertProfileIntupsertProfilePermission8CAC9D2B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnUpsertProfile2D0FF237",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/profile"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteupsertProfile/IntupsertProfile-Permission"
+   }
+  },
+  "RouteupsertProfile7F1E8AEB": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "POST /profile",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RouteupsertProfileIntupsertProfile982A343A"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteupsertProfile/Resource"
+   }
+  },
+  "RoutegetLeaderboardIntgetLeaderboard402CC983": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnGetLeaderboard0A5859C0",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetLeaderboard/IntgetLeaderboard/Resource"
+   }
+  },
+  "RoutegetLeaderboardIntgetLeaderboardPermission909DA608": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnGetLeaderboard0A5859C0",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/leaderboard"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetLeaderboard/IntgetLeaderboard-Permission"
+   }
+  },
+  "RoutegetLeaderboardD3A33D17": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /leaderboard",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutegetLeaderboardIntgetLeaderboard402CC983"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutegetLeaderboard/Resource"
+   }
+  },
+  "RoutesubmitSnippetIntsubmitSnippet33E1EF7E": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnSubmitSnippetDD8D1BED",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutesubmitSnippet/IntsubmitSnippet/Resource"
+   }
+  },
+  "RoutesubmitSnippetIntsubmitSnippetPermissionCD7C0E9B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnSubmitSnippetDD8D1BED",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/snippets/submissions"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutesubmitSnippet/IntsubmitSnippet-Permission"
+   }
+  },
+  "RoutesubmitSnippet2D91A5CC": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "POST /snippets/submissions",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutesubmitSnippetIntsubmitSnippet33E1EF7E"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutesubmitSnippet/Resource"
+   }
+  },
+  "RoutelistSubmissionsIntlistSubmissionsD7E3ADA4": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnListSubmissions1ACC582D",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutelistSubmissions/IntlistSubmissions/Resource"
+   }
+  },
+  "RoutelistSubmissionsIntlistSubmissionsPermission9E9A9A10": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnListSubmissions1ACC582D",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/snippets/submissions"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutelistSubmissions/IntlistSubmissions-Permission"
+   }
+  },
+  "RoutelistSubmissions29196725": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "GET /snippets/submissions",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RoutelistSubmissionsIntlistSubmissionsD7E3ADA4"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RoutelistSubmissions/Resource"
+   }
+  },
+  "RouteapproveSubmissionIntapproveSubmission6E1AD874": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnApproveSubmissionBB09BE39",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteapproveSubmission/IntapproveSubmission/Resource"
+   }
+  },
+  "RouteapproveSubmissionIntapproveSubmissionPermission8EA1D96B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnApproveSubmissionBB09BE39",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/snippets/submissions/{id}/approve"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteapproveSubmission/IntapproveSubmission-Permission"
+   }
+  },
+  "RouteapproveSubmission032C2A08": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "POST /snippets/submissions/{id}/approve",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RouteapproveSubmissionIntapproveSubmission6E1AD874"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteapproveSubmission/Resource"
+   }
+  },
+  "RouterejectSubmissionIntrejectSubmission8C5A2A62": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnRejectSubmissionBEFAA85D",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouterejectSubmission/IntrejectSubmission/Resource"
+   }
+  },
+  "RouterejectSubmissionIntrejectSubmissionPermission37D14BF1": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnRejectSubmissionBEFAA85D",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/snippets/submissions/{id}/reject"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouterejectSubmission/IntrejectSubmission-Permission"
+   }
+  },
+  "RouterejectSubmission2068EDD3": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "POST /snippets/submissions/{id}/reject",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RouterejectSubmissionIntrejectSubmission8C5A2A62"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouterejectSubmission/Resource"
+   }
+  },
+  "RouteretractSnippetIntretractSnippet9F3DD2D6": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "FnRetractSnippet979185AC",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteretractSnippet/IntretractSnippet/Resource"
+   }
+  },
+  "RouteretractSnippetIntretractSnippetPermission6472BF2A": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FnRetractSnippet979185AC",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:223516915733:",
+       {
+        "Ref": "HttpApiF5A9A8A7"
+       },
+       "/*/*/snippets/{lang}/{id}/retract"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteretractSnippet/IntretractSnippet-Permission"
+   }
+  },
+  "RouteretractSnippetE31BA818": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApiF5A9A8A7"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "HttpApiJwtAuthorizer14F16BDB"
+    },
+    "RouteKey": "POST /snippets/{lang}/{id}/retract",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "RouteretractSnippetIntretractSnippet9F3DD2D6"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/RouteretractSnippet/Resource"
+   }
+  },
+  "WebBucket12880F5B": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "OwnershipControls": {
+     "Rules": [
+      {
+       "ObjectOwnership": "BucketOwnerEnforced"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/WebBucket/Resource"
+   }
+  },
+  "WebBucketPolicy95D08FAA": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "WebBucket12880F5B"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "WebBucket12880F5B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "WebBucket12880F5B",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Condition": {
+        "StringEquals": {
+         "AWS:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":cloudfront::",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":distribution/",
+            {
+             "Ref": "WebDistribution59C46482"
+            }
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "WebBucket12880F5B",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/WebBucket/Policy/Resource"
+   }
+  },
+  "UrlRewriteE50C993D": {
+   "Type": "AWS::CloudFront::Function",
+   "Properties": {
+    "AutoPublish": true,
+    "FunctionCode": "function handler(event) {\n  var req = event.request;\n  var uri = req.uri;\n  if (uri.endsWith(\"/\")) {\n    req.uri = uri + \"index.html\";\n  } else if (!uri.includes(\".\")) {\n    req.uri = uri + \".html\";\n  }\n  return req;\n}",
+    "FunctionConfig": {
+     "Comment": "ap-southeast-1codetypesoloUrlRewrite9E1B7E0F",
+     "Runtime": "cloudfront-js-1.0"
+    },
+    "Name": "ap-southeast-1codetypesoloUrlRewrite9E1B7E0F"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/UrlRewrite/Resource"
+   }
+  },
+  "WebDistributionOrigin1S3OriginAccessControl83AD2F73": {
+   "Type": "AWS::CloudFront::OriginAccessControl",
+   "Properties": {
+    "OriginAccessControlConfig": {
+     "Name": "codetypesoloWebDistributionOrigin1S3OriginAccessControl41673F37",
+     "OriginAccessControlOriginType": "s3",
+     "SigningBehavior": "always",
+     "SigningProtocol": "sigv4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/WebDistribution/Origin1/S3OriginAccessControl/Resource"
+   }
+  },
+  "WebDistribution59C46482": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "CustomErrorResponses": [
+      {
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "FunctionAssociations": [
+       {
+        "EventType": "viewer-request",
+        "FunctionARN": {
+         "Fn::GetAtt": [
+          "UrlRewriteE50C993D",
+          "FunctionARN"
+         ]
+        }
+       }
+      ],
+      "TargetOriginId": "codetypesoloWebDistributionOrigin1574BDF7A",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "WebBucket12880F5B",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "codetypesoloWebDistributionOrigin1574BDF7A",
+       "OriginAccessControlId": {
+        "Fn::GetAtt": [
+         "WebDistributionOrigin1S3OriginAccessControl83AD2F73",
+         "Id"
+        ]
+       },
+       "S3OriginConfig": {
+        "OriginAccessIdentity": ""
+       }
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/WebDistribution/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3VS227CMAz9lr2HbKLbBwDTLtKkobI9ozQ1naGNq9gBsSr/PiUdAk3j6ZxjH1u2k6mePhT67sYceGLr3aTFSg8rMXanzIHXQ310pqO60sOHqVpQi43LJCpLjUMhPXwy+CVRm3L/8WdPoVcntWgRnFzmx0hUremq2ujhKTgrSC55LvkSfIfMSC4qNJ0eShoHyrikFu0x+zKLiou1YQZhPUuguNDDPNgdyNwwqJGmgl82wrnPpY6qpYb1GzUlCLg8kumxMQIHc9xP9fAi0s96TIUJklyJafKAI8mOIF/k8Rt8Np5VSpYUZLS9OoHGm9Pmf2T2RWVbCvXGk5MrN3tEFo9VyGJVvHts0M2sBeYFOfHjM10JXxbHqEpgCt6CyrdMC6Fr8jCnRGoVpA8SlaMa9JZv99N7nT7XlhEnPjjBDnQ54g/2CT3veQIAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ApiUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "HttpApiF5A9A8A7",
+     "ApiEndpoint"
+    ]
+   }
+  },
+  "UserPoolId": {
+   "Value": {
+    "Ref": "UserPool6BA7E5F2"
+   }
+  },
+  "UserPoolClientId": {
+   "Value": {
+    "Ref": "UserPoolClient2F5918F7"
+   }
+  },
+  "WebBucketName": {
+   "Value": {
+    "Ref": "WebBucket12880F5B"
+   }
+  },
+  "CloudFrontDistributionId": {
+   "Value": {
+    "Ref": "WebDistribution59C46482"
+   }
+  },
+  "CloudFrontUrl": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "WebDistribution59C46482",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "TableName": {
+   "Value": {
+    "Ref": "TableCD117FA1"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
