@@ -9,7 +9,7 @@
     "synth": "bun run build:api && cdk synth",
     "diff": "bun run build:api && cdk diff",
     "bootstrap": "cdk bootstrap",
-    "deploy:stack": "bun run build:api && cdk deploy --require-approval never",
+    "deploy:stack": "bun run build:api && cdk deploy --all --require-approval never",
     "deploy:web": "bun run build:web && bun run scripts/sync-web.ts && bun run scripts/invalidate.ts",
     "deploy:all": "bun run deploy:stack && bun run seed && bun run deploy:web",
     "destroy": "cdk destroy",

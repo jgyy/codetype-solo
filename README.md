@@ -159,10 +159,16 @@ Without `web/.env.local`, the web app runs in **guest mode**: attempts persist t
 ### Deploy to AWS
 
 ```bash
-# First time only — bootstrap CDK assets in this account/region.
-bun run bootstrap -- --profile <your-profile>
+# First time only — bootstrap CDK assets in BOTH regions in a single command.
+# ap-southeast-1 hosts the main stack; us-east-1 hosts the ACM cert for the
+# solo.codephase.dev CloudFront alias (CloudFront requires us-east-1 certs).
+# If you skip us-east-1 you'll see: "SSM parameter /cdk-bootstrap/hnb659fds/version not found"
+# during deploy of the codetype-solo-cert stack.
+AWS_PROFILE=<your-profile> bunx --cwd infra cdk bootstrap \
+  aws://<account-id>/ap-southeast-1 \
+  aws://<account-id>/us-east-1
 
-# Full deploy: build api → cdk deploy → seed → build web → S3 sync → CF invalidate.
+# Full deploy: build api → cdk deploy (both stacks) → seed → build web → S3 sync → CF invalidate.
 AWS_PROFILE=<your-profile> bun run deploy
 ```
 
