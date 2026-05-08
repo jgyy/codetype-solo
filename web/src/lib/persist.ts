@@ -19,6 +19,9 @@ export async function persistAttempt(a: Attempt): Promise<PersistResult> {
     if (s) {
       try {
         const r = await postAttempt(a);
+        if ("duplicate" in r) {
+          return { destination: "api", leaderboardUpdated: false };
+        }
         return {
           destination: "api",
           leaderboardUpdated: r.leaderboard_updated === true,
