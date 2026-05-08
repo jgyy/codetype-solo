@@ -17,36 +17,29 @@ This directory contains design specifications for new features and architectural
   8. **Implementation appendix** — concrete file paths, function signatures, DDB key schemas, migration steps, test plan.
 
 - **Invariants every spec must preserve** (inherited from `README.md` and current code):
-  - Auth boundary is the partition key: `PK = USER#<sub>` for all per-user reads/writes.
+  - Auth boundary is the partition key: `PK = USER#<sub>` for all per-user reads/writes (`api/src/handlers/attempts-post.ts:55`).
   - Idempotent writes via `ConditionExpression: attribute_not_exists(...)`.
   - Server recomputes WPM (`shared/src/wpm.ts`); client numbers are advisory and only set `wpm_mismatch`.
   - Single-table DynamoDB; new entity types use distinct `entity` values and follow the existing `PK / SK / GSI1PK / GSI1SK` shape.
 
 ## Specs
 
-Implemented / archived specs live in [`done/`](done/). Active drafts:
-
 | # | Title | Scope | Status |
 |---|-------|-------|--------|
-| 011 | [Domain events via DynamoDB Streams](011-domain-events-and-ddb-streams.md) | Refactor | Draft |
-| 012 | [Hexagonal architecture (ports & adapters)](012-hexagonal-ports-and-adapters.md) | Refactor | Draft |
-| 013 | [Adaptive practice & spaced repetition](013-adaptive-practice-and-spaced-repetition.md) | Feature | Draft |
-| 014 | [Real-time multiplayer races](014-realtime-multiplayer-races.md) | Feature | Draft |
-| 015 | [Achievements & progression](015-achievements-and-progression.md) | Feature | Draft |
-| 016 | [Accessibility, theming & i18n](016-accessibility-theming-i18n.md) | Quality | Draft |
-
-## Recommended sequencing
-
-`011` and `012` are foundational refactors that make the feature specs cheap. Suggested order:
-
-1. **012 (hexagonal)** — establishes the use-case + ports seam; everything else slots into it.
-2. **011 (events)** — adds the projector pipeline; unblocks 015 and the LB write-path of `done/005`.
-3. **016 (a11y/theme/i18n)** — pure web; ships independently of backend work.
-4. **015 (achievements)** — first consumer of the event pipeline; low-risk validation of 011.
-5. **013 (adaptive practice)** — server-side selection logic; reuses the use-case shape from 012.
-6. **014 (multiplayer)** — heaviest; depends on 012 for the WS handlers to stay thin.
+| 001 | [Error envelope & Result type](001-error-envelope-and-result-type.md) | Refactor | Draft |
+| 002 | [Request validation layer (Zod)](002-request-validation-layer.md) | Refactor | Draft |
+| 003 | [Repository pattern over DynamoDB](003-repository-pattern-ddb.md) | Refactor | Draft |
+| 004 | [Handler composition middleware](004-handler-composition-middleware.md) | Refactor | Draft |
+| 005 | [Opt-in public leaderboards](005-feature-leaderboards.md) | Feature | Draft |
+| 006 | [User snippet submission + moderation](006-feature-snippet-submission.md) | Feature | Draft |
+| 007 | [Keystroke replay & anti-cheat](007-feature-replay-and-anticheat.md) | Feature | Draft |
+| 008 | [Testing & observability baseline](008-testing-and-observability.md) | Quality | Draft |
+| 009 | [Performance & cost hardening](009-performance-and-cost.md) | Quality | Draft |
+| 010 | [OpenAPI contract & generated client](010-openapi-contract.md) | Refactor | Draft |
 
 ## Spec template
+
+Copy `_template.md` (below) when starting a new spec.
 
 ```md
 ---
