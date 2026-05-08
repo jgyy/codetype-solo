@@ -76,8 +76,7 @@
     ],
     "PointInTimeRecoverySpecification": {
      "PointInTimeRecoveryEnabled": true
-    },
-    "TableName": "codetype"
+    }
    },
    "UpdateReplacePolicy": "Retain",
    "DeletionPolicy": "Retain",
@@ -172,6 +171,17 @@
    },
    "Metadata": {
     "aws:cdk:path": "codetype-solo/UserPoolClient/Resource"
+   }
+  },
+  "FnPostAttemptLogsF77F6D5B": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "RetentionInDays": 14
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/FnPostAttemptLogs/Resource"
    }
   },
   "FnPostAttemptServiceRoleE8765C0F": {
@@ -273,17 +283,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "attempts-post.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnPostAttemptLogsF77F6D5B"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -300,124 +317,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnPostAttempt/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnPostAttemptLogRetention39A42672": {
-   "Type": "Custom::LogRetention",
+  "FnListAttemptsLogsF076ED82": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnPostAttemptA1CA94A4"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnPostAttempt/LogRetention/Resource"
-   }
-  },
-  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
-   "Type": "AWS::IAM::Role",
-   "Properties": {
-    "AssumeRolePolicyDocument": {
-     "Statement": [
-      {
-       "Action": "sts:AssumeRole",
-       "Effect": "Allow",
-       "Principal": {
-        "Service": "lambda.amazonaws.com"
-       }
-      }
-     ],
-     "Version": "2012-10-17"
-    },
-    "ManagedPolicyArns": [
-     {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-       ]
-      ]
-     }
-    ]
-   },
-   "Metadata": {
-    "aws:cdk:path": "codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource"
-   }
-  },
-  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
-   "Type": "AWS::IAM::Policy",
-   "Properties": {
-    "PolicyDocument": {
-     "Statement": [
-      {
-       "Action": [
-        "logs:DeleteRetentionPolicy",
-        "logs:PutRetentionPolicy"
-       ],
-       "Effect": "Allow",
-       "Resource": "*"
-      }
-     ],
-     "Version": "2012-10-17"
-    },
-    "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
-    "Roles": [
-     {
-      "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
-     }
-    ]
-   },
-   "Metadata": {
-    "aws:cdk:path": "codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource"
-   }
-  },
-  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
-   "Type": "AWS::Lambda::Function",
-   "Properties": {
-    "Handler": "index.handler",
-    "Runtime": "nodejs22.x",
-    "Timeout": 900,
-    "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d.zip"
-    },
-    "Role": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
-      "Arn"
-     ]
-    }
-   },
-   "DependsOn": [
-    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
-    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
-   ],
-   "Metadata": {
-    "aws:cdk:path": "codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/node_modules/.bun/aws-cdk-lib@2.253.0+e7139fb0f4384fd5/node_modules/aws-cdk-lib/custom-resource-handlers/dist/aws-logs/log-retention-handler",
-    "aws:asset:is-bundled": false,
-    "aws:asset:property": "Code"
+    "aws:cdk:path": "codetype-solo/FnListAttemptsLogs/Resource"
    }
   },
   "FnListAttemptsServiceRole0ABAC2F1": {
@@ -519,17 +432,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "attempts-list.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnListAttemptsLogsF076ED82"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -546,35 +466,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnListAttempts/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnListAttemptsLogRetention9DDB5E3A": {
-   "Type": "Custom::LogRetention",
+  "FnGetDailyLogs4AD24FA5": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnListAttempts6CBF6638"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnListAttempts/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnGetDailyLogs/Resource"
    }
   },
   "FnGetDailyServiceRole9AEF127D": {
@@ -676,17 +581,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "daily-get.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnGetDailyLogs4AD24FA5"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -703,35 +615,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnGetDaily/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnGetDailyLogRetention8B275151": {
-   "Type": "Custom::LogRetention",
+  "FnGetSnippetLogsBB5452A4": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnGetDailyC7A56EAE"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnGetDaily/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnGetSnippetLogs/Resource"
    }
   },
   "FnGetSnippetServiceRole89777B05": {
@@ -833,17 +730,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "snippet-get.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnGetSnippetLogsBB5452A4"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -860,35 +764,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnGetSnippet/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnGetSnippetLogRetentionA2A18A10": {
-   "Type": "Custom::LogRetention",
+  "FnUpsertProfileLogs6AEB4068": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnGetSnippet8ABD0C55"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnGetSnippet/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnUpsertProfileLogs/Resource"
    }
   },
   "FnUpsertProfileServiceRole5ABC4E59": {
@@ -990,17 +879,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "profile-upsert.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnUpsertProfileLogs6AEB4068"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1017,35 +913,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnUpsertProfile/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnUpsertProfileLogRetentionA809B54F": {
-   "Type": "Custom::LogRetention",
+  "FnGetLeaderboardLogs371C7BFB": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnUpsertProfile2D0FF237"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnUpsertProfile/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnGetLeaderboardLogs/Resource"
    }
   },
   "FnGetLeaderboardServiceRoleD2A8B76B": {
@@ -1147,17 +1028,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "leaderboard-get.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnGetLeaderboardLogs371C7BFB"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1174,35 +1062,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnGetLeaderboard/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnGetLeaderboardLogRetentionF4B411B4": {
-   "Type": "Custom::LogRetention",
+  "FnSubmitSnippetLogsB2D1699F": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnGetLeaderboard0A5859C0"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnGetLeaderboard/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnSubmitSnippetLogs/Resource"
    }
   },
   "FnSubmitSnippetServiceRoleE9981BF0": {
@@ -1304,17 +1177,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "submissions-post.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnSubmitSnippetLogsB2D1699F"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1331,35 +1211,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnSubmitSnippet/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnSubmitSnippetLogRetentionBF3C194E": {
-   "Type": "Custom::LogRetention",
+  "FnListSubmissionsLogs9398EA3F": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnSubmitSnippetDD8D1BED"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnSubmitSnippet/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnListSubmissionsLogs/Resource"
    }
   },
   "FnListSubmissionsServiceRole72EE2A60": {
@@ -1461,17 +1326,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "submissions-list.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnListSubmissionsLogs9398EA3F"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1488,35 +1360,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnListSubmissions/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnListSubmissionsLogRetention8B6E598F": {
-   "Type": "Custom::LogRetention",
+  "FnApproveSubmissionLogsABB8AD56": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnListSubmissions1ACC582D"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnListSubmissions/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnApproveSubmissionLogs/Resource"
    }
   },
   "FnApproveSubmissionServiceRole45AAA495": {
@@ -1618,17 +1475,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "submissions-approve.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnApproveSubmissionLogsABB8AD56"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1645,35 +1509,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnApproveSubmission/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnApproveSubmissionLogRetention929098DE": {
-   "Type": "Custom::LogRetention",
+  "FnRejectSubmissionLogsB8F81F9D": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnApproveSubmissionBB09BE39"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnApproveSubmission/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnRejectSubmissionLogs/Resource"
    }
   },
   "FnRejectSubmissionServiceRole83D0BC7C": {
@@ -1775,17 +1624,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "submissions-reject.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnRejectSubmissionLogsB8F81F9D"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1802,35 +1658,20 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnRejectSubmission/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
   },
-  "FnRejectSubmissionLogRetention738B1F5C": {
-   "Type": "Custom::LogRetention",
+  "FnRetractSnippetLogs0A0D5CD5": {
+   "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnRejectSubmissionBEFAA85D"
-       }
-      ]
-     ]
-    },
     "RetentionInDays": 14
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnRejectSubmission/LogRetention/Resource"
+    "aws:cdk:path": "codetype-solo/FnRetractSnippetLogs/Resource"
    }
   },
   "FnRetractSnippetServiceRole500DB6D8": {
@@ -1932,17 +1773,24 @@
      "arm64"
     ],
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-223516915733-ap-southeast-1",
-     "S3Key": "e39f4054e3118d04576d69d5387f80c9898594c9f85073ed6ba8e9e6b91272c1.zip"
+     "S3Bucket": "cdk-hnb659fds-assets-473359703960-ap-southeast-1",
+     "S3Key": "50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d.zip"
     },
     "Environment": {
      "Variables": {
-      "TABLE_NAME": "codetype",
+      "TABLE_NAME": {
+       "Ref": "TableCD117FA1"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
     "Handler": "snippet-retract.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "FnRetractSnippetLogs0A0D5CD5"
+     }
+    },
     "MemorySize": 512,
     "Role": {
      "Fn::GetAtt": [
@@ -1959,35 +1807,9 @@
    ],
    "Metadata": {
     "aws:cdk:path": "codetype-solo/FnRetractSnippet/Resource",
-    "aws:asset:path": "/home/jegoh/Documents/repo/codetype-solo/api/dist",
+    "aws:asset:path": "asset.50c14dd06e52dc46d6e86c9c148f98ee7866e62e0d16015e4290206b4a14d86d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
-   }
-  },
-  "FnRetractSnippetLogRetention23B9EB7C": {
-   "Type": "Custom::LogRetention",
-   "Properties": {
-    "ServiceToken": {
-     "Fn::GetAtt": [
-      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
-      "Arn"
-     ]
-    },
-    "LogGroupName": {
-     "Fn::Join": [
-      "",
-      [
-       "/aws/lambda/",
-       {
-        "Ref": "FnRetractSnippet979185AC"
-       }
-      ]
-     ]
-    },
-    "RetentionInDays": 14
-   },
-   "Metadata": {
-    "aws:cdk:path": "codetype-solo/FnRetractSnippet/LogRetention/Resource"
    }
   },
   "HttpApiF5A9A8A7": {
@@ -2100,7 +1922,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2178,7 +2000,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2256,7 +2078,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2331,7 +2153,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2406,7 +2228,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2484,7 +2306,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2559,7 +2381,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2637,7 +2459,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2715,7 +2537,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2793,7 +2615,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -2871,7 +2693,7 @@
        {
         "Ref": "AWS::Partition"
        },
-       ":execute-api:ap-southeast-1:223516915733:",
+       ":execute-api:ap-southeast-1:473359703960:",
        {
         "Ref": "HttpApiF5A9A8A7"
        },
@@ -3136,7 +2958,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3VS227CMAz9lr2HbKLbBwDTLtKkobI9ozQ1naGNq9gBsSr/PiUdAk3j6ZxjH1u2k6mePhT67sYceGLr3aTFSg8rMXanzIHXQ310pqO60sOHqVpQi43LJCpLjUMhPXwy+CVRm3L/8WdPoVcntWgRnFzmx0hUremq2ujhKTgrSC55LvkSfIfMSC4qNJ0eShoHyrikFu0x+zKLiou1YQZhPUuguNDDPNgdyNwwqJGmgl82wrnPpY6qpYb1GzUlCLg8kumxMQIHc9xP9fAi0s96TIUJklyJafKAI8mOIF/k8Rt8Np5VSpYUZLS9OoHGm9Pmf2T2RWVbCvXGk5MrN3tEFo9VyGJVvHts0M2sBeYFOfHjM10JXxbHqEpgCt6CyrdMC6Fr8jCnRGoVpA8SlaMa9JZv99N7nT7XlhEnPjjBDnQ54g/2CT3veQIAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3VS0U4CMRD8Ft9LNZx+AGAUExPJoc+k1yvnwl330t1CsOm/m7YSiNGnmdmZbXbbTuX0oZJ3N+pIE93uJz00MqxZ6b1QR9qE9mTVgG0jw7tqeiMWW5tJFBo7C4wyfJBxK8Q+eX/xZ4d+FGe16MFYvvZLJYoeO5LhFbvSsNjaM4+iV0PTKhmevNUMaJN7zVfGDUAEaKMANchQYxk24wp70KecyywKqjaKyDDJWQJBlQxzr/eG54qMKDQ1/LACl3OudRRqhE6xOarTYSrDknmcjZBiCZJcs+ryOIUsU8LzJzr4Mi4HLyqZNXousRfLpnPqvOcvmXNR6B59u3Vo+Z8begRiB43PYl29OejAzrQ2RAu07MqD/VO+bo5R1IbQO21Evrm0ENgut3sePUdhsTVyR7eH6b1MX2tHABPnLcNgZF3wGxkfFFd3AgAA"
    },
    "Metadata": {
     "aws:cdk:path": "codetype-solo/CDKMetadata/Default"

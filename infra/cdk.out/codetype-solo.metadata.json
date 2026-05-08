@@ -10,14 +10,6 @@
       ]
     }
   ],
-  "/codetype-solo/Table": [
-    {
-      "type": "aws:cdk:hasPhysicalName",
-      "data": {
-        "Ref": "TableCD117FA1"
-      }
-    }
-  ],
   "/codetype-solo/ModsGroup": [
     {
       "type": "aws:cdk:logicalId",
@@ -26,7 +18,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:108:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:106:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -42,7 +34,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:230:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:233:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -58,7 +50,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:231:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:234:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -74,7 +66,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:232:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:235:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -90,7 +82,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:233:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:236:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -106,7 +98,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:234:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:237:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -122,7 +114,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:237:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:240:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -138,7 +130,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:240:9)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:243:9)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -181,7 +173,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Table2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:78:23)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:77:23)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -198,7 +190,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new UserPool2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:99:26)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:97:26)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -215,7 +207,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new UserPoolClient2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:113:32)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:111:32)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnPostAttemptLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnPostAttemptLogsF77F6D5B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -232,7 +241,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -240,16 +249,16 @@
       ]
     }
   ],
-  "/codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource": [
+  "/codetype-solo/FnListAttemptsLogs/Resource": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A"
+      "data": "FnListAttemptsLogsF076ED82"
     },
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -266,7 +275,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnGetDailyLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnGetDailyLogs4AD24FA5"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -283,7 +309,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnGetSnippetLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnGetSnippetLogsBB5452A4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -300,7 +343,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnUpsertProfileLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnUpsertProfileLogs6AEB4068"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -317,7 +377,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnGetLeaderboardLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnGetLeaderboardLogs371C7BFB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -334,7 +411,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnSubmitSnippetLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnSubmitSnippetLogsB2D1699F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -351,7 +445,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnListSubmissionsLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnListSubmissionsLogs9398EA3F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -368,7 +479,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnApproveSubmissionLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnApproveSubmissionLogsABB8AD56"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -385,7 +513,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnRejectSubmissionLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnRejectSubmissionLogsB8F81F9D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -402,7 +547,24 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo/FnRetractSnippetLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "FnRetractSnippetLogs0A0D5CD5"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in .bun...",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:135:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -419,7 +581,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -436,7 +598,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpApi2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:150:25)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:153:25)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -453,7 +615,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -470,7 +632,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -487,7 +649,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -504,7 +666,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -521,7 +683,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -538,7 +700,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -555,7 +717,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -572,7 +734,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -589,7 +751,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -606,7 +768,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -623,7 +785,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -640,7 +802,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -657,7 +819,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -674,7 +836,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -691,7 +853,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -708,7 +870,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -725,7 +887,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -742,7 +904,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -759,7 +921,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -776,7 +938,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -793,7 +955,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -810,7 +972,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -827,7 +989,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Bucket2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:188:27)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:191:27)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -844,7 +1006,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:196:28)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:199:28)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -861,7 +1023,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Distribution2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:213:30)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:216:30)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -891,41 +1053,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnPostAttempt/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnPostAttemptLogRetention39A42672"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -942,24 +1070,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnListAttempts/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnListAttemptsLogRetention9DDB5E3A"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -976,24 +1087,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnGetDaily/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnGetDailyLogRetention8B275151"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1010,24 +1104,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnGetSnippet/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnGetSnippetLogRetentionA2A18A10"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1044,24 +1121,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnUpsertProfile/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnUpsertProfileLogRetentionA809B54F"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1078,24 +1138,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnGetLeaderboard/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnGetLeaderboardLogRetentionF4B411B4"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1112,24 +1155,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnSubmitSnippet/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnSubmitSnippetLogRetentionBF3C194E"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1146,24 +1172,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnListSubmissions/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnListSubmissionsLogRetention8B6E598F"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1180,24 +1189,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnApproveSubmission/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnApproveSubmissionLogRetention929098DE"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1214,24 +1206,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnRejectSubmission/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnRejectSubmissionLogRetention738B1F5C"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1248,24 +1223,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/FnRetractSnippet/LogRetention/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "FnRetractSnippetLogRetention23B9EB7C"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:139:22)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1282,7 +1240,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpApi2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:150:25)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:153:25)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1299,7 +1257,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1316,7 +1274,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1333,7 +1291,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1350,7 +1308,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1367,7 +1325,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1384,7 +1342,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1401,7 +1359,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1418,7 +1376,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1435,7 +1393,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1452,7 +1410,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1469,7 +1427,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1486,7 +1444,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new HttpRoute2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:180:11)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:183:11)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1503,7 +1461,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Bucket2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:188:27)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:191:27)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1520,24 +1478,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
-        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
-        "moduleEvaluation (native:1:11)",
-        "moduleEvaluation (native:1:11)",
-        "loadAndEvaluateModule (native:2)"
-      ]
-    }
-  ],
-  "/codetype-solo/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB"
-    },
-    {
-      "type": "aws:cdk:creationStack",
-      "data": [
-        "...new Function2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:136:22)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1554,7 +1495,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1571,7 +1512,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1588,7 +1529,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1605,7 +1546,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1622,7 +1563,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1639,7 +1580,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1656,7 +1597,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1673,7 +1614,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1690,7 +1631,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1707,7 +1648,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...readWriteData in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:146:13)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:149:13)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",
@@ -1724,7 +1665,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new Distribution2 in .bun...",
-        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:213:30)",
+        "new CodetypeStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/stack.ts:216:30)",
         "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:7 (:)",
         "moduleEvaluation (native:1:11)",
         "moduleEvaluation (native:1:11)",

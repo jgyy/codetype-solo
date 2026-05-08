@@ -4,9 +4,10 @@ import { join } from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { BatchWriteCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { LanguageSchema, SnippetSeedRow } from "@codetype/shared";
+import { resolveTableName } from "./_stack";
 
 const REGION = process.env.AWS_REGION ?? "ap-southeast-1";
-const TABLE = process.env.TABLE_NAME ?? "codetype";
+const TABLE = resolveTableName();
 const DATA_DIR = join(import.meta.dir, "..", "..", "data", "snippets");
 const MAX_LEN = 400;
 

@@ -1,4 +1,4 @@
-import { rmSync, mkdirSync, readdirSync } from "node:fs";
+import { rmSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const HANDLER_DIR = join(import.meta.dir, "src", "handlers");
@@ -34,6 +34,10 @@ if (!result.success) {
   for (const m of result.logs) console.error(m);
   process.exit(1);
 }
+
+// Lambda's Node runtime treats .js as CommonJS by default. Our bundle is ESM,
+// so emit a marker package.json so the runtime loads it as a module.
+writeFileSync(join(OUT_DIR, "package.json"), JSON.stringify({ type: "module" }) + "\n");
 console.log(
   `built ${entries.length} handlers → ${OUT_DIR}${bundleAwsSdk ? " (sdk bundled)" : ""}`,
 );

@@ -10,6 +10,7 @@
     "deploy": "bun --filter @codetype/infra deploy:all",
     "deploy:stack": "bun --filter @codetype/infra deploy:stack",
     "deploy:web": "bun --filter @codetype/infra deploy:web",
+    "cdk": "cd infra && bun x cdk",
     "synth": "bun --filter @codetype/infra synth",
     "diff": "bun --filter @codetype/infra diff",
     "bootstrap": "bun --filter @codetype/infra bootstrap",

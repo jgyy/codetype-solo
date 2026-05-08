@@ -44,7 +44,7 @@ import {
   Function as LambdaFn,
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
-import { RetentionDays } from "aws-cdk-lib/aws-logs";
+import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import {
   BlockPublicAccess,
   Bucket,
@@ -68,7 +68,6 @@ const HANDLER_FILE: Record<keyof typeof ENDPOINTS, string> = {
   retractSnippet: "snippet-retract",
 };
 
-const TABLE_NAME = "codetype";
 const MOD_GROUP = "mods";
 
 export class CodetypeStack extends Stack {
@@ -76,11 +75,10 @@ export class CodetypeStack extends Stack {
     super(scope, id, props);
 
     const table = new Table(this, "Table", {
-      tableName: TABLE_NAME,
       partitionKey: { name: "PK", type: AttributeType.STRING },
       sortKey: { name: "SK", type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
       removalPolicy: RemovalPolicy.RETAIN,
     });
     table.addGlobalSecondaryIndex({
@@ -122,7 +120,7 @@ export class CodetypeStack extends Stack {
 
     const apiAsset = Code.fromAsset(join(__dirname, "..", "..", "api", "dist"));
     const sharedEnv = {
-      TABLE_NAME,
+      TABLE_NAME: table.tableName,
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
       NODE_OPTIONS: "--enable-source-maps",
     };
@@ -133,7 +131,12 @@ export class CodetypeStack extends Stack {
       EndpointDef,
     ][]) {
       const file = HANDLER_FILE[opId];
-      const fn = new LambdaFn(this, `Fn${opId[0]!.toUpperCase()}${opId.slice(1)}`, {
+      const fnId = `Fn${opId[0]!.toUpperCase()}${opId.slice(1)}`;
+      const logGroup = new LogGroup(this, `${fnId}Logs`, {
+        retention: RetentionDays.TWO_WEEKS,
+        removalPolicy: RemovalPolicy.DESTROY,
+      });
+      const fn = new LambdaFn(this, fnId, {
         runtime: Runtime.NODEJS_20_X,
         architecture: Architecture.ARM_64,
         handler: `${file}.handler`,
@@ -141,7 +144,7 @@ export class CodetypeStack extends Stack {
         memorySize: 512,
         timeout: Duration.seconds(10),
         environment: sharedEnv,
-        logRetention: RetentionDays.TWO_WEEKS,
+        logGroup,
       });
       table.grantReadWriteData(fn);
       fns[opId] = fn;

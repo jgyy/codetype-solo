@@ -68,6 +68,13 @@ bun run synth -- --profile <your-profile>
 bun run diff  -- --profile <your-profile>
 ```
 
+Or invoke any `cdk` subcommand directly from the repo root (forwards into `infra/`):
+
+```bash
+bun run cdk deploy --profile <your-profile>
+bun run cdk ls     --profile <your-profile>
+```
+
 After the first deploy, populate `web/.env.local` from stack outputs:
 
 ```bash
@@ -97,6 +104,7 @@ bun run deploy:web
 | `bun run deploy:stack` | CDK only (Lambda + HTTP API + DynamoDB + Cognito + S3/CF) |
 | `bun run deploy:web` | Build + sync `web/out` to S3 + invalidate CloudFront |
 | `bun run synth` / `diff` | `cdk synth` / `cdk diff` against the deployed stack |
+| `bun run cdk <cmd>` | Forward any `cdk` subcommand to `infra/` (e.g. `bun run cdk deploy --profile jgyy`) |
 | `bun run bootstrap` | One-time `cdk bootstrap` for this account/region |
 | `bun run seed` | Seed snippets and 30-day daily-challenge pool into DynamoDB |
 | `bun run outputs` | Print CloudFormation outputs for the current stack |

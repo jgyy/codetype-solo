@@ -6,9 +6,10 @@ import {
     ScanCommand,
     UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { resolveTableName } from "./_stack";
 
 const REGION = process.env.AWS_REGION ?? "ap-southeast-1";
-const TABLE = process.env.TABLE_NAME ?? "codetype";
+const TABLE = resolveTableName();
 const ENDPOINT = process.env.DDB_ENDPOINT;
 
 const ddb = DynamoDBDocumentClient.from(
