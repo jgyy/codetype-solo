@@ -38,6 +38,9 @@ import {
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
+import type { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
+import { ARecord, AaaaRecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
+import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import {
   Architecture,
   Code,
@@ -70,9 +73,16 @@ const HANDLER_FILE: Record<keyof typeof ENDPOINTS, string> = {
 
 const MOD_GROUP = "mods";
 
+export interface CodetypeStackProps extends StackProps {
+  domainName: string;
+  zoneName: string;
+  certificate: ICertificate;
+}
+
 export class CodetypeStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps) {
+  constructor(scope: Construct, id: string, props: CodetypeStackProps) {
     super(scope, id, props);
+    const { domainName, zoneName, certificate } = props;
 
     const table = new Table(this, "Table", {
       partitionKey: { name: "PK", type: AttributeType.STRING },
@@ -215,6 +225,8 @@ export class CodetypeStack extends Stack {
 
     const distribution = new Distribution(this, "WebDistribution", {
       defaultRootObject: "index.html",
+      domainNames: [domainName],
+      certificate,
       defaultBehavior: {
         origin: S3BucketOrigin.withOriginAccessControl(webBucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -230,6 +242,12 @@ export class CodetypeStack extends Stack {
       ],
     });
 
+    const zone = HostedZone.fromLookup(this, "Zone", { domainName: zoneName });
+    const aliasTarget = RecordTarget.fromAlias(new CloudFrontTarget(distribution));
+    new ARecord(this, "AliasA", { zone, recordName: domainName, target: aliasTarget });
+    new AaaaRecord(this, "AliasAAAA", { zone, recordName: domainName, target: aliasTarget });
+
+    new CfnOutput(this, "SiteUrl", { value: `https://${domainName}` });
     new CfnOutput(this, "ApiUrl", { value: httpApi.apiEndpoint });
     new CfnOutput(this, "UserPoolId", { value: userPool.userPoolId });
     new CfnOutput(this, "UserPoolClientId", { value: userPoolClient.userPoolClientId });

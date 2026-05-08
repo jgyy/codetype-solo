@@ -1,5 +1,7 @@
 # codetype-solo
 
+**Live:** [solo.codephase.dev](https://solo.codephase.dev)
+
 A daily code-snippet typing trainer for a single developer. Pick a language, type real code against the clock, get **WPM / accuracy / streak** stats, and watch your progress over time.
 
 > **Stack:** Next.js 15 (static export) + TypeScript + Tailwind · Bun workspaces · AWS Lambda + API Gateway HTTP + DynamoDB + Cognito · S3 + CloudFront · AWS CDK (TypeScript).
@@ -75,7 +77,7 @@ Users propose new snippets via `submissions-post`; moderation happens through `s
 
 ### Frontend components
 
-- **Next.js 15** (App Router, static export via `output: "export"`) — pages under `web/src/app/{play,history,signin,dashboard,leaderboard,submit}`.
+- **Next.js 16** (App Router, static export via `output: "export"`) — pages under `web/src/app/{play,history,signin,dashboard,leaderboard,submit}`.
 - **TypeScript** end-to-end; shared domain types imported from `@codetype/shared`.
 - **Tailwind CSS** for styling.
 - **Generated typed API client** (`web/src/lib/api-client/`) produced from the OpenAPI contract in `docs/api/`.

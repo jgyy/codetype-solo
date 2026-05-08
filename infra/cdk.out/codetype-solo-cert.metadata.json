@@ -1,0 +1,82 @@
+{
+  "/codetype-solo-cert": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:13: (/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:13:2)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo-cert/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....bun...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/codetype-solo-cert/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....bun...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/codetype-solo-cert/Cert/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Cert5C9FAEC1"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Certificate2 in .bun...",
+        "new CodetypeCertStack (/home/jegoh/Documents/repo/codetype-solo/infra/lib/cert-stack.ts:25:28)",
+        "/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:13: (/home/jegoh/Documents/repo/codetype-solo/infra/bin/app.ts:13:2)",
+        "moduleEvaluation (native:1:11)",
+        "moduleEvaluation (native:1:11)",
+        "loadAndEvaluateModule (native:2)"
+      ]
+    }
+  ],
+  "/codetype-solo-cert/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....bun...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/codetype-solo-cert/Publish/Output{\"Ref\":\"Cert5C9FAEC1\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefCert5C9FAEC1D9C13E8E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....bun...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ]
+}

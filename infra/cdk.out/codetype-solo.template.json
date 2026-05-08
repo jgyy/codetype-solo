@@ -2892,6 +2892,9 @@
    "Type": "AWS::CloudFront::Distribution",
    "Properties": {
     "DistributionConfig": {
+     "Aliases": [
+      "solo.codephase.dev"
+     ],
      "CustomErrorResponses": [
       {
        "ErrorCode": 403,
@@ -2948,24 +2951,104 @@
         "OriginAccessIdentity": ""
        }
       }
-     ]
+     ],
+     "ViewerCertificate": {
+      "AcmCertificateArn": {
+       "Fn::GetStackOutput": {
+        "StackName": "codetype-solo-cert",
+        "Region": "us-east-1",
+        "OutputName": "PublishOutputRefCert5C9FAEC1D9C13E8E"
+       }
+      },
+      "MinimumProtocolVersion": "TLSv1.2_2021",
+      "SslSupportMethod": "sni-only"
+     }
     }
    },
    "Metadata": {
     "aws:cdk:path": "codetype-solo/WebDistribution/Resource"
    }
   },
+  "AliasAEAD92310": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "WebDistribution59C46482",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z09491112YFE7EGG3Z9QN",
+    "Name": "solo.codephase.dev.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/AliasA/Resource"
+   }
+  },
+  "AliasAAAA067338AF": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "WebDistribution59C46482",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z09491112YFE7EGG3Z9QN",
+    "Name": "solo.codephase.dev.",
+    "Type": "AAAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo/AliasAAAA/Resource"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3VS0U4CMRD8Ft9LNZx+AGAUExPJoc+k1yvnwl330t1CsOm/m7YSiNGnmdmZbXbbTuX0oZJ3N+pIE93uJz00MqxZ6b1QR9qE9mTVgG0jw7tqeiMWW5tJFBo7C4wyfJBxK8Q+eX/xZ4d+FGe16MFYvvZLJYoeO5LhFbvSsNjaM4+iV0PTKhmevNUMaJN7zVfGDUAEaKMANchQYxk24wp70KecyywKqjaKyDDJWQJBlQxzr/eG54qMKDQ1/LACl3OudRRqhE6xOarTYSrDknmcjZBiCZJcs+ryOIUsU8LzJzr4Mi4HLyqZNXousRfLpnPqvOcvmXNR6B59u3Vo+Z8begRiB43PYl29OejAzrQ2RAu07MqD/VO+bo5R1IbQO21Evrm0ENgut3sePUdhsTVyR7eH6b1MX2tHABPnLcNgZF3wGxkfFFd3AgAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3WS3W7bMAyFn2X3ijbE6wO4GdYW2NDA6a4LWlZcNrZoiFSDVNC7D5IaNBiWq/Md8dCmftZ6fdPob1/gyCszHFYT9jruBMxBwZGf43ByMNPQ6/gE/WTVZu8KJGVodCik4x+2fks05dr/+M5TWNTZbSa0Ti7rdSWpiUbW8ReNtWGzd2dOaoK5H0DHn8EZQXK5eslb62dkRnJJIcw6dlSHLbqlCc2p5Aolxc0zMFth3WZR3Oh4G8zByi2wVRVzwwdV+fzOpU8KFhxB7BFOb2sd70WWdsEcy5LtTmAs41QoiSAv5PHd+hL8dLnYUZAae3BiRw/nff5jSy4pM1EY9p6cXDmhH8jisQ/F7JpHjyO61hjLvCEnvl7YleXL5qR8/uVNo2PbWUN+KGMU2llRLQBUl5LqLFPwxqpyxnnr6Mac/w3L8oGPQZYgSTkarH7lr2/r7zq/x1dGXPngBGeru6p/AXoxUwKsAgAA"
    },
    "Metadata": {
     "aws:cdk:path": "codetype-solo/CDKMetadata/Default"
    }
   }
  },
+ "Mappings": {
+  "AWSCloudFrontPartitionHostedZoneIdMap": {
+   "aws": {
+    "zoneId": "Z2FDTNDATAQYW2"
+   },
+   "aws-cn": {
+    "zoneId": "Z3RFFRIM2A3IF5"
+   }
+  }
+ },
  "Outputs": {
+  "SiteUrl": {
+   "Value": "https://solo.codephase.dev"
+  },
   "ApiUrl": {
    "Value": {
     "Fn::GetAtt": [

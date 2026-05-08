@@ -1,0 +1,76 @@
+{
+ "Resources": {
+  "Cert5C9FAEC1": {
+   "Type": "AWS::CertificateManager::Certificate",
+   "Properties": {
+    "DomainName": "solo.codephase.dev",
+    "DomainValidationOptions": [
+     {
+      "DomainName": "solo.codephase.dev",
+      "HostedZoneId": "Z09491112YFE7EGG3Z9QN"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "codetype-solo-cert/Cert"
+     }
+    ],
+    "ValidationMethod": "DNS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo-cert/Cert/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI11jNQTCwv1k1OydbNyUzSqw4uSUzO1glKLc4vLUpO1UksL45PTi0qyUzLTE4sSc1NzEtMTy3Sq3ZGiOk4p+UhcWtrdfLyU1L1sor1y4xM9EAWZBVnZuoWleaVZOam6gVBaAD9paw9fQAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "codetype-solo-cert/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "PublishOutputRefCert5C9FAEC1D9C13E8E": {
+   "Value": {
+    "Ref": "Cert5C9FAEC1"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

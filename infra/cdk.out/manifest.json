@@ -1,6 +1,41 @@
 {
   "version": "53.0.0",
   "artifacts": {
+    "codetype-solo-cert.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "codetype-solo-cert.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "codetype-solo-cert": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://473359703960/us-east-1",
+      "properties": {
+        "templateFile": "codetype-solo-cert.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::473359703960:role/cdk-hnb659fds-deploy-role-473359703960-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::473359703960:role/cdk-hnb659fds-cfn-exec-role-473359703960-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-473359703960-us-east-1/7f04dbcf9e75a57d545620fd2eb7f5d81f08e5b44d84e59a65c4a2241a22a89d.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "codetype-solo-cert.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::473359703960:role/cdk-hnb659fds-lookup-role-473359703960-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "codetype-solo-cert.assets"
+      ],
+      "additionalMetadataFile": "codetype-solo-cert.metadata.json",
+      "displayName": "codetype-solo-cert"
+    },
     "codetype-solo.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
@@ -18,7 +53,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::473359703960:role/cdk-hnb659fds-deploy-role-473359703960-ap-southeast-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::473359703960:role/cdk-hnb659fds-cfn-exec-role-473359703960-ap-southeast-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-473359703960-ap-southeast-1/916a42fcf1de327db24d4c03cae20a62fbb610df93e52292f98cbf0c1e09f2e2.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-473359703960-ap-southeast-1/99a687bb7689b7f16033868877544e8c394fa744213b0de49d272e30ad016de6.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -31,6 +66,7 @@
         }
       },
       "dependencies": [
+        "codetype-solo-cert",
         "codetype-solo.assets"
       ],
       "additionalMetadataFile": "codetype-solo.metadata.json",
