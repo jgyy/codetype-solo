@@ -168,8 +168,6 @@ paths:
                             type: string
                           wpm_mismatch:
                             type: boolean
-                          leaderboard_updated:
-                            type: boolean
                           cheat_score:
                             type: number
                             minimum: 0
@@ -213,8 +211,6 @@ paths:
                           sk:
                             type: string
                           wpm_mismatch:
-                            type: boolean
-                          leaderboard_updated:
                             type: boolean
                           cheat_score:
                             type: number
