@@ -1,17 +1,11 @@
 import {
     PostAttemptBody,
-    accuracyScaledWpm,
-    analyse,
     apiError,
     err,
-    grossWpm,
-    isErr,
-    netWpm,
-    ok,
     type ApiError,
     type Result,
-    type WpmInput,
 } from "@codetype/shared";
+import { useCases } from "../composition";
 import {
     compose,
     withAuth,
@@ -24,73 +18,18 @@ import {
     type DomainHandler,
 } from "../middleware";
 import { composeRepos } from "../repos";
+import type { RecordAttemptOutput } from "../core/use-cases";
 
-type AttemptResponse =
-    | {
-          sk: string;
-          wpm_mismatch: boolean;
-          duplicate?: false;
-          cheat_score?: number;
-          cheat_reasons?: string[];
-      }
-    | { sk: string; duplicate: true };
-
-export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx) => {
+export const postAttemptLogic: DomainHandler<RecordAttemptOutput> = async (ctx: Ctx) => {
     if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
-    const body = ctx.body as PostAttemptBody;
-
-    const wpmInput: WpmInput = {
-        charsTotal: body.chars_total,
-        charsCorrect: body.chars_correct,
-        errors: body.errors,
-        durationMs: body.duration_ms,
-    };
-    const serverGross = grossWpm(wpmInput);
-    const serverNet = netWpm(wpmInput);
-    const serverScaled = accuracyScaledWpm(wpmInput);
-    const mismatch =
-        Math.abs(serverGross - body.wpm_gross) > 1 ||
-        Math.abs(serverNet - body.wpm_net) > 1 ||
-        Math.abs(serverScaled - body.wpm_scaled) > 1;
-
-    const cheatReport = body.timeline
-        ? analyse(body.timeline, {
-              chars: body.chars_total,
-              errors: body.errors,
-              durationMs: body.duration_ms,
-          })
-        : null;
-
-    const r = await ctx.repos.attempts.put({
+    const uc = useCases({ repos: ctx.repos, clock: ctx.clock, id: ctx.id });
+    return uc.recordAttempt({
         sub: ctx.caller.sub,
-        clientAttemptId: body.client_attempt_id,
-        snippetId: body.snippet_id,
-        language: body.language,
-        createdAt: ctx.clock.now().toISOString(),
-        wpmGross: serverGross,
-        wpmNet: serverNet,
-        wpmScaled: serverScaled,
-        accuracy: body.accuracy,
-        errors: body.errors,
-        durationMs: body.duration_ms,
-        charsTotal: body.chars_total,
-        charsCorrect: body.chars_correct,
-        wpmMismatch: mismatch,
-        ...(body.timeline ? { timeline: body.timeline } : {}),
-        ...(cheatReport ? { cheatScore: cheatReport.score, cheatReasons: cheatReport.reasons } : {}),
-    });
-    if (isErr(r)) return r as Result<never, ApiError>;
-    if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
-
-    // Leaderboard sync moved to the AttemptRecorded projector (spec 011).
-    return ok({
-        sk: r.value.sk,
-        wpm_mismatch: mismatch,
-        ...(cheatReport ? { cheat_score: cheatReport.score, cheat_reasons: cheatReport.reasons } : {}),
-    });
+        body: ctx.body as PostAttemptBody,
+    }) as Promise<Result<RecordAttemptOutput, ApiError>>;
 };
 
-export const handler = compose<AttemptResponse>(
+export const handler = compose<RecordAttemptOutput>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),

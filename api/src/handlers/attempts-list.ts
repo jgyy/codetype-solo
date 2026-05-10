@@ -2,11 +2,8 @@ import {
     ListAttemptsQuery,
     apiError,
     err,
-    isErr,
-    ok,
-    type ApiError,
-    type Result,
 } from "@codetype/shared";
+import { useCases } from "../composition";
 import {
     compose,
     withAuth,
@@ -18,22 +15,17 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { composeRepos, type AttemptRow } from "../repos";
+import { composeRepos } from "../repos";
+import type { ListAttemptsOutput } from "../core/use-cases";
 
-type ListResponse = { items: AttemptRow[] };
-
-export const listAttemptsLogic: DomainHandler<ListResponse> = async (ctx: Ctx) => {
+export const listAttemptsLogic: DomainHandler<ListAttemptsOutput> = async (ctx: Ctx) => {
     if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
     const q = ctx.body as { from?: string; to?: string };
-    const from = q.from ?? "1970-01-01";
-    const to = q.to ?? "9999-12-31";
-
-    const r = await ctx.repos.attempts.listByUser(ctx.caller.sub, { from, to });
-    if (isErr(r)) return r as Result<never, ApiError>;
-    return ok({ items: r.value });
+    const uc = useCases({ repos: ctx.repos, clock: ctx.clock, id: ctx.id });
+    return uc.listAttempts({ sub: ctx.caller.sub, from: q.from, to: q.to });
 };
 
-export const handler = compose<ListResponse>(
+export const handler = compose<ListAttemptsOutput>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),
