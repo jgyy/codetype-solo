@@ -11,7 +11,6 @@ export const PostAttemptResponse = z.union([
     z.object({
         sk: z.string(),
         wpm_mismatch: z.boolean(),
-        leaderboard_updated: z.boolean().optional(),
         cheat_score: z.number().min(0).max(1).optional(),
         cheat_reasons: z.array(z.string()).optional(),
     }),

@@ -38,7 +38,6 @@ function PlayInner() {
   const [snippet, setSnippet] = useState<Snippet | null>(null);
   const [result, setResult] = useState<TypingResult | null>(null);
   const [nonce, setNonce] = useState(0);
-  const [leaderboardUpdated, setLeaderboardUpdated] = useState(false);
   const [cheatScore, setCheatScore] = useState<number | undefined>(undefined);
   const [cheatReasons, setCheatReasons] = useState<string[] | undefined>(undefined);
 
@@ -80,7 +79,6 @@ function PlayInner() {
 
   const onComplete = (r: TypingResult) => {
     setResult(r);
-    setLeaderboardUpdated(false);
     setCheatScore(undefined);
     setCheatReasons(undefined);
     if (!snippet) return;
@@ -101,7 +99,6 @@ function PlayInner() {
       timeline: r.timeline,
     };
     persistAttempt(a).then((res) => {
-      setLeaderboardUpdated(res.leaderboardUpdated);
       setCheatScore(res.cheatScore);
       setCheatReasons(res.cheatReasons);
     });
@@ -128,7 +125,6 @@ function PlayInner() {
       {result && (
         <ResultCard
           {...result}
-          leaderboardUpdated={leaderboardUpdated}
           cheatScore={cheatScore}
           cheatReasons={cheatReasons}
           onAgain={() => setNonce((n) => n + 1)}

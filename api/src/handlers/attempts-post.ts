@@ -1,5 +1,4 @@
 import {
-    CHEAT_THRESHOLD,
     PostAttemptBody,
     accuracyScaledWpm,
     analyse,
@@ -25,14 +24,12 @@ import {
     type DomainHandler,
 } from "../middleware";
 import { composeRepos } from "../repos";
-import { syncLeaderboardForUser } from "../lib/lb-sync";
 
 type AttemptResponse =
     | {
           sk: string;
           wpm_mismatch: boolean;
           duplicate?: false;
-          leaderboard_updated?: boolean;
           cheat_score?: number;
           cheat_reasons?: string[];
       }
@@ -85,24 +82,10 @@ export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx)
     if (isErr(r)) return r as Result<never, ApiError>;
     if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
 
-    let lbUpdated = false;
-    const cheatBlocksLb = cheatReport !== null && cheatReport.score >= CHEAT_THRESHOLD;
-    if (!cheatBlocksLb) {
-        try {
-            const sync = await syncLeaderboardForUser(ctx.repos, ctx.caller.sub, body.language);
-            lbUpdated = sync.kind === "updated";
-        } catch (e) {
-            ctx.log.warn("lb_sync_failed", {
-                err: e instanceof Error ? e.message : String(e),
-                sub: ctx.caller.sub,
-            });
-        }
-    }
-
+    // Leaderboard sync moved to the AttemptRecorded projector (spec 011).
     return ok({
         sk: r.value.sk,
         wpm_mismatch: mismatch,
-        leaderboard_updated: lbUpdated,
         ...(cheatReport ? { cheat_score: cheatReport.score, cheat_reasons: cheatReport.reasons } : {}),
     });
 };

@@ -2,8 +2,6 @@ import type { ApiError, Language, Result } from "@codetype/shared";
 import type { Logger } from "../lib/logger";
 import type { Repos } from "../repos";
 
-// A DDB item image after unmarshalling. We intentionally keep this loose:
-// projectors validate the fields they actually use.
 export type ItemImage = Record<string, unknown>;
 
 export type DomainEventType =

@@ -8,7 +8,6 @@ import { currentSession } from "./auth";
 
 export type PersistResult = {
   destination: "api" | "guest";
-  leaderboardUpdated: boolean;
   cheatScore?: number;
   cheatReasons?: string[];
 };
@@ -20,11 +19,10 @@ export async function persistAttempt(a: Attempt): Promise<PersistResult> {
       try {
         const r = await postAttempt(a);
         if ("duplicate" in r) {
-          return { destination: "api", leaderboardUpdated: false };
+          return { destination: "api" };
         }
         return {
           destination: "api",
-          leaderboardUpdated: r.leaderboard_updated === true,
           cheatScore: r.cheat_score,
           cheatReasons: r.cheat_reasons,
         };
@@ -34,5 +32,5 @@ export async function persistAttempt(a: Attempt): Promise<PersistResult> {
     }
   }
   saveGuest(a);
-  return { destination: "guest", leaderboardUpdated: false };
+  return { destination: "guest" };
 }

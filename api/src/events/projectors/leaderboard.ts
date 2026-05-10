@@ -1,17 +1,29 @@
-import { ok } from "@codetype/shared";
+import { CHEAT_THRESHOLD, apiError, err, ok } from "@codetype/shared";
+import { syncLeaderboardForUser } from "../../lib/lb-sync";
 import type { Projector } from "../types";
 
-// Phase 1: skeleton. Phase 2 will replace `handle` with a call into
-// `syncLeaderboardForUser` from api/src/lib/lb-sync.ts, gated on the cheat
-// score already stamped on the attempt image.
 export const leaderboardProjector: Projector = {
     name: "leaderboard",
     handles: ["AttemptRecorded"],
     async handle(event, ctx) {
-        ctx.log.info("projector_skipped_stub", {
-            projector: "leaderboard",
-            event_type: event.type,
-        });
-        return ok(undefined);
+        if (event.type !== "AttemptRecorded") return ok(undefined);
+        const score = event.image.cheat_score;
+        if (typeof score === "number" && score >= CHEAT_THRESHOLD) {
+            ctx.log.info("lb_skipped_cheat", { sub: event.sub, score });
+            return ok(undefined);
+        }
+        try {
+            const result = await syncLeaderboardForUser(
+                ctx.repos,
+                event.sub,
+                event.language,
+            );
+            ctx.log.info("lb_synced", { sub: event.sub, kind: result.kind });
+            return ok(undefined);
+        } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
+            ctx.log.warn("lb_sync_failed", { sub: event.sub, err: message });
+            return err(apiError("internal", "lb_sync_failed"));
+        }
     },
 };

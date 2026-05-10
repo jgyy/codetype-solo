@@ -4,19 +4,12 @@ import type { AttributeValue as SdkAttributeValue } from "@aws-sdk/client-dynamo
 import type { Language } from "@codetype/shared";
 import type { DomainEvent, ItemImage } from "./types";
 
-// Translate DDB Streams records into typed domain events. Returns null for
-// records we deliberately ignore (LB rows, DAILY rows, anything without an
-// `entity` field, or transitions that don't represent a meaningful state
-// change — e.g. a SUBMISSION MODIFY that didn't flip status).
-
 const SUPPORTED_LANGUAGES: ReadonlySet<string> = new Set(["js", "py", "c", "go"]);
 
 function asImage(
     image: Record<string, LambdaAttributeValue> | undefined,
 ): ItemImage | null {
     if (!image) return null;
-    // The DynamoDBRecord types from @types/aws-lambda are structurally
-    // identical to AttributeValue from the SDK, but nominally different.
     return unmarshall(image as Record<string, SdkAttributeValue>);
 }
 
@@ -59,9 +52,6 @@ function decodeSubmission(
     nu: ItemImage | null,
     old: ItemImage | null,
 ): DomainEvent | null {
-    // Only act on status transitions: prior status !== new status, and the
-    // new status is a terminal one we care about. INSERTs (status=pending)
-    // are intentionally ignored.
     if (eventName !== "MODIFY" || !nu) return null;
     const newStatus = nu.status;
     const oldStatus = old?.status;

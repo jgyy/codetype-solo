@@ -2,7 +2,6 @@ import { accuracyScaledWpm, grossWpm, netWpm, type WpmInput } from "@codetype/sh
 
 type Props = WpmInput & {
   onAgain: () => void;
-  leaderboardUpdated?: boolean;
   cheatScore?: number;
   cheatReasons?: string[];
 };
@@ -22,11 +21,6 @@ export function ResultCard(props: Props) {
         <Stat label="Errors" value={String(props.errors)} />
         <Stat label="Time" value={`${(props.durationMs / 1000).toFixed(2)}s`} />
       </div>
-      {props.leaderboardUpdated && (
-        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
-          Personal best · submitted to leaderboard
-        </p>
-      )}
       {props.cheatScore !== undefined && props.cheatScore >= 0.5 && (
         <p className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
           Flagged ({(props.cheatScore * 100).toFixed(0)}%) · excluded from leaderboard.

@@ -11,6 +11,9 @@ import {
 } from "../../src/middleware";
 import { postAttemptLogic } from "../../src/handlers/attempts-post";
 import { composeInMemoryRepos } from "../../src/repos";
+import { leaderboardProjector } from "../../src/events/projectors/leaderboard";
+import type { AttemptRecorded } from "../../src/events/types";
+import { makeLogger } from "../../src/lib/logger";
 
 const baseEvent = (body: unknown) =>
     ({
@@ -57,7 +60,21 @@ const make = () => {
     )(postAttemptLogic, {
         successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
     });
-    return { repos, handler };
+    // Spec 011: post-cutover, the LB write happens in a stream-driven
+    // projector, not in the HTTP handler. Tests that assert LB state run
+    // the projector directly to simulate the stream delivery.
+    const log = makeLogger({ requestId: "test", route: "TEST" });
+    const fireProjector = async (sub: string, attempt: Record<string, unknown>) => {
+        const ev: AttemptRecorded = {
+            type: "AttemptRecorded",
+            sub,
+            language: attempt.language as AttemptRecorded["language"],
+            image: attempt,
+        };
+        const r = await leaderboardProjector.handle(ev, { repos, log });
+        if (!r.ok) throw new Error(`projector failed: ${JSON.stringify(r.error)}`);
+    };
+    return { repos, handler, fireProjector };
 };
 
 describe("attempts-post + anticheat", () => {
@@ -73,12 +90,10 @@ describe("attempts-post + anticheat", () => {
     });
 
     test("paste-burst timeline yields cheat_score=1 and is excluded from LB", async () => {
-        const { handler, repos } = make();
-        // Opt the user into the leaderboard so we can verify exclusion.
+        const { handler, repos, fireProjector } = make();
         await repos.profiles.upsert("u-1", { email: "e@x" });
         await repos.profiles.patch("u-1", { handle: "kestrel", leaderboard_optin: true });
 
-        // Three flagged attempts in window — would otherwise meet MIN_ATTEMPTS.
         for (let i = 0; i < 3; i++) {
             const r = (await handler(
                 baseEvent({
@@ -91,19 +106,21 @@ describe("attempts-post + anticheat", () => {
             const data = JSON.parse(r.body).data;
             expect(data.cheat_score).toBe(1);
             expect(data.cheat_reasons).toContain("paste_burst");
-            expect(data.leaderboard_updated).toBe(false);
+            await fireProjector("u-1", {
+                language: "js",
+                wpm_scaled: 60,
+                cheat_score: data.cheat_score,
+            });
         }
 
         const week = isoWeek(new Date());
         const top = await repos.leaderboard.topN("js", week, 10);
         if (!top.ok) throw new Error();
-        // No entry — all attempts were flagged, so the in-window "valid" count
-        // stays below MIN_ATTEMPTS.
         expect(top.value.length).toBe(0);
     });
 
     test("clean timeline does not block LB", async () => {
-        const { handler, repos } = make();
+        const { handler, repos, fireProjector } = make();
         await repos.profiles.upsert("u-1", { email: "e@x" });
         await repos.profiles.patch("u-1", { handle: "kestrel", leaderboard_optin: true });
 
@@ -118,6 +135,7 @@ describe("attempts-post + anticheat", () => {
             await handler(
                 baseEvent({ ...validBody, client_attempt_id: `c${i}`, timeline: cleanTimeline }),
             );
+            await fireProjector("u-1", { language: "js", wpm_scaled: 60 });
         }
 
         const week = isoWeek(new Date());
