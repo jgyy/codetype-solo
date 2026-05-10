@@ -40,7 +40,6 @@ const validBody = {
     chars_correct: 60,
 };
 
-// 40-char paste burst — triggers hard flag on its own.
 const pasteTimeline = {
     v: 1 as const,
     t: Array.from({ length: 40 }, (_, i) => 150 + i * 4),
@@ -60,9 +59,6 @@ const make = () => {
     )(postAttemptLogic, {
         successStatus: (v) => ("duplicate" in v && v.duplicate ? 200 : 201),
     });
-    // Spec 011: post-cutover, the LB write happens in a stream-driven
-    // projector, not in the HTTP handler. Tests that assert LB state run
-    // the projector directly to simulate the stream delivery.
     const log = makeLogger({ requestId: "test", route: "TEST" });
     const fireProjector = async (sub: string, attempt: Record<string, unknown>) => {
         const ev: AttemptRecorded = {

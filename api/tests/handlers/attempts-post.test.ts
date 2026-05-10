@@ -86,7 +86,6 @@ describe("POST /attempts (composed)", () => {
         const { handler, repos } = makeHandler();
         const fixedTime = "2026-05-07T10:00:00.000Z";
         const realDate = Date;
-        // @ts-expect-error - test stub
         globalThis.Date = class extends realDate {
             constructor() { super(); return new realDate(fixedTime); }
             static now() { return new realDate(fixedTime).getTime(); }

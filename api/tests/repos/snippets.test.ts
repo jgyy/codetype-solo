@@ -68,7 +68,7 @@ describe("SnippetsRepo (in-memory) — spec 009", () => {
 
     test("put without GSI2 keys still ends up indexed", async () => {
         const repo = makeInMemorySnippetsRepo();
-        await repo.put({ ...row("py", "abc") }); // no GSI2 keys on input
+        await repo.put({ ...row("py", "abc") });
         const r = await repo.listByLanguage("py");
         if (!r.ok) throw new Error();
         expect(r.value.length).toBe(1);

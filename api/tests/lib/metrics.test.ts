@@ -12,7 +12,6 @@ describe("buildEmf", () => {
             extras: { requestId: "r-1" },
         });
 
-        // _aws block
         expect(emf._aws).toBeDefined();
         const aws = emf._aws as Record<string, unknown>;
         expect(typeof aws.Timestamp).toBe("number");
@@ -25,13 +24,11 @@ describe("buildEmf", () => {
             { Name: "RequestLatencyMs", Unit: "Milliseconds" },
         ]);
 
-        // Dimension values + metric values at the root
         expect(emf.Route).toBe("POST /attempts");
         expect(emf.Outcome).toBe("success");
         expect(emf.RequestCount).toBe(1);
         expect(emf.RequestLatencyMs).toBe(42);
 
-        // Extras passthrough
         expect(emf.requestId).toBe("r-1");
     });
 

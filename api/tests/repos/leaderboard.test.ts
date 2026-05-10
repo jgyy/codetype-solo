@@ -33,7 +33,7 @@ describe("LeaderboardRepo (in-memory)", () => {
         expect(r.value.updated).toBe(true);
         const after2 = await lb.topN("js", "2026-W19", 10);
         if (!after2.ok) throw new Error();
-        expect(after2.value.length).toBe(1); // still only one entry per user
+        expect(after2.value.length).toBe(1);
         expect(after2.value[0]!.wpm_scaled).toBe(80);
     });
 

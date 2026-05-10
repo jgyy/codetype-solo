@@ -1,6 +1,3 @@
-// Helpers for the DDB-Local conformance suite (gated by RUN_DDB_TESTS=1).
-// Creates / drops a single-table layout matching production.
-
 import {
     CreateTableCommand,
     DeleteTableCommand,
@@ -27,12 +24,10 @@ export async function provisionLiveTable(name: string): Promise<LiveDdb> {
         marshallOptions: { removeUndefinedValues: true },
     });
 
-    // If a previous run left it behind, drop and recreate.
     try {
         await raw.send(new DescribeTableCommand({ TableName: name }));
         await raw.send(new DeleteTableCommand({ TableName: name }));
     } catch {
-        // table absent — fine
     }
 
     await raw.send(
@@ -79,7 +74,6 @@ export async function provisionLiveTable(name: string): Promise<LiveDdb> {
             try {
                 await raw.send(new DeleteTableCommand({ TableName: name }));
             } catch {
-                // best-effort
             }
         },
     };

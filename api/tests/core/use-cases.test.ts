@@ -67,7 +67,6 @@ describe("recordAttempt", () => {
         if ("duplicate" in r.value && r.value.duplicate) return;
         expect(r.value.wpm_mismatch).toBe(false);
         expect(r.value.sk.startsWith("ATTEMPT#")).toBe(true);
-        // SK includes ISO timestamp from the fake clock.
         expect(r.value.sk).toContain(clock.now().toISOString().slice(0, 10));
     });
 

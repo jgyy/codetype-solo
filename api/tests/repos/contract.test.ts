@@ -127,19 +127,6 @@ describe("Repo contract — in-memory", () => {
     runRepoContract(() => composeInMemoryRepos(SNIPPETS));
 });
 
-// DDB-backed smoke test, opt-in: requires DDB Local at $DDB_ENDPOINT.
-//
-// Locally:
-//   docker compose -f infra/test/docker-compose.yml up -d
-//   RUN_DDB_TESTS=1 DDB_ENDPOINT=http://localhost:8000 \
-//     AWS_REGION=us-east-1 AWS_ACCESS_KEY_ID=dummy AWS_SECRET_ACCESS_KEY=dummy \
-//     bun test api/tests/repos/contract.test.ts
-//
-// CI runs this in `.github/workflows/nightly.yml`.
-//
-// Scope: this is intentionally a *smoke test*, not the full contract — it
-// proves wire-up (key schema, GSI1, condition expressions) but the
-// in-memory conformance suite above remains the canonical correctness check.
 if (process.env.RUN_DDB_TESTS === "1") {
     const { provisionLiveTable } = await import("./ddb-local-setup");
     const { makeDdbAttemptsRepo } = await import("../../src/repos/attempts");

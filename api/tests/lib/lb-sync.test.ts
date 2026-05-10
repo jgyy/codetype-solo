@@ -69,8 +69,6 @@ describe("syncLeaderboardForUser", () => {
         await seedAttempts(repos, "u-1", 3, 80);
         await syncLeaderboardForUser(repos, "u-1", "js", NOW);
 
-        // Simulate a fresh week (no attempts in this window) by syncing for
-        // a date >7 days after the seeded attempts.
         const future = new Date(NOW.getTime() + 8 * 86_400_000);
         await syncLeaderboardForUser(repos, "u-1", "js", future);
         const top = await repos.leaderboard.topN("js", isoWeek(future), 10);
@@ -85,7 +83,6 @@ describe("syncLeaderboardForUser", () => {
         await seedAttempts(repos, "u-1", 3, 90);
         await syncLeaderboardForUser(repos, "u-1", "js", NOW);
 
-        // A second sync with no new attempts shouldn't regress the entry.
         await syncLeaderboardForUser(repos, "u-1", "js", NOW);
         const top = await repos.leaderboard.topN("js", week, 10);
         if (!top.ok) throw new Error();

@@ -2,9 +2,6 @@ import { describe, expect, test } from "bun:test";
 import type { DynamoDBRecord } from "aws-lambda";
 import { decode } from "../../src/events/decode";
 
-// Minimal DDB-Streams record builder. We hand-construct the AttributeValue
-// shapes here rather than pulling in `marshall` to keep the test fixtures
-// readable as data.
 type Img = Record<string, unknown>;
 
 function rec(args: {
@@ -31,8 +28,8 @@ function rec(args: {
         for (const [k, v] of Object.entries(i)) out[k] = toAttr(v);
         return out as DynamoDBRecord["dynamodb"] extends infer T
             ? T extends { NewImage?: infer X }
-                ? X
-                : never
+            ? X
+            : never
             : never;
     };
     return {
