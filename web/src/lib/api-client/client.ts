@@ -1,13 +1,5 @@
 "use client";
 
-// Typed client driven by the shared ENDPOINTS registry. Endpoint names,
-// paths, methods, and request/response shapes are all derived from
-// shared/src/schemas/endpoints.ts — the same source the OpenAPI YAML uses.
-//
-// Adding a new endpoint: declare it in shared/src/schemas/endpoints.ts, then
-// `bun --filter @codetype/shared build:openapi` and you're done. No
-// hand-typed URLs, no hand-written response interfaces.
-
 import { z } from "zod";
 import { ENDPOINTS, type EndpointName } from "@codetype/shared";
 import { CONFIG } from "../config";
@@ -18,14 +10,11 @@ type Def<N extends EndpointName> = Endpoints[N];
 
 type ZTo<T> = T extends z.ZodTypeAny ? z.infer<T> : never;
 
-// Empty-object branches act as the identity element for intersection — using
-// Record<string, never> would collapse the whole intersection to `never`.
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Empty = {};
 export type RequestArgs<N extends EndpointName> =
     (Def<N> extends { body: z.ZodTypeAny } ? { body: ZTo<Def<N>["body"]> } : Empty) &
-        (Def<N> extends { query: z.ZodTypeAny } ? { query: ZTo<Def<N>["query"]> } : Empty) &
-        (Def<N> extends { params: z.ZodTypeAny } ? { params: ZTo<Def<N>["params"]> } : Empty);
+    (Def<N> extends { query: z.ZodTypeAny } ? { query: ZTo<Def<N>["query"]> } : Empty) &
+    (Def<N> extends { params: z.ZodTypeAny } ? { params: ZTo<Def<N>["params"]> } : Empty);
 
 export type ResponseFor<N extends EndpointName> = ZTo<Def<N>["response"]>;
 
@@ -89,7 +78,6 @@ export async function call<N extends EndpointName>(
         params?: Record<string, string | number>;
     };
 
-    // Pre-flight client validation (mirrors withSchema on the server).
     if (def.body) {
         const r = def.body.safeParse(body);
         if (!r.success) {

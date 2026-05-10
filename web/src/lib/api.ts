@@ -1,9 +1,5 @@
 "use client";
 
-// Thin convenience wrappers over the typed client (web/src/lib/api-client).
-// Endpoint URLs and shapes live in shared/src/schemas/endpoints.ts — never
-// here. Adding/renaming an endpoint touches only the shared registry.
-
 import type {
     Attempt,
     Language,

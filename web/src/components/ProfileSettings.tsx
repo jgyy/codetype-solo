@@ -12,7 +12,6 @@ export function ProfileSettings() {
     const [message, setMessage] = useState<string | null>(null);
     const [loaded, setLoaded] = useState(false);
 
-    // Initial load: an empty POST returns the current profile state.
     useEffect(() => {
         let cancelled = false;
         upsertProfile()
