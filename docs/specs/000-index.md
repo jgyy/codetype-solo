@@ -28,7 +28,6 @@ Implemented / archived specs live in [`done/`](done/). Active drafts:
 
 | # | Title | Scope | Status |
 |---|-------|-------|--------|
-| 011 | [Domain events via DynamoDB Streams](011-domain-events-and-ddb-streams.md) | Refactor | Draft |
 | 012 | [Hexagonal architecture (ports & adapters)](012-hexagonal-ports-and-adapters.md) | Refactor | Draft |
 | 013 | [Adaptive practice & spaced repetition](013-adaptive-practice-and-spaced-repetition.md) | Feature | Draft |
 | 014 | [Real-time multiplayer races](014-realtime-multiplayer-races.md) | Feature | Draft |
@@ -37,14 +36,13 @@ Implemented / archived specs live in [`done/`](done/). Active drafts:
 
 ## Recommended sequencing
 
-`011` and `012` are foundational refactors that make the feature specs cheap. Suggested order:
+`012` is a foundational refactor that makes the feature specs cheap. Suggested order:
 
 1. **012 (hexagonal)** — establishes the use-case + ports seam; everything else slots into it.
-2. **011 (events)** — adds the projector pipeline; unblocks 015 and the LB write-path of `done/005`.
-3. **016 (a11y/theme/i18n)** — pure web; ships independently of backend work.
-4. **015 (achievements)** — first consumer of the event pipeline; low-risk validation of 011.
-5. **013 (adaptive practice)** — server-side selection logic; reuses the use-case shape from 012.
-6. **014 (multiplayer)** — heaviest; depends on 012 for the WS handlers to stay thin.
+2. **016 (a11y/theme/i18n)** — pure web; ships independently of backend work.
+3. **015 (achievements)** — first real consumer of the event pipeline shipped in `done/011`; fills in the achievements projector stub.
+4. **013 (adaptive practice)** — server-side selection logic; reuses the use-case shape from 012.
+5. **014 (multiplayer)** — heaviest; depends on 012 for the WS handlers to stay thin.
 
 ## Spec template
 
