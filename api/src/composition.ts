@@ -1,7 +1,9 @@
+import { join } from "node:path";
 import { systemClock } from "./adapters/clock/system";
+import { fsDrillTemplates } from "./adapters/drills/fs";
 import { uuidId } from "./adapters/id/uuid";
 import { systemRng } from "./adapters/rng/system";
-import type { ClockPort, IdPort, RngPort } from "./core/ports";
+import type { ClockPort, DrillTemplatesPort, IdPort, RngPort } from "./core/ports";
 import {
     approveSubmission,
     getDailyChallenge,
@@ -30,7 +32,13 @@ export type Adapters = {
     clock: ClockPort;
     id: IdPort;
     rng: RngPort;
+    drillTemplates: DrillTemplatesPort;
 };
+
+// DRILLS_ROOT lets infra point Lambda at the bundled templates dir; locally
+// the default `data/drills` resolves from the repo root.
+const drillsRoot = (): string =>
+    process.env.DRILLS_ROOT ?? join(process.cwd(), "data", "drills");
 
 export type UseCases = {
     listAttempts: ReturnType<typeof listAttempts>;
@@ -54,6 +62,7 @@ export const buildAdapters = (overrides: Partial<Adapters> = {}): Adapters => ({
     clock: overrides.clock ?? systemClock(),
     id: overrides.id ?? uuidId(),
     rng: overrides.rng ?? systemRng(),
+    drillTemplates: overrides.drillTemplates ?? fsDrillTemplates(drillsRoot()),
 });
 
 export const buildUseCases = (a: Adapters): UseCases => ({
@@ -78,7 +87,11 @@ export const buildUseCases = (a: Adapters): UseCases => ({
         profiles: a.repos.profiles,
         rng: a.rng,
     }),
-    getDrillSnippet: getDrillSnippet({ rng: a.rng, clock: a.clock }),
+    getDrillSnippet: getDrillSnippet({
+        rng: a.rng,
+        clock: a.clock,
+        templates: a.drillTemplates,
+    }),
     getErrorModel: getErrorModel({ profiles: a.repos.profiles }),
 });
 

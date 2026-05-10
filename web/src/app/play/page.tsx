@@ -7,11 +7,12 @@ import { ReplayPlayer } from "@/components/ReplayPlayer";
 import { ResultCard } from "@/components/ResultCard";
 import { TypingArea, type TypingResult } from "@/components/TypingArea";
 import { persistAttempt } from "@/lib/persist";
-import { getDaily, getDrillSnippet, getNextSnippet, getSnippet, type SelectionMode } from "@/lib/api";
+import { getDaily, getDrillSnippet, getErrorModel, getNextSnippet, getSnippet, type ErrorModelView, type SelectionMode } from "@/lib/api";
 import { apiConfigured } from "@/lib/config";
 import { pickRandom, SNIPPETS } from "@/lib/snippets";
 import {
   accuracyScaledWpm,
+  detectClasses,
   grossWpm,
   netWpm,
   type Attempt,
@@ -46,6 +47,16 @@ function PlayInner() {
   const [mode, setMode] = useState<SelectionMode | "drill">("adaptive");
   const [drillClass, setDrillClass] = useState("arrow");
   const [selectionMode, setSelectionMode] = useState<"adaptive" | "random" | "warming_up" | null>(null);
+  const [errorModel, setErrorModel] = useState<ErrorModelView | null>(null);
+
+  useEffect(() => {
+    if (!apiConfigured()) return;
+    let cancelled = false;
+    getErrorModel().then((v) => !cancelled && setErrorModel(v)).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [result]); // refresh after each completed attempt
 
   useEffect(() => {
     let cancelled = false;
@@ -145,6 +156,25 @@ function PlayInner() {
 
   const headline = useMemo(() => (snippet ? `${snippet.title} · ${snippet.language}` : ""), [snippet]);
 
+  // Spec 013: explain why this snippet was picked. Shown only when adaptive
+  // selection actually fired (not warming-up, not random). The pick rationale
+  // is the highest-weighted weakness that this snippet *contains*.
+  const adaptiveReason = useMemo(() => {
+    if (selectionMode !== "adaptive" || !snippet || !errorModel?.error_model) return null;
+    const m = errorModel.error_model;
+    const code = snippet.code;
+    const bigramHit = m.bigrams.find((x) => x.weight > 0 && code.includes(x.b));
+    const presentClasses = detectClasses(snippet.language, code);
+    const classHit = m.classes.find(
+      (x) => x.weight > 0 && (presentClasses.get(x.c) ?? 0) > 0,
+    );
+    const bigram = bigramHit?.b;
+    const klass = classHit?.c;
+    if (!bigram && !klass) return null;
+    if (bigram && klass) return `targets your \`${bigram}\` and \`${klass}\` weakness`;
+    return `targets your \`${(bigram ?? klass)!}\` weakness`;
+  }, [selectionMode, snippet, errorModel]);
+
   return (
     <main className="space-y-6">
       <div className="flex items-center justify-between">
@@ -194,7 +224,9 @@ function PlayInner() {
             <span className="text-xs text-zinc-500">warming up — collect 5 attempts to unlock adaptive</span>
           )}
           {selectionMode === "adaptive" && (
-            <span className="text-xs text-emerald-500">targeting your weakest patterns</span>
+            <span className="text-xs text-emerald-500">
+              {adaptiveReason ?? "targeting your weakest patterns"}
+            </span>
           )}
         </div>
       )}

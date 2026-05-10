@@ -7,54 +7,13 @@ import {
     type Result,
     type Snippet,
 } from "@codetype/shared";
-import type { ClockPort, RngPort } from "../ports";
+import type { ClockPort, DrillTemplatesPort, RngPort } from "../ports";
 
-// Inline template bag. Spec calls these `data/drills/<lang>/*.tmpl` — keeping
-// them in TS for now means no FS hop from a Lambda cold start, and avoids a
-// "shared can't read FS" purity break. They render into ≤10-line snippets.
-type Tmpl = { tmpl: string; bags: Record<string, string[]> };
-
-const DRILLS: Record<Language, Record<string, Tmpl[]>> = {
-    js: {
-        arrow: [
-            {
-                tmpl: "const {{name}} = ({{a}}, {{b}}) => {{a}} {{op}} {{b}};",
-                bags: {
-                    name: ["add", "mul", "combine", "fold"],
-                    a: ["x", "lhs", "value"],
-                    b: ["y", "rhs", "delta"],
-                    op: ["+", "*", "-", "&&"],
-                },
-            },
-        ],
-        "template-literal": [
-            {
-                tmpl: "const msg = `hello ${{{name}}}, you have ${count} items`;",
-                bags: { name: ["user", "name", "who"] },
-            },
-        ],
-    },
-    py: {
-        fstring: [
-            {
-                tmpl: 'print(f"{{{name}}}: {{{value}}}")',
-                bags: { name: ["count", "total"], value: ["n + 1", "items[0]"] },
-            },
-        ],
-    },
-    c: {
-        "struct-arrow": [
-            { tmpl: "if (p->{{f}} == NULL) return -1;", bags: { f: ["next", "data", "head"] } },
-        ],
-    },
-    go: {
-        "short-decl": [
-            { tmpl: "x := {{n}}\nif err := f(x); err != nil { return err }", bags: { n: ["1", "42"] } },
-        ],
-    },
+export type GetDrillDeps = {
+    rng: RngPort;
+    clock: ClockPort;
+    templates: DrillTemplatesPort;
 };
-
-export type GetDrillDeps = { rng: RngPort; clock: ClockPort };
 
 export type GetDrillInput = {
     sub: string | null;
@@ -64,26 +23,25 @@ export type GetDrillInput = {
 
 export const getDrillSnippet =
     (d: GetDrillDeps) =>
-    async (input: GetDrillInput): Promise<Result<Snippet, ApiError>> => {
-        const byClass = DRILLS[input.lang]?.[input.class];
-        if (!byClass || byClass.length === 0) {
-            return err(apiError("not_found", "no drill template for class"));
-        }
-        // Deterministic seed per (sub|guest, day, class). Reload-stable.
-        const day = d.clock.now().toISOString().slice(0, 10);
-        const seed = hashStr(`${input.sub ?? "guest"}|${day}|${input.class}`);
-        const rng = mulberry32(seed);
+        async (input: GetDrillInput): Promise<Result<Snippet, ApiError>> => {
+            const templates = d.templates.list(input.lang, input.class);
+            if (templates.length === 0) {
+                return err(apiError("not_found", "no drill template for class"));
+            }
+            const day = d.clock.now().toISOString().slice(0, 10);
+            const seed = hashStr(`${input.sub ?? "guest"}|${day}|${input.class}`);
+            const rng = mulberry32(seed);
 
-        const t = byClass[Math.floor(rng() * byClass.length)]!;
-        const filled = render(t.tmpl, t.bags, rng);
-        return ok({
-            id: `drill-${input.lang}-${input.class}-${day}`,
-            language: input.lang,
-            title: `Drill: ${input.class}`,
-            code: filled,
-            difficulty: 1,
-        });
-    };
+            const t = templates[Math.floor(rng() * templates.length)]!;
+            const filled = render(t.tmpl, t.bags, rng);
+            return ok({
+                id: `drill-${input.lang}-${input.class}-${day}`,
+                language: input.lang,
+                title: `Drill: ${input.class}`,
+                code: filled,
+                difficulty: 1,
+            });
+        };
 
 const render = (tmpl: string, bags: Record<string, string[]>, rng: () => number): string =>
     tmpl.replace(/\{\{(\w+)\}\}/g, (_, k) => {
@@ -92,7 +50,6 @@ const render = (tmpl: string, bags: Record<string, string[]>, rng: () => number)
         return bag[Math.floor(rng() * bag.length)]!;
     });
 
-// FNV-1a — same family as the daily-challenge seed (invariant #4 in AGENTS.md).
 const hashStr = (s: string): number => {
     let h = 2166136261 >>> 0;
     for (let i = 0; i < s.length; i++) {

@@ -1,6 +1,7 @@
 export type { ClockPort } from "./clock-port";
 export type { IdPort } from "./id-port";
 export type { RngPort } from "./rng-port";
+export type { DrillTemplatesPort, DrillTemplate } from "./drill-templates-port";
 
 export type { AttemptsRepo as AttemptsPort, NewAttempt, AttemptRow } from "../../repos/attempts";
 export type { DailyRepo as DailyPort, DailySeedRow } from "../../repos/daily";

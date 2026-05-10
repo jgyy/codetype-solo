@@ -2,9 +2,26 @@ import { describe, expect, test } from "bun:test";
 import { getDrillSnippet } from "../../src/core/use-cases/get-drill-snippet";
 import { fakeClock } from "../../src/adapters/clock/fake";
 import { systemRng } from "../../src/adapters/rng/system";
+import { inMemoryDrillTemplates } from "../../src/adapters/drills/in-memory";
+
+const templates = inMemoryDrillTemplates({
+    js: {
+        arrow: [
+            {
+                tmpl: "const {{name}} = ({{a}}, {{b}}) => {{a}} {{op}} {{b}};",
+                bags: {
+                    name: ["add", "mul", "combine", "fold"],
+                    a: ["x", "lhs", "value"],
+                    b: ["y", "rhs", "delta"],
+                    op: ["+", "*", "-", "&&"],
+                },
+            },
+        ],
+    },
+});
 
 describe("getDrillSnippet use-case", () => {
-    const deps = { rng: systemRng(), clock: fakeClock("2026-05-10T12:00:00Z") };
+    const deps = { rng: systemRng(), clock: fakeClock("2026-05-10T12:00:00Z"), templates };
 
     test("deterministic per (sub, day, class)", async () => {
         const uc = getDrillSnippet(deps);

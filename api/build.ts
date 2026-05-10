@@ -1,8 +1,9 @@
-import { rmSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { cpSync, rmSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const HANDLER_DIR = join(import.meta.dir, "src", "handlers");
 const OUT_DIR = join(import.meta.dir, "dist");
+const DRILLS_SRC = join(import.meta.dir, "..", "data", "drills");
 
 const bundleAwsSdk = process.env.BUNDLE_AWS_SDK === "1";
 
@@ -31,6 +32,11 @@ if (!result.success) {
 }
 
 writeFileSync(join(OUT_DIR, "package.json"), JSON.stringify({ type: "module" }) + "\n");
+
+// Spec 013: drill .tmpl files are read at Lambda init via fsDrillTemplates.
+// Copy them into the asset so /var/task/data/drills exists at runtime.
+cpSync(DRILLS_SRC, join(OUT_DIR, "data", "drills"), { recursive: true });
+
 console.log(
     `built ${entries.length} handlers → ${OUT_DIR}${bundleAwsSdk ? " (sdk bundled)" : ""}`,
 );
