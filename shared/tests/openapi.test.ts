@@ -8,9 +8,6 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-// Tiny fixture schema. Snapshot ensures upgrades to zod-to-openapi don't
-// silently change shape — if this output changes, treat it as a generator
-// regression and review carefully.
 describe("zod-to-openapi generator (fixture)", () => {
     test("turns a small Zod schema into a stable OpenAPI shape", () => {
         const reg = new OpenAPIRegistry();

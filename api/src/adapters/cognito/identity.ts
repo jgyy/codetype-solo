@@ -5,14 +5,12 @@ export type Caller = { sub: string; email?: string; groups: string[] };
 function parseGroups(raw: unknown): string[] {
     if (Array.isArray(raw)) return raw.filter((g): g is string => typeof g === "string");
     if (typeof raw === "string") {
-        // Cognito sometimes serialises groups as "[mods]" or "mods" or a JSON array string.
         const trimmed = raw.trim();
         if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
             try {
                 const parsed = JSON.parse(trimmed);
                 if (Array.isArray(parsed)) return parsed.filter((g): g is string => typeof g === "string");
             } catch {
-                // Fall through to token splitter for "[mods]" non-JSON form.
             }
             return trimmed
                 .slice(1, -1)

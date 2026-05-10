@@ -6,12 +6,11 @@ import {
     type Timeline,
 } from "../src/anticheat";
 
-// Helpers to build synthetic timelines.
 function humanLike(n: number, baseDelay = 100, jitter = 25): Timeline {
     const t: number[] = [];
     const k: number[] = [];
     const c: (0 | 1)[] = [];
-    let now = 200; // realistic first-keystroke offset
+    let now = 200;
     for (let i = 0; i < n; i++) {
         t.push(now);
         k.push(97 + (i % 26));
@@ -26,7 +25,7 @@ function pasted(n: number): Timeline {
     const k: number[] = [];
     const c: (0 | 1)[] = [];
     for (let i = 0; i < n; i++) {
-        t.push(150 + i * 4); // 30 chars within ~120ms
+        t.push(150 + i * 4);
         k.push(97 + (i % 26));
         c.push(1);
     }
@@ -38,7 +37,7 @@ function robotic(n: number): Timeline {
     const k: number[] = [];
     const c: (0 | 1)[] = [];
     for (let i = 0; i < n; i++) {
-        t.push(150 + i * 50); // exactly 50ms between keys → stdev 0
+        t.push(150 + i * 50);
         k.push(97 + (i % 26));
         c.push(1);
     }
@@ -98,7 +97,6 @@ describe("analyse — flagged timelines", () => {
 
     test("warp gap (>5x median) is a weak flag", () => {
         const tl = humanLike(40, 80, 5);
-        // Inject a 1-second pause partway through.
         tl.t = tl.t.map((x, i) => (i >= 20 ? x + 1000 : x));
         const r = analyse(tl, totals(40));
         expect(r.reasons).toContain("warp_gap");
@@ -118,7 +116,6 @@ describe("analyse — performance", () => {
         const r = analyse(tl, totals(2000));
         const dur = performance.now() - start;
         expect(dur).toBeLessThan(50);
-        // sanity
         expect(typeof r.score).toBe("number");
     });
 });

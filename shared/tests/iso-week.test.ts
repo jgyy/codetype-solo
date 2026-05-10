@@ -3,7 +3,6 @@ import { isoWeek, padScaled } from "../src/iso-week";
 
 describe("isoWeek", () => {
     test("returns ISO week format YYYY-Www", () => {
-        // 2026-01-01 is a Thursday → ISO week 1 of 2026
         expect(isoWeek(new Date("2026-01-01T00:00:00Z"))).toBe("2026-W01");
     });
 
@@ -13,7 +12,6 @@ describe("isoWeek", () => {
     });
 
     test("year-end week belongs to following year when Thursday is in next year", () => {
-        // 2024-12-30 (Mon) is ISO week 1 of 2025.
         expect(isoWeek(new Date("2024-12-30T12:00:00Z"))).toBe("2025-W01");
     });
 });
