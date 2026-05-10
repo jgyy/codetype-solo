@@ -1,6 +1,8 @@
 import { apiError, STATUS_BY_CODE, type ApiError, type Envelope, type Result } from "@codetype/shared";
 import type { APIGatewayProxyResultV2 } from "aws-lambda";
 import { emitEmf } from "../lib/metrics";
+import { systemClock } from "../adapters/clock/system";
+import { uuidId } from "../adapters/id/uuid";
 import type { ApiHandler, Ctx, DomainHandler, Logger, Mw } from "./types";
 
 export type ComposeOptions<T = unknown> = {
@@ -76,6 +78,8 @@ export function compose<T = unknown>(...mws: Mw[]): (
                 caller: null,
                 body: undefined,
                 repos: undefined as unknown as Ctx["repos"],
+                clock: systemClock(),
+                id: uuidId(),
             };
 
             let result: Result<unknown, ApiError>;

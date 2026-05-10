@@ -66,7 +66,7 @@ export const postAttemptLogic: DomainHandler<AttemptResponse> = async (ctx: Ctx)
         clientAttemptId: body.client_attempt_id,
         snippetId: body.snippet_id,
         language: body.language,
-        createdAt: new Date().toISOString(),
+        createdAt: ctx.clock.now().toISOString(),
         wpmGross: serverGross,
         wpmNet: serverNet,
         wpmScaled: serverScaled,

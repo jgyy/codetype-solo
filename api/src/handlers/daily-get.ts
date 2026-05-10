@@ -31,7 +31,7 @@ function pickByDate(date: string) {
 
 export const getDailyLogic: DomainHandler<DailySeedRow> = async (ctx: Ctx) => {
     const q = ctx.body as { date?: string };
-    const date = q.date ?? new Date().toISOString().slice(0, 10);
+    const date = q.date ?? ctx.clock.now().toISOString().slice(0, 10);
     return ctx.repos.daily.getOrSeed(date, pickByDate(date)) as Promise<Result<DailySeedRow, ApiError>>;
 };
 
