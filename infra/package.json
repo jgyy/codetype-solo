@@ -17,6 +17,7 @@
     "seed:snippets": "bun run scripts/seed-snippets.ts",
     "seed:daily": "bun run scripts/seed-daily.ts",
     "backfill:gsi2": "bun run scripts/backfill-gsi2.ts",
+    "replay:events": "bun run scripts/replay-events.ts",
     "outputs": "aws cloudformation describe-stacks --stack-name codetype-solo --query 'Stacks[0].Outputs' --output table",
     "typecheck": "tsc --noEmit"
   },

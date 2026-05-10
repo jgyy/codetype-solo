@@ -35,6 +35,11 @@ import {
   SqsDlq,
 } from "aws-cdk-lib/aws-lambda-event-sources";
 import {
+  Alarm,
+  ComparisonOperator,
+  TreatMissingData,
+} from "aws-cdk-lib/aws-cloudwatch";
+import {
   AllowedMethods,
   CachePolicy,
   Distribution,
@@ -199,6 +204,19 @@ export class CodetypeStack extends Stack {
         onFailure: new SqsDlq(eventsDlq),
       }),
     );
+    // Spec 011 risk register: persistent projector failures must be visible.
+    // Any message landing in the DLQ across a 5-minute window trips the alarm.
+    new Alarm(this, "EventsDlqAlarm", {
+      metric: eventsDlq.metricApproximateNumberOfMessagesVisible({
+        period: Duration.minutes(5),
+        statistic: "Maximum",
+      }),
+      threshold: 0,
+      evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+      alarmDescription: "DDB-stream events Lambda has messages in DLQ",
+    });
 
     const httpApi = new HttpApi(this, "HttpApi", {
       apiName: "codetype-api",
