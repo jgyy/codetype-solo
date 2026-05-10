@@ -3,11 +3,8 @@ import {
     SubmissionIdParam,
     apiError,
     err,
-    isErr,
-    ok,
-    type ApiError,
-    type Result,
 } from "@codetype/shared";
+import { useCases } from "../composition";
 import {
     compose,
     withAuth,
@@ -19,28 +16,30 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { composeRepos } from "../repos";
+import { prodRepos } from "../composition";
 
 type Response = { ok: true };
 
 export const rejectSubmissionLogic: DomainHandler<Response> = async (ctx: Ctx) => {
     if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
     const body = ctx.body as { reason: string };
-
     const pathRes = SubmissionIdParam.safeParse(ctx.event.pathParameters ?? {});
     if (!pathRes.success) {
         return err(apiError("bad_request", "validation_failed", pathRes.error.issues));
     }
-    const r = await ctx.repos.submissions.reject(pathRes.data.id, ctx.caller.sub, body.reason);
-    if (isErr(r)) return r as Result<never, ApiError>;
-    return ok({ ok: true });
+    const uc = useCases({ repos: ctx.repos, clock: ctx.clock, id: ctx.id });
+    return uc.rejectSubmission({
+        id: pathRes.data.id,
+        modSub: ctx.caller.sub,
+        reason: body.reason,
+    });
 };
 
 export const handler = compose<Response>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),
-    withRepos(composeRepos()),
+    withRepos(prodRepos()),
     withAuth({ required: true, group: "mods" }),
     withSchema(RejectBody),
 )(rejectSubmissionLogic, { successStatus: 200 });

@@ -2,11 +2,9 @@ import {
     RetractParam,
     apiError,
     err,
-    isErr,
-    ok,
-    type ApiError,
-    type Result,
+    type Language,
 } from "@codetype/shared";
+import { useCases } from "../composition";
 import {
     compose,
     withAuth,
@@ -18,23 +16,22 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { composeRepos } from "../repos";
+import { prodRepos } from "../composition";
 
 type Response = { retired: true };
 
 export const retractSnippetLogic: DomainHandler<Response> = async (ctx: Ctx) => {
     if (!ctx.caller) return err(apiError("unauthorized", "missing caller"));
-    const p = ctx.body as { lang: import("@codetype/shared").Language; id: string };
-    const r = await ctx.repos.snippets.retract(p.lang, p.id);
-    if (isErr(r)) return r as Result<never, ApiError>;
-    return ok({ retired: true });
+    const p = ctx.body as { lang: Language; id: string };
+    const uc = useCases({ repos: ctx.repos, clock: ctx.clock, id: ctx.id });
+    return uc.retractSnippet(p);
 };
 
 export const handler = compose<Response>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),
-    withRepos(composeRepos()),
+    withRepos(prodRepos()),
     withAuth({ required: true, group: "mods" }),
     withSchema(RetractParam, "path"),
 )(retractSnippetLogic, { successStatus: 200 });

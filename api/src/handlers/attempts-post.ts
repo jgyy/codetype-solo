@@ -17,7 +17,7 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { composeRepos } from "../repos";
+import { prodRepos } from "../composition";
 import type { RecordAttemptOutput } from "../core/use-cases";
 
 export const postAttemptLogic: DomainHandler<RecordAttemptOutput> = async (ctx: Ctx) => {
@@ -33,7 +33,7 @@ export const handler = compose<RecordAttemptOutput>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),
-    withRepos(composeRepos()),
+    withRepos(prodRepos()),
     withAuth({ required: true }),
     withSchema(PostAttemptBody),
 )(postAttemptLogic, {

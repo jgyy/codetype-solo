@@ -3,6 +3,20 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const CORE_ROOT = join(import.meta.dir, "..", "src", "core");
+const HANDLERS_ROOT = join(import.meta.dir, "..", "src", "handlers");
+
+// events.ts is the DDB Streams handler (spec 011). It owns its own repo
+// composition because it runs outside the API request pipeline and there's
+// no Ctx to thread `repos` through. Allowed list, not a blanket exception.
+const HANDLER_REPO_EXEMPT = new Set(["events.ts"]);
+
+const HANDLER_BANNED: RegExp[] = [
+    /from\s+["']@aws-sdk\//,
+    /from\s+["']aws-sdk["']/,
+    /from\s+["'][^"']*\/repos["']/,
+    /from\s+["'][^"']*\/repos\//,
+    /from\s+["'][^"']*\/adapters\//,
+];
 
 const BANNED_PATTERNS: RegExp[] = [
     /from\s+["']@aws-sdk\//,
@@ -61,6 +75,25 @@ describe("architecture: core/** purity", () => {
                 .map((v) => `${v.file}:${v.line}  ${v.text}`)
                 .join("\n");
             throw new Error(`core/** purity violations:\n${msg}`);
+        }
+        expect(violations).toEqual([]);
+    });
+
+    test("handlers/** must reach repos/adapters only via composition.ts", () => {
+        const violations: { file: string; text: string }[] = [];
+        for (const file of walk(HANDLERS_ROOT)) {
+            const base = file.split("/").pop() ?? file;
+            if (HANDLER_REPO_EXEMPT.has(base)) continue;
+            const lines = readFileSync(file, "utf8").split("\n");
+            for (const line of lines) {
+                for (const pat of HANDLER_BANNED) {
+                    if (pat.test(line)) violations.push({ file, text: line.trim() });
+                }
+            }
+        }
+        if (violations.length) {
+            const msg = violations.map((v) => `${v.file}  ${v.text}`).join("\n");
+            throw new Error(`handlers/** violations (use composition.ts):\n${msg}`);
         }
         expect(violations).toEqual([]);
     });

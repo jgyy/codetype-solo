@@ -15,7 +15,7 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { composeRepos } from "../repos";
+import { prodRepos } from "../composition";
 import type { ListAttemptsOutput } from "../core/use-cases";
 
 export const listAttemptsLogic: DomainHandler<ListAttemptsOutput> = async (ctx: Ctx) => {
@@ -29,7 +29,7 @@ export const handler = compose<ListAttemptsOutput>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),
-    withRepos(composeRepos()),
+    withRepos(prodRepos()),
     withAuth({ required: true }),
     withSchema(ListAttemptsQuery, "query"),
 )(listAttemptsLogic, { successStatus: 200 });

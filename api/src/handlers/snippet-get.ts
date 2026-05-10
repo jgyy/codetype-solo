@@ -1,8 +1,5 @@
-import {
-    GetSnippetParams,
-    type ApiError,
-    type Result,
-} from "@codetype/shared";
+import { GetSnippetParams } from "@codetype/shared";
+import { useCases } from "../composition";
 import {
     compose,
     withAuth,
@@ -14,18 +11,19 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { composeRepos, type SnippetRow } from "../repos";
+import { prodRepos, type SnippetRow } from "../composition";
 
 export const getSnippetLogic: DomainHandler<SnippetRow> = async (ctx: Ctx) => {
     const p = ctx.body as GetSnippetParams;
-    return ctx.repos.snippets.get(p.lang, p.id) as Promise<Result<SnippetRow, ApiError>>;
+    const uc = useCases({ repos: ctx.repos, clock: ctx.clock, id: ctx.id });
+    return uc.getSnippet(p);
 };
 
 export const handler = compose<SnippetRow>(
     withRequestId(),
     withLogger(),
     withErrorEnvelope(),
-    withRepos(composeRepos()),
+    withRepos(prodRepos()),
     withAuth({ required: false }),
     withSchema(GetSnippetParams, "path"),
 )(getSnippetLogic, { successStatus: 200 });
