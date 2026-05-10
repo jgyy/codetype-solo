@@ -28,7 +28,7 @@ Implemented / archived specs live in [`done/`](done/). Active drafts:
 
 | # | Title | Scope | Status |
 |---|-------|-------|--------|
-| 012 | [Hexagonal architecture (ports & adapters)](012-hexagonal-ports-and-adapters.md) | Refactor | Draft |
+| 012 | [Hexagonal architecture (ports & adapters)](done/012-hexagonal-ports-and-adapters.md) | Refactor | Implemented |
 | 013 | [Adaptive practice & spaced repetition](013-adaptive-practice-and-spaced-repetition.md) | Feature | Draft |
 | 014 | [Real-time multiplayer races](014-realtime-multiplayer-races.md) | Feature | Draft |
 | 015 | [Achievements & progression](015-achievements-and-progression.md) | Feature | Draft |

@@ -15,7 +15,6 @@ import {
     type Ctx,
     type DomainHandler,
 } from "../middleware";
-import { callerInGroup } from "../lib/auth";
 import { prodRepos } from "../composition";
 import type { ListSubmissionsOutput } from "../core/use-cases";
 
@@ -28,7 +27,7 @@ export const listSubmissionsLogic: DomainHandler<ListSubmissionsOutput> = async 
         return uc.listSubmissions({ mode: "mine", sub: ctx.caller.sub });
     }
     if (q.status) {
-        if (!callerInGroup(ctx.caller, "mods")) {
+        if (!ctx.caller?.groups.includes("mods")) {
             return err(apiError("unauthorized", "moderator role required"));
         }
         if (q.status !== "PENDING") {

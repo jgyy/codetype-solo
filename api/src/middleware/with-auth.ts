@@ -1,5 +1,5 @@
 import { apiError, err } from "@codetype/shared";
-import { callerInGroup, getCaller } from "../lib/auth";
+import { callerInGroup, getCaller } from "../adapters/cognito/identity";
 import type { Mw } from "./types";
 
 export type AuthOptions = { required: boolean; group?: string };

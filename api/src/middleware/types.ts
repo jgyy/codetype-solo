@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer, APIGatewayProxyResultV2 } from "aws-lambda";
 import type { ApiError, Result } from "@codetype/shared";
-import type { Caller } from "../lib/auth";
+import type { Caller } from "../adapters/cognito/identity";
 import type { Repos } from "../repos";
 import type { ClockPort } from "../core/ports/clock-port";
 import type { IdPort } from "../core/ports/id-port";
