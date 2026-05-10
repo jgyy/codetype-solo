@@ -120,3 +120,33 @@ export type RejectResponse = z.infer<typeof RejectResponse>;
 
 export const RetractResponse = z.object({ retired: z.literal(true) });
 export type RetractResponse = z.infer<typeof RetractResponse>;
+
+// Spec 013
+export const NextSnippetResponse = z.object({
+    snippet: SnippetResponse,
+    selection_mode: z.enum(["adaptive", "random", "warming_up"]),
+});
+export type NextSnippetResponse = z.infer<typeof NextSnippetResponse>;
+
+export const DrillSnippetResponse = z.object({
+    id: z.string(),
+    language: LanguageSchema,
+    title: z.string(),
+    code: z.string(),
+    difficulty: z.number(),
+});
+export type DrillSnippetResponse = z.infer<typeof DrillSnippetResponse>;
+
+const ErrorModelSchema = z.object({
+    v: z.literal(1),
+    updated_at: z.string(),
+    bigrams: z.array(z.object({ b: z.string(), weight: z.number() })),
+    classes: z.array(z.object({ c: z.string(), weight: z.number() })),
+    attempts_merged: z.number().int().nonnegative(),
+});
+
+export const ErrorModelResponse = z.object({
+    error_model: ErrorModelSchema.nullable(),
+    warmed_up: z.boolean(),
+});
+export type ErrorModelResponse = z.infer<typeof ErrorModelResponse>;

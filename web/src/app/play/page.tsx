@@ -7,7 +7,7 @@ import { ReplayPlayer } from "@/components/ReplayPlayer";
 import { ResultCard } from "@/components/ResultCard";
 import { TypingArea, type TypingResult } from "@/components/TypingArea";
 import { persistAttempt } from "@/lib/persist";
-import { getDaily, getSnippet } from "@/lib/api";
+import { getDaily, getDrillSnippet, getNextSnippet, getSnippet, type SelectionMode } from "@/lib/api";
 import { apiConfigured } from "@/lib/config";
 import { pickRandom, SNIPPETS } from "@/lib/snippets";
 import {
@@ -40,10 +40,17 @@ function PlayInner() {
   const [nonce, setNonce] = useState(0);
   const [cheatScore, setCheatScore] = useState<number | undefined>(undefined);
   const [cheatReasons, setCheatReasons] = useState<string[] | undefined>(undefined);
+  // Spec 013: selection mode. Adaptive falls back to random server-side
+  // when the user is cold-started (attempts_merged < 5), surfaced via
+  // selectionMode === "warming_up".
+  const [mode, setMode] = useState<SelectionMode | "drill">("adaptive");
+  const [drillClass, setDrillClass] = useState("arrow");
+  const [selectionMode, setSelectionMode] = useState<"adaptive" | "random" | "warming_up" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setResult(null);
+    setSelectionMode(null);
     (async () => {
       if (isDaily && apiConfigured()) {
         try {
@@ -70,12 +77,44 @@ function PlayInner() {
           console.error("daily fetch failed", err);
         }
       }
+
+      // Spec 013: server-side selection when API is configured.
+      if (apiConfigured() && !isDaily) {
+        try {
+          if (mode === "drill") {
+            const d = await getDrillSnippet(language, drillClass);
+            if (cancelled) return;
+            setSnippet({
+              id: d.id,
+              language: d.language,
+              title: d.title,
+              code: d.code,
+              difficulty: 1,
+            });
+            setSelectionMode(null);
+            return;
+          }
+          const next = await getNextSnippet(language, mode);
+          if (cancelled) return;
+          setSnippet({
+            id: next.snippet.id ?? next.snippet.SK.replace(/^SNIPPET#/, ""),
+            language: next.snippet.language,
+            title: next.snippet.title,
+            code: next.snippet.code,
+            difficulty: 3,
+          });
+          setSelectionMode(next.selection_mode);
+          return;
+        } catch (err) {
+          console.error("server snippet selection failed; using local pool", err);
+        }
+      }
       if (!cancelled) setSnippet(pickRandom(language));
     })();
     return () => {
       cancelled = true;
     };
-  }, [language, nonce, isDaily]);
+  }, [language, nonce, isDaily, mode, drillClass]);
 
   const onComplete = (r: TypingResult) => {
     setResult(r);
@@ -118,6 +157,47 @@ function PlayInner() {
         </button>
       </div>
       <h1 className="text-xl font-semibold">{headline}</h1>
+
+      {!isDaily && apiConfigured() && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {(["adaptive", "random", "drill"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => {
+                setMode(m);
+                setNonce((n) => n + 1);
+              }}
+              className={
+                "rounded px-3 py-1 " +
+                (mode === m
+                  ? "bg-amber-400 text-zinc-900"
+                  : "bg-zinc-800 text-zinc-300 hover:text-amber-400")
+              }
+            >
+              {m === "adaptive" ? "Adaptive" : m === "random" ? "Random" : "Drill"}
+            </button>
+          ))}
+          {mode === "drill" && (
+            <select
+              value={drillClass}
+              onChange={(e) => {
+                setDrillClass(e.target.value);
+                setNonce((n) => n + 1);
+              }}
+              className="rounded bg-zinc-800 px-2 py-1 text-zinc-200"
+            >
+              <option value="arrow">arrow</option>
+              <option value="template-literal">template-literal</option>
+            </select>
+          )}
+          {selectionMode === "warming_up" && (
+            <span className="text-xs text-zinc-500">warming up — collect 5 attempts to unlock adaptive</span>
+          )}
+          {selectionMode === "adaptive" && (
+            <span className="text-xs text-emerald-500">targeting your weakest patterns</span>
+          )}
+        </div>
+      )}
 
       {snippet && !result && (
         <TypingArea key={snippet.id + ":" + nonce} target={snippet.code} onComplete={onComplete} />

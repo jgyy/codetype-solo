@@ -8,7 +8,7 @@ import {
     PostAttemptBody,
 } from "./attempts";
 import { DailyQuery } from "./daily";
-import { GetSnippetParams } from "./snippets";
+import { DrillSnippetQuery, GetSnippetParams, NextSnippetQuery } from "./snippets";
 import { UpsertProfileBody } from "./profile";
 import { GetLeaderboardQuery } from "./leaderboard";
 import {
@@ -21,9 +21,12 @@ import {
 import {
     ApproveResponse,
     DailyResponse,
+    DrillSnippetResponse,
+    ErrorModelResponse,
     LeaderboardResponseSchema,
     ListAttemptsResponse,
     ListSubmissionsResponse,
+    NextSnippetResponse,
     PostAttemptResponse,
     ProfileResponse,
     RejectResponse,
@@ -148,6 +151,33 @@ export const ENDPOINTS = {
         description: "Retire an approved snippet so it stops appearing in listings or daily.",
         params: RetractParam,
         response: RetractResponse,
+    },
+    // Spec 013
+    getNextSnippet: {
+        operationId: "getNextSnippet",
+        method: "GET",
+        path: "/snippets/next",
+        auth: "public",
+        description: "Adaptive next-snippet picker. Falls back to random for guests or cold-start users.",
+        query: NextSnippetQuery,
+        response: NextSnippetResponse,
+    },
+    getDrillSnippet: {
+        operationId: "getDrillSnippet",
+        method: "GET",
+        path: "/snippets/drill",
+        auth: "public",
+        description: "Synthesised micro-snippet targeting one symbol class; deterministic per (user, day, class).",
+        query: DrillSnippetQuery,
+        response: DrillSnippetResponse,
+    },
+    getErrorModel: {
+        operationId: "getErrorModel",
+        method: "GET",
+        path: "/profile/error-model",
+        auth: "user",
+        description: "The caller's per-user weakness model — top bigrams and symbol classes.",
+        response: ErrorModelResponse,
     },
 } as const satisfies Record<string, EndpointDef>;
 

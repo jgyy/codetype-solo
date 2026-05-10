@@ -7,3 +7,5 @@ export * from "./schemas";
 export * from "./iso-week";
 export * from "./handle-blocklist";
 export * from "./anticheat";
+export * from "./error-model";
+export * from "./symbol-classes";

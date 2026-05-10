@@ -4,7 +4,7 @@ import {
     PutCommand,
     type DynamoDBDocumentClient,
 } from "@aws-sdk/lib-dynamodb";
-import { ok, type ApiError, type Result } from "@codetype/shared";
+import { ok, type ApiError, type ErrorModel, type Result } from "@codetype/shared";
 import { profileSk, userPk } from "./keys";
 
 export type ProfileRow = {
@@ -17,6 +17,7 @@ export type ProfileRow = {
     leaderboard_optin?: boolean;
     display_name?: string;
     handle_changed_at?: string;
+    error_model?: ErrorModel;
 };
 
 export type ProfilePatch = {
@@ -25,6 +26,7 @@ export type ProfilePatch = {
     leaderboard_optin?: boolean;
     display_name?: string;
     handle_changed_at?: string;
+    error_model?: ErrorModel;
 };
 
 export interface ProfileRepo {
@@ -42,6 +44,7 @@ const PATCH_FIELDS: (keyof ProfilePatch)[] = [
     "leaderboard_optin",
     "display_name",
     "handle_changed_at",
+    "error_model",
 ];
 
 function buildUpdate(patch: ProfilePatch) {

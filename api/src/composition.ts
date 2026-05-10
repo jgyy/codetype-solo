@@ -1,10 +1,14 @@
 import { systemClock } from "./adapters/clock/system";
 import { uuidId } from "./adapters/id/uuid";
-import type { ClockPort, IdPort } from "./core/ports";
+import { systemRng } from "./adapters/rng/system";
+import type { ClockPort, IdPort, RngPort } from "./core/ports";
 import {
     approveSubmission,
     getDailyChallenge,
+    getDrillSnippet,
+    getErrorModel,
     getLeaderboard,
+    getNextSnippet,
     getSnippet,
     listAttempts,
     listSubmissions,
@@ -25,6 +29,7 @@ export type Adapters = {
     repos: Repos;
     clock: ClockPort;
     id: IdPort;
+    rng: RngPort;
 };
 
 export type UseCases = {
@@ -39,18 +44,27 @@ export type UseCases = {
     approveSubmission: ReturnType<typeof approveSubmission>;
     rejectSubmission: ReturnType<typeof rejectSubmission>;
     getLeaderboard: ReturnType<typeof getLeaderboard>;
+    getNextSnippet: ReturnType<typeof getNextSnippet>;
+    getDrillSnippet: ReturnType<typeof getDrillSnippet>;
+    getErrorModel: ReturnType<typeof getErrorModel>;
 };
 
 export const buildAdapters = (overrides: Partial<Adapters> = {}): Adapters => ({
     repos: overrides.repos ?? composeRepos(),
     clock: overrides.clock ?? systemClock(),
     id: overrides.id ?? uuidId(),
+    rng: overrides.rng ?? systemRng(),
 });
 
 export const buildUseCases = (a: Adapters): UseCases => ({
     listAttempts: listAttempts({ attempts: a.repos.attempts }),
     getDailyChallenge: getDailyChallenge({ daily: a.repos.daily, clock: a.clock }),
-    recordAttempt: recordAttempt({ attempts: a.repos.attempts, clock: a.clock }),
+    recordAttempt: recordAttempt({
+        attempts: a.repos.attempts,
+        clock: a.clock,
+        profiles: a.repos.profiles,
+        snippets: a.repos.snippets,
+    }),
     upsertProfile: upsertProfile({ profiles: a.repos.profiles, clock: a.clock }),
     getSnippet: getSnippet({ snippets: a.repos.snippets }),
     retractSnippet: retractSnippet({ snippets: a.repos.snippets }),
@@ -59,6 +73,13 @@ export const buildUseCases = (a: Adapters): UseCases => ({
     approveSubmission: approveSubmission({ submissions: a.repos.submissions }),
     rejectSubmission: rejectSubmission({ submissions: a.repos.submissions }),
     getLeaderboard: getLeaderboard({ leaderboard: a.repos.leaderboard, clock: a.clock }),
+    getNextSnippet: getNextSnippet({
+        snippets: a.repos.snippets,
+        profiles: a.repos.profiles,
+        rng: a.rng,
+    }),
+    getDrillSnippet: getDrillSnippet({ rng: a.rng, clock: a.clock }),
+    getErrorModel: getErrorModel({ profiles: a.repos.profiles }),
 });
 
 let cached: { adapters: Adapters; useCases: UseCases } | null = null;

@@ -1,8 +1,10 @@
 import {
     accuracyScaledWpm,
     analyse,
+    analyseAttempt,
     grossWpm,
     isErr,
+    mergeModel,
     netWpm,
     ok,
     type ApiError,
@@ -10,9 +12,16 @@ import {
     type Result,
     type WpmInput,
 } from "@codetype/shared";
-import type { AttemptsPort, ClockPort } from "../ports";
+import type { AttemptsPort, ClockPort, ProfilePort, SnippetsPort } from "../ports";
 
-export type RecordAttemptDeps = { attempts: AttemptsPort; clock: ClockPort };
+export type RecordAttemptDeps = {
+    attempts: AttemptsPort;
+    clock: ClockPort;
+    // Optional: when present, attempt-record also folds the timeline into
+    // the user's error model. Tests that don't care can omit them.
+    profiles?: ProfilePort;
+    snippets?: SnippetsPort;
+};
 export type RecordAttemptInput = { sub: string; body: PostAttemptBody };
 
 export type RecordAttemptOutput =
@@ -24,6 +33,25 @@ export type RecordAttemptOutput =
           cheat_reasons?: string[];
       }
     | { sk: string; duplicate: true };
+
+async function updateErrorModel(
+    d: RecordAttemptDeps,
+    sub: string,
+    body: PostAttemptBody,
+): Promise<void> {
+    if (!d.profiles || !d.snippets || !body.timeline) return;
+    const sn = await d.snippets.get(body.language, body.snippet_id);
+    if (isErr(sn)) return;
+    const fresh = analyseAttempt({
+        snippet: sn.value.code,
+        language: body.language,
+        timeline: body.timeline,
+    });
+    const profile = await d.profiles.get(sub);
+    if (isErr(profile)) return;
+    const merged = mergeModel(profile.value?.error_model, fresh, d.clock.now());
+    await d.profiles.patch(sub, { error_model: merged });
+}
 
 export const recordAttempt =
     (d: RecordAttemptDeps) =>
@@ -73,6 +101,14 @@ export const recordAttempt =
         });
         if (isErr(r)) return r as Result<never, ApiError>;
         if (r.value.duplicate) return ok({ sk: r.value.sk, duplicate: true });
+
+        // Best-effort error-model update. Spec 013: synchronous in v1.
+        // Never fails the attempt — the leaderboard / streak are the
+        // observable part, the model is opportunistic.
+        if (d.profiles && d.snippets && body.timeline) {
+            void updateErrorModel(d, input.sub, body).catch(() => {});
+        }
+
         return ok({
             sk: r.value.sk,
             wpm_mismatch: mismatch,

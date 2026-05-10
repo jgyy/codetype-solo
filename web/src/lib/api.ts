@@ -72,6 +72,25 @@ export async function submitSnippet(
     return call("submitSnippet", { body: input });
 }
 
+// Spec 013
+export type SelectionMode = "adaptive" | "random";
+export type NextSnippetResult = ResponseFor<"getNextSnippet">;
+export async function getNextSnippet(
+    lang: Language,
+    mode: SelectionMode = "adaptive",
+): Promise<NextSnippetResult> {
+    return call("getNextSnippet", { query: { lang, mode } });
+}
+
+export async function getDrillSnippet(lang: Language, klass: string) {
+    return call("getDrillSnippet", { query: { lang, class: klass } });
+}
+
+export type ErrorModelView = ResponseFor<"getErrorModel">;
+export async function getErrorModel(): Promise<ErrorModelView> {
+    return call("getErrorModel", {});
+}
+
 export async function listMySubmissions(): Promise<{ items: SubmissionDtoView[] }> {
     const r = await call("listSubmissions", { query: { mine: "true" } });
     return { items: r.items as unknown as SubmissionDtoView[] };

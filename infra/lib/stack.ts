@@ -81,6 +81,9 @@ const HANDLER_FILE: Record<keyof typeof ENDPOINTS, string> = {
   approveSubmission: "submissions-approve",
   rejectSubmission: "submissions-reject",
   retractSnippet: "snippet-retract",
+  getNextSnippet: "snippet-next",
+  getDrillSnippet: "snippet-drill",
+  getErrorModel: "profile-error-model",
 };
 
 const MOD_GROUP = "mods";

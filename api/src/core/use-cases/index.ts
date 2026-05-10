@@ -5,3 +5,6 @@ export * from "./upsert-profile";
 export * from "./snippets";
 export * from "./submissions";
 export * from "./get-leaderboard";
+export * from "./get-next-snippet";
+export * from "./get-drill-snippet";
+export * from "./get-error-model";
