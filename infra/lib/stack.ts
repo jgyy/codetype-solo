@@ -26,8 +26,14 @@ import {
   AttributeType,
   BillingMode,
   ProjectionType,
+  StreamViewType,
   Table,
 } from "aws-cdk-lib/aws-dynamodb";
+import { Queue } from "aws-cdk-lib/aws-sqs";
+import {
+  DynamoEventSource,
+  SqsDlq,
+} from "aws-cdk-lib/aws-lambda-event-sources";
 import {
   AllowedMethods,
   CachePolicy,
@@ -46,6 +52,7 @@ import {
   Code,
   Function as LambdaFn,
   Runtime,
+  StartingPosition,
 } from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import {
@@ -90,6 +97,8 @@ export class CodetypeStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
       removalPolicy: RemovalPolicy.RETAIN,
+      // Spec 011: enables the domain-event projector pipeline.
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
     });
     table.addGlobalSecondaryIndex({
       indexName: "GSI1",
@@ -159,6 +168,37 @@ export class CodetypeStack extends Stack {
       table.grantReadWriteData(fn);
       fns[opId] = fn;
     }
+
+    // Spec 011: events Lambda — single consumer of the table's DDB stream,
+    // fans out to projectors in-process. Failed batches retry up to 5 times
+    // (Lambda built-in) before draining to the SQS DLQ for inspection.
+    const eventsDlq = new Queue(this, "EventsDlq", {
+      retentionPeriod: Duration.days(14),
+    });
+    const eventsLogGroup = new LogGroup(this, "FnEventsLogs", {
+      retention: RetentionDays.TWO_WEEKS,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+    const eventsFn = new LambdaFn(this, "FnEvents", {
+      runtime: Runtime.NODEJS_20_X,
+      architecture: Architecture.ARM_64,
+      handler: "events.handler",
+      code: apiAsset,
+      memorySize: 512,
+      timeout: Duration.seconds(30),
+      environment: sharedEnv,
+      logGroup: eventsLogGroup,
+    });
+    table.grantReadWriteData(eventsFn);
+    eventsFn.addEventSource(
+      new DynamoEventSource(table, {
+        startingPosition: StartingPosition.LATEST,
+        batchSize: 25,
+        retryAttempts: 5,
+        bisectBatchOnError: true,
+        onFailure: new SqsDlq(eventsDlq),
+      }),
+    );
 
     const httpApi = new HttpApi(this, "HttpApi", {
       apiName: "codetype-api",
@@ -259,5 +299,6 @@ export class CodetypeStack extends Stack {
       value: `https://${distribution.domainName}`,
     });
     new CfnOutput(this, "TableName", { value: table.tableName });
+    new CfnOutput(this, "EventsDlqUrl", { value: eventsDlq.queueUrl });
   }
 }
