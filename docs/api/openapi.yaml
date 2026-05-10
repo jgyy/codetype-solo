@@ -571,7 +571,7 @@ paths:
                         type: string
                       entity:
                         type: string
-                        enum:
+                        enum: &a3
                           - SNIPPET
                           - SNIPPET_RETIRED
                       id:
@@ -1383,6 +1383,324 @@ paths:
                           - true
                     required:
                       - retired
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/next:
+    get:
+      operationId: getNextSnippet
+      description: Adaptive next-snippet picker. Falls back to random for guests or cold-start users.
+      tags:
+        - public
+      security: []
+      parameters:
+        - schema:
+            type: string
+            enum: *a1
+          required: true
+          name: lang
+          in: query
+        - schema:
+            type: string
+            enum:
+              - adaptive
+              - random
+            default: adaptive
+          required: false
+          name: mode
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      snippet:
+                        type: object
+                        properties:
+                          PK:
+                            type: string
+                          SK:
+                            type: string
+                          entity:
+                            type: string
+                            enum: *a3
+                          id:
+                            type: string
+                          language:
+                            type: string
+                            enum: *a1
+                          title:
+                            type: string
+                          code:
+                            type: string
+                          difficulty:
+                            type: number
+                        required:
+                          - PK
+                          - SK
+                          - entity
+                          - language
+                          - title
+                          - code
+                          - difficulty
+                      selection_mode:
+                        type: string
+                        enum:
+                          - adaptive
+                          - random
+                          - warming_up
+                    required:
+                      - snippet
+                      - selection_mode
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /snippets/drill:
+    get:
+      operationId: getDrillSnippet
+      description: Synthesised micro-snippet targeting one symbol class; deterministic per (user, day, class).
+      tags:
+        - public
+      security: []
+      parameters:
+        - schema:
+            type: string
+            enum: *a1
+          required: true
+          name: lang
+          in: query
+        - schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+          required: true
+          name: class
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      language:
+                        type: string
+                        enum: *a1
+                      title:
+                        type: string
+                      code:
+                        type: string
+                      difficulty:
+                        type: number
+                    required:
+                      - id
+                      - language
+                      - title
+                      - code
+                      - difficulty
+                required:
+                  - ok
+                  - data
+        "400":
+          description: bad_request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: rate_limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: internal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /profile/error-model:
+    get:
+      operationId: getErrorModel
+      description: The caller's per-user weakness model — top bigrams and symbol classes.
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      error_model:
+                        type:
+                          - object
+                          - "null"
+                        properties:
+                          v:
+                            type: number
+                            enum:
+                              - 1
+                          updated_at:
+                            type: string
+                          bigrams:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                b:
+                                  type: string
+                                weight:
+                                  type: number
+                              required:
+                                - b
+                                - weight
+                          classes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                c:
+                                  type: string
+                                weight:
+                                  type: number
+                              required:
+                                - c
+                                - weight
+                          attempts_merged:
+                            type: integer
+                            minimum: 0
+                        required:
+                          - v
+                          - updated_at
+                          - bigrams
+                          - classes
+                          - attempts_merged
+                      warmed_up:
+                        type: boolean
+                    required:
+                      - error_model
+                      - warmed_up
                 required:
                   - ok
                   - data
