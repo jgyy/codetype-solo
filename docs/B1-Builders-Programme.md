@@ -86,54 +86,67 @@ project/
 
 - Sections to be included in `README.md`:
 
-````markdown
+```markdown
 # Project Title
 
 ## Overview
+
 ### Problem
+
 - Who is affected?
 - What is the issue?
 
 ### Outcome
+
 - What was achieved?
 - Measurable results (if any).
+
 ---
 
 ## Demo
+
 - How does the solution work from the user's perspective, covering the main steps from start to finish?
 - Provide screenshots, GIFs or demo video.
+
 ---
 
 ## Technology Stack
+
 ### Frontend components:
+
 - List of client-side technologies used for user interaction.
 
 ### Backend components:
+
 - List of server-side technologies used for processing, APIs, and coordination.
+
 ---
 
 ## Development Approach with AI
+
 - List of AI tools, services, models, and their purposes.
 - List of AI agents, including roles and skills.
 - List of key prompts used.
 - List of key review points and the corresponding decision made.
+
 ---
 
 ## Installation
-Steps to run the project.
----
+
+## Steps to run the project.
 
 ## Usage
-How to use the project (commands, examples, expected behaviour).
----
+
+## How to use the project (commands, examples, expected behaviour).
 
 ## Project Structure
-Explanation of key folders
----
+
+## Explanation of key folders
 
 ## Reflection
+
 - What worked, what failed, changes made, rationale.
-````
+```
 
 ### Step 2: Presentation Interview (latest by 18 May 2026)
 
@@ -141,9 +154,9 @@ Shortlisted students will be invited to present their projects.
 
 The interview will assess:
 
-| Area | What we look for |
-|---|---|
-| Technical ability | Can you clearly explain your development process? Can you use AI effectively, responsibly, and creatively across diverse tools? |
+| Area                   | What we look for                                                                                                                                                                        |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Technical ability      | Can you clearly explain your development process? Can you use AI effectively, responsibly, and creatively across diverse tools?                                                         |
 | Facilitation potential | Can you break down vague problems into workable steps for students? Can you guide students without doing it for them yourselves? Can you guide students to reflect, adapt, and improve? |
 
 ### Step 3: Training and Shadowing (TBC)
@@ -184,12 +197,12 @@ This means:
 
 ## Timeline
 
-| Batch | Key Event | Date |
-|---|---|---|
-| Batch 1 | Attend Design AI workshop as participants | Completed |
-| Batch 1 | Project submission | Now till 15 May 2026 |
-| Batch 1 | Presentation Interview | 18 May 2026 |
-| Batch 1 | Training and Shadowing | TBC |
+| Batch   | Key Event                                 | Date                 |
+| ------- | ----------------------------------------- | -------------------- |
+| Batch 1 | Attend Design AI workshop as participants | Completed            |
+| Batch 1 | Project submission                        | Now till 15 May 2026 |
+| Batch 1 | Presentation Interview                    | 18 May 2026          |
+| Batch 1 | Training and Shadowing                    | TBC                  |
 
 ## Links
 
