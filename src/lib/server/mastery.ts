@@ -22,9 +22,15 @@ export async function updateMasteryForAttempt(attemptId: number): Promise<void> 
 	const now = new Date();
 
 	for (const topic of topics) {
-		const existing = await db.query.topicMastery.findFirst({ where: eq(topicMastery.topic, topic) });
+		const existing = await db.query.topicMastery.findFirst({
+			where: eq(topicMastery.topic, topic)
+		});
 		const prevState = existing
-			? { ease: existing.ease, intervalDays: existing.intervalDays, repetitions: existing.repetitions }
+			? {
+					ease: existing.ease,
+					intervalDays: existing.intervalDays,
+					repetitions: existing.repetitions
+				}
 			: null;
 
 		const next = nextSchedule(prevState, outcome, now);

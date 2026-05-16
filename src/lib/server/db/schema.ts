@@ -6,7 +6,10 @@ export const problems = sqliteTable('problems', {
 	slug: text('slug').notNull().unique(),
 	title: text('title').notNull(),
 	difficulty: text('difficulty', { enum: ['easy', 'medium', 'hard'] }).notNull(),
-	topics: text('topics', { mode: 'json' }).$type<string[]>().notNull().default(sql`'[]'`),
+	topics: text('topics', { mode: 'json' })
+		.$type<string[]>()
+		.notNull()
+		.default(sql`'[]'`),
 	url: text('url'),
 	descriptionMd: text('description_md').notNull().default('')
 });

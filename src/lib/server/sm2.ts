@@ -39,7 +39,11 @@ export function qualityFor(outcome: Outcome): number {
 	}
 }
 
-export function nextSchedule(prev: MasteryState | null, outcome: Outcome, now: Date = new Date()): SchedulerResult {
+export function nextSchedule(
+	prev: MasteryState | null,
+	outcome: Outcome,
+	now: Date = new Date()
+): SchedulerResult {
 	const state: MasteryState = prev ?? { ease: DEFAULT_EASE, intervalDays: 0, repetitions: 0 };
 	const q = qualityFor(outcome);
 

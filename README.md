@@ -16,7 +16,9 @@
 
 ## Demo
 
-_Coming soon — screenshots and a short clip will be added once the typing view ships._
+**Live:** https://codetype-solo.vercel.app _(replace with your deployment URL once provisioned)_
+
+_Screenshots and a short clip will be added once the typing view ships._
 
 ---
 
@@ -30,8 +32,9 @@ _Coming soon — screenshots and a short clip will be added once the typing view
 
 ### Backend components
 
-- SvelteKit server routes for any future API endpoints
-- Local-first data: practice history and weakness metrics live in the browser (IndexedDB / localStorage) for the solo use case
+- SvelteKit server routes (deployed as Vercel Functions in production)
+- Drizzle ORM over libSQL — local SQLite file in dev, Turso-hosted libSQL in production
+- HMAC-signed session cookie (no server-side session store)
 
 ---
 
@@ -48,10 +51,47 @@ _Coming soon — screenshots and a short clip will be added once the typing view
 
 ```bash
 npm install
+cp .env.example .env   # then edit APP_PIN and SESSION_SECRET
 npm run dev
 ```
 
-Open the printed local URL (usually http://localhost:5173).
+Open the printed local URL (usually http://localhost:5173). The local SQLite file is created at `./data/codetype.db` on first run.
+
+---
+
+## Deployment (Vercel)
+
+This project deploys to Vercel using `@sveltejs/adapter-vercel`. Because Vercel's filesystem is ephemeral, the database lives in [Turso](https://turso.tech) (managed libSQL).
+
+### One-time setup
+
+1. **Create a Turso database:**
+
+   ```bash
+   turso db create codetype-solo
+   turso db show codetype-solo --url           # → libsql://...turso.io
+   turso db tokens create codetype-solo        # → auth token
+   ```
+
+2. **Apply schema to Turso:**
+
+   ```bash
+   DATABASE_URL=libsql://<your-db>.turso.io \
+   DATABASE_AUTH_TOKEN=<token> \
+   npx drizzle-kit push
+   ```
+
+3. **Import the Vercel project** from GitHub at https://vercel.com/new and set the following Environment Variables (Production + Preview):
+
+   | Variable              | Value                                         |
+   | --------------------- | --------------------------------------------- |
+   | `DATABASE_URL`        | `libsql://<your-db>.turso.io`                 |
+   | `DATABASE_AUTH_TOKEN` | Turso auth token                              |
+   | `APP_PIN`             | A 4–8 digit PIN                               |
+   | `SESSION_SECRET`      | ≥16-char random string                        |
+   | `ANTHROPIC_API_KEY`   | Required for `/api/hint` and `/api/summarize` |
+
+4. Deploy. Preview URLs are automatic on every PR.
 
 ---
 

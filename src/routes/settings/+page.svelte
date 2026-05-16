@@ -56,11 +56,7 @@
 		<div class="actions">
 			<a class="btn" href="/api/backup/export" download>Export backup (JSON)</a>
 
-			<button
-				class="btn btn-danger"
-				disabled={importing}
-				onclick={() => fileInput?.click()}
-			>
+			<button class="btn btn-danger" disabled={importing} onclick={() => fileInput?.click()}>
 				{importing ? 'Importing…' : 'Import backup (replaces all data)'}
 			</button>
 			<input
@@ -80,8 +76,7 @@
 		{/if}
 
 		<p class="hint">
-			Import is destructive: existing rows in all tables are deleted before the backup is
-			restored.
+			Import is destructive: existing rows in all tables are deleted before the backup is restored.
 		</p>
 	</section>
 </main>

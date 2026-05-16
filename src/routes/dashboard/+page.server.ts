@@ -42,7 +42,10 @@ export const load: PageServerLoad = async () => {
 		};
 	});
 
-	const weakest = dueTopics.slice().sort((a, b) => a.score - b.score).slice(0, 5);
+	const weakest = dueTopics
+		.slice()
+		.sort((a, b) => a.score - b.score)
+		.slice(0, 5);
 
 	const [{ totalTopics }] = await db
 		.select({ totalTopics: sql<number>`count(*)` })

@@ -1,5 +1,11 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { SESSION_COOKIE, SESSION_MAX_AGE, issueToken, verifyPin, verifyToken } from '$lib/server/session';
+import {
+	SESSION_COOKIE,
+	SESSION_MAX_AGE,
+	issueToken,
+	verifyPin,
+	verifyToken
+} from '$lib/server/session';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ cookies, url }) => {

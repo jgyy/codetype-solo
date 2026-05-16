@@ -29,11 +29,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 	if (Object.keys(updates).length === 0) throw error(400, 'No fields to update');
 
-	const updated = await db
-		.update(attempts)
-		.set(updates)
-		.where(eq(attempts.id, id))
-		.returning();
+	const updated = await db.update(attempts).set(updates).where(eq(attempts.id, id)).returning();
 
 	if (!updated[0]) throw error(404, 'Attempt not found');
 

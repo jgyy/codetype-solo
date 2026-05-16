@@ -19,13 +19,15 @@ const STATUSES = ['unsolved', 'attempted', 'solved'] as const;
 
 export const load: PageServerLoad = async ({ url }) => {
 	const q = (url.searchParams.get('q') ?? '').trim().toLowerCase();
-	const difficulty = url.searchParams.getAll('difficulty').filter((d): d is (typeof DIFFICULTIES)[number] =>
-		(DIFFICULTIES as readonly string[]).includes(d)
-	);
+	const difficulty = url.searchParams
+		.getAll('difficulty')
+		.filter((d): d is (typeof DIFFICULTIES)[number] =>
+			(DIFFICULTIES as readonly string[]).includes(d)
+		);
 	const topicFilter = url.searchParams.getAll('topic');
-	const statusFilter = url.searchParams.getAll('status').filter((s): s is ProblemStatus =>
-		(STATUSES as readonly string[]).includes(s)
-	);
+	const statusFilter = url.searchParams
+		.getAll('status')
+		.filter((s): s is ProblemStatus => (STATUSES as readonly string[]).includes(s));
 
 	const rows = await db
 		.select({

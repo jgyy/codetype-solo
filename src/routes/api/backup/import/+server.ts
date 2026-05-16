@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		throw error(400, 'Invalid JSON');
 	}
 	try {
-		const { counts } = importBackup(body);
+		const { counts } = await importBackup(body);
 		return json({ ok: true, counts });
 	} catch (e) {
 		throw error(400, e instanceof Error ? e.message : 'Import failed');

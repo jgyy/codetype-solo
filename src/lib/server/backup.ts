@@ -1,7 +1,4 @@
-import Database from 'better-sqlite3';
-import { resolve } from 'node:path';
-
-const DB_PATH = process.env.DATABASE_URL ?? resolve(process.cwd(), 'data/codetype.db');
+import { client } from './db';
 
 const TABLES = ['problems', 'attempts', 'hints_used', 'topic_mastery'] as const;
 type TableName = (typeof TABLES)[number];
@@ -12,26 +9,20 @@ export type Backup = {
 	tables: Record<TableName, Record<string, unknown>[]>;
 };
 
-function openDb() {
-	const sqlite = new Database(DB_PATH);
-	sqlite.pragma('foreign_keys = ON');
-	return sqlite;
-}
-
-export function exportBackup(): Backup {
-	const sqlite = openDb();
-	try {
-		const tables = {} as Backup['tables'];
-		for (const t of TABLES) {
-			tables[t] = sqlite.prepare(`SELECT * FROM ${t}`).all() as Record<string, unknown>[];
-		}
-		return { version: 1, exportedAt: new Date().toISOString(), tables };
-	} finally {
-		sqlite.close();
+export async function exportBackup(): Promise<Backup> {
+	const tables = {} as Backup['tables'];
+	for (const t of TABLES) {
+		const result = await client.execute(`SELECT * FROM ${t}`);
+		tables[t] = result.rows.map((row) => {
+			const obj: Record<string, unknown> = {};
+			for (const col of result.columns) obj[col] = row[col];
+			return obj;
+		});
 	}
+	return { version: 1, exportedAt: new Date().toISOString(), tables };
 }
 
-export function importBackup(backup: Backup): { counts: Record<TableName, number> } {
+export async function importBackup(backup: Backup): Promise<{ counts: Record<TableName, number> }> {
 	if (backup?.version !== 1 || !backup.tables) {
 		throw new Error('Invalid backup: missing version or tables');
 	}
@@ -41,42 +32,32 @@ export function importBackup(backup: Backup): { counts: Record<TableName, number
 		}
 	}
 
-	const sqlite = openDb();
-	try {
-		const tx = sqlite.transaction(() => {
-			// Delete in reverse dependency order
-			for (const t of [...TABLES].reverse()) {
-				sqlite.prepare(`DELETE FROM ${t}`).run();
-			}
-			const counts = {} as Record<TableName, number>;
-			for (const t of TABLES) {
-				const rows = backup.tables[t];
-				counts[t] = rows.length;
-				if (rows.length === 0) continue;
-				const cols = Object.keys(rows[0]);
-				const placeholders = cols.map(() => '?').join(', ');
-				const stmt = sqlite.prepare(
-					`INSERT INTO ${t} (${cols.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`
-				);
-				for (const row of rows) {
-					stmt.run(
-						...cols.map((c) => {
-							const v = row[c];
-							if (v === null || v === undefined) return null;
-							if (typeof v === 'object') return JSON.stringify(v);
-							if (typeof v === 'boolean') return v ? 1 : 0;
-							return v as string | number;
-						})
-					);
-				}
-			}
-			return counts;
-		});
-		const counts = tx();
-		return { counts };
-	} finally {
-		sqlite.close();
+	const statements: { sql: string; args: (string | number | null)[] }[] = [];
+	for (const t of [...TABLES].reverse()) {
+		statements.push({ sql: `DELETE FROM ${t}`, args: [] });
 	}
+	const counts = {} as Record<TableName, number>;
+	for (const t of TABLES) {
+		const rows = backup.tables[t];
+		counts[t] = rows.length;
+		if (rows.length === 0) continue;
+		const cols = Object.keys(rows[0]);
+		const placeholders = cols.map(() => '?').join(', ');
+		const sql = `INSERT INTO ${t} (${cols.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`;
+		for (const row of rows) {
+			const args = cols.map((c) => {
+				const v = row[c];
+				if (v === null || v === undefined) return null;
+				if (typeof v === 'object') return JSON.stringify(v);
+				if (typeof v === 'boolean') return v ? 1 : 0;
+				return v as string | number;
+			});
+			statements.push({ sql, args });
+		}
+	}
+
+	await client.batch(statements, 'write');
+	return { counts };
 }
 
 export function backupFilename(date = new Date()): string {

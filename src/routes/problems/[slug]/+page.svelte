@@ -20,10 +20,10 @@
 		marked.parse(data.problem.descriptionMd || '*No description provided yet.*')
 	);
 
-	let language: Language = $state(
-		(data.activeAttempt?.language as Language) ?? 'javascript'
+	let language: Language = $state((data.activeAttempt?.language as Language) ?? 'javascript');
+	let code: string = $state(
+		data.activeAttempt?.code ?? STARTERS[(data.activeAttempt?.language as Language) ?? 'javascript']
 	);
-	let code: string = $state(data.activeAttempt?.code ?? STARTERS[(data.activeAttempt?.language as Language) ?? 'javascript']);
 	let attemptId: number | null = $state(data.activeAttempt?.id ?? null);
 
 	let timerStartMs: number | null = $state(null);
@@ -92,7 +92,9 @@
 
 	function formatElapsed(ms: number) {
 		const total = Math.max(0, Math.floor(ms / 1000));
-		const m = Math.floor(total / 60).toString().padStart(2, '0');
+		const m = Math.floor(total / 60)
+			.toString()
+			.padStart(2, '0');
 		const s = (total % 60).toString().padStart(2, '0');
 		return `${m}:${s}`;
 	}
@@ -175,7 +177,8 @@
 					Language
 					<select
 						value={language}
-						onchange={(e) => onLanguageChange((e.currentTarget as HTMLSelectElement).value as Language)}
+						onchange={(e) =>
+							onLanguageChange((e.currentTarget as HTMLSelectElement).value as Language)}
 					>
 						{#each LANGUAGES as lang}
 							<option value={lang}>{lang}</option>
@@ -252,11 +255,7 @@
 
 				<div class="notes-actions">
 					<button type="submit">Save notes</button>
-					<button
-						type="button"
-						onclick={generateSummary}
-						disabled={summarizing}
-					>
+					<button type="button" onclick={generateSummary} disabled={summarizing}>
 						{summarizing ? 'Summarising…' : 'AI summarise my approach'}
 					</button>
 				</div>

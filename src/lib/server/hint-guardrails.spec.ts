@@ -51,7 +51,8 @@ describe('looksLikeFullCode — refuses to leak full solutions', () => {
 
 	describe('level 3 (pseudocode allowed)', () => {
 		it('permits a ```pseudo fenced block', () => {
-			const text = '```pseudo\nFOR EACH x IN arr\n  IF x > best THEN SET best ← x\nRETURN best\n```';
+			const text =
+				'```pseudo\nFOR EACH x IN arr\n  IF x > best THEN SET best ← x\nRETURN best\n```';
 			expect(looksLikeFullCode(text, 3)).toBe(false);
 		});
 

@@ -20,7 +20,11 @@
 	<section>
 		<h2>Due for review today ({data.dueTopics.length})</h2>
 		{#if data.dueTopics.length === 0}
-			<p class="muted">Nothing due. {data.totalTopics === 0 ? 'Submit an attempt to start scheduling reviews.' : 'Come back tomorrow.'}</p>
+			<p class="muted">
+				Nothing due. {data.totalTopics === 0
+					? 'Submit an attempt to start scheduling reviews.'
+					: 'Come back tomorrow.'}
+			</p>
 		{:else}
 			<table>
 				<thead>

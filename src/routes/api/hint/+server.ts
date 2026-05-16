@@ -107,7 +107,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		`Topics: ${problem.topics.join(', ') || 'n/a'}`,
 		problem.descriptionMd ? `Description:\n${problem.descriptionMd}` : '',
 		`Language: ${attempt.language}`,
-		attempt.code ? `Learner's current code:\n\`\`\`${attempt.language}\n${attempt.code}\n\`\`\`` : 'Learner has not written code yet.',
+		attempt.code
+			? `Learner's current code:\n\`\`\`${attempt.language}\n${attempt.code}\n\`\`\``
+			: 'Learner has not written code yet.',
 		`Give a level ${level} hint.`
 	]
 		.filter(Boolean)
@@ -130,7 +132,13 @@ export const POST: RequestHandler = async ({ request }) => {
 		.returning();
 
 	return json(
-		{ level, response, hintId: inserted[0].id, used: used + 1, remaining: MAX_HINTS_PER_ATTEMPT - used - 1 },
+		{
+			level,
+			response,
+			hintId: inserted[0].id,
+			used: used + 1,
+			remaining: MAX_HINTS_PER_ATTEMPT - used - 1
+		},
 		{ status: 201 }
 	);
 };
