@@ -44,7 +44,11 @@ export const topicMastery = sqliteTable(
 	{
 		topic: text('topic').notNull(),
 		score: real('score').notNull().default(0),
-		lastReviewedAt: integer('last_reviewed_at', { mode: 'timestamp_ms' })
+		ease: real('ease').notNull().default(2.5),
+		intervalDays: real('interval_days').notNull().default(0),
+		repetitions: integer('repetitions').notNull().default(0),
+		lastReviewedAt: integer('last_reviewed_at', { mode: 'timestamp_ms' }),
+		nextReviewAt: integer('next_review_at', { mode: 'timestamp_ms' })
 	},
 	(t) => [primaryKey({ columns: [t.topic] })]
 );

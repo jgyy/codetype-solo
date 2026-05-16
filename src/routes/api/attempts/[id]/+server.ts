@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { attempts } from '$lib/server/db/schema';
+import { updateMasteryForAttempt } from '$lib/server/mastery';
 import type { RequestHandler } from './$types';
 
 const STATUSES = ['in_progress', 'passed', 'failed', 'abandoned'] as const;
@@ -36,5 +37,10 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		.returning();
 
 	if (!updated[0]) throw error(404, 'Attempt not found');
+
+	if (updates.status && updates.status !== 'in_progress') {
+		await updateMasteryForAttempt(id);
+	}
+
 	return json(updated[0]);
 };

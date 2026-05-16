@@ -3,6 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { problems, attempts, hintsUsed } from '$lib/server/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
+import { updateMasteryForAttempt } from '$lib/server/mastery';
 
 const LANGUAGES = ['javascript', 'typescript', 'python'] as const;
 type Language = (typeof LANGUAGES)[number];
@@ -72,6 +73,7 @@ export const actions: Actions = {
 				.update(attempts)
 				.set({ code, language, status: 'passed', endedAt: new Date() })
 				.where(eq(attempts.id, attemptId));
+			await updateMasteryForAttempt(attemptId);
 			return { submitted: true, attemptId };
 		}
 
@@ -85,6 +87,7 @@ export const actions: Actions = {
 				endedAt: new Date()
 			})
 			.returning({ id: attempts.id });
+		await updateMasteryForAttempt(inserted[0].id);
 		return { submitted: true, attemptId: inserted[0].id };
 	},
 
