@@ -23,7 +23,8 @@ export const attempts = sqliteTable('attempts', {
 	language: text('language').notNull(),
 	status: text('status', { enum: ['in_progress', 'passed', 'failed', 'abandoned'] }).notNull(),
 	code: text('code').notNull().default(''),
-	notes: text('notes')
+	notes: text('notes'),
+	aiSummary: text('ai_summary')
 });
 
 export const hintsUsed = sqliteTable('hints_used', {

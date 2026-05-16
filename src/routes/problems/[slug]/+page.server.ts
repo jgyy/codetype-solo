@@ -21,9 +21,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		.orderBy(desc(attempts.startedAt))
 		.limit(1);
 
-	const activeAttempt = latestAttempt[0]?.status === 'in_progress' ? latestAttempt[0] : null;
+	const latest = latestAttempt[0] ?? null;
+	const activeAttempt = latest?.status === 'in_progress' ? latest : null;
+	const lastSolvedAttempt = latest?.status === 'passed' ? latest : null;
 
-	return { problem, activeAttempt };
+	return { problem, activeAttempt, lastSolvedAttempt };
 };
 
 function parseLanguage(value: FormDataEntryValue | null): Language {
@@ -115,5 +117,18 @@ export const actions: Actions = {
 
 		await db.insert(hintsUsed).values({ attemptId, level, prompt, response });
 		return { hint: { level, response } };
+	},
+
+	saveNotes: async ({ request }) => {
+		const data = await request.formData();
+		const attemptIdRaw = data.get('attemptId');
+		const attemptId = attemptIdRaw ? Number(attemptIdRaw) : null;
+		if (!attemptId) return fail(400, { error: 'No attempt to attach notes to.' });
+		const notes = String(data.get('notes') ?? '');
+		const aiSummaryRaw = data.get('aiSummary');
+		const updates: { notes: string; aiSummary?: string | null } = { notes };
+		if (aiSummaryRaw !== null) updates.aiSummary = String(aiSummaryRaw) || null;
+		await db.update(attempts).set(updates).where(eq(attempts.id, attemptId));
+		return { notesSaved: true, attemptId };
 	}
 };

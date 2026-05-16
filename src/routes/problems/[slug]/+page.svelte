@@ -33,6 +33,43 @@
 	let hintMessage: string | null = $state(null);
 	let submitMessage: string | null = $state(null);
 
+	let solvedAttemptId: number | null = $state(data.lastSolvedAttempt?.id ?? null);
+	let notes: string = $state(data.lastSolvedAttempt?.notes ?? '');
+	let aiSummary: string = $state(data.lastSolvedAttempt?.aiSummary ?? '');
+	let notesStatus: string | null = $state(null);
+	let summarizing = $state(false);
+	let summarizeError: string | null = $state(null);
+
+	async function generateSummary() {
+		if (!solvedAttemptId) return;
+		summarizing = true;
+		summarizeError = null;
+		try {
+			// Persist any unsaved notes so the model sees them.
+			const saveBody = new FormData();
+			saveBody.set('attemptId', String(solvedAttemptId));
+			saveBody.set('notes', notes);
+			await fetch('?/saveNotes', { method: 'POST', body: saveBody });
+
+			const res = await fetch('/api/summarize', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ attemptId: solvedAttemptId })
+			});
+			if (!res.ok) {
+				const detail = await res.text().catch(() => '');
+				throw new Error(detail || `Request failed: ${res.status}`);
+			}
+			const json = (await res.json()) as { summary: string };
+			aiSummary = json.summary;
+			notesStatus = 'Summary generated.';
+		} catch (err) {
+			summarizeError = err instanceof Error ? err.message : 'Failed to generate summary.';
+		} finally {
+			summarizing = false;
+		}
+	}
+
 	function draftKey(lang: Language) {
 		return `codetype-solo:draft:${problem.slug}:${lang}`;
 	}
@@ -100,6 +137,10 @@
 		if (form && 'submitted' in form && form.submitted) {
 			submitMessage = 'Submission recorded as passed.';
 			stopTimer();
+			if (form.attemptId) solvedAttemptId = form.attemptId as number;
+		}
+		if (form && 'notesSaved' in form && form.notesSaved) {
+			notesStatus = 'Notes saved.';
 		}
 	});
 </script>
@@ -178,6 +219,50 @@
 			</form>
 		</div>
 	</footer>
+
+	{#if solvedAttemptId}
+		<section class="notes-panel">
+			<header class="notes-header">
+				<h2>Notes & takeaways</h2>
+				<span class="attempt-pill">Attempt #{solvedAttemptId}</span>
+				{#if notesStatus}<span class="msg ok">{notesStatus}</span>{/if}
+				{#if summarizeError}<span class="msg err">{summarizeError}</span>{/if}
+			</header>
+			<form method="POST" action="?/saveNotes" use:enhance class="notes-form">
+				<input type="hidden" name="attemptId" value={solvedAttemptId} />
+				<label class="notes-label">
+					Your notes (markdown)
+					<textarea
+						name="notes"
+						bind:value={notes}
+						rows="6"
+						placeholder="What approach did you take? What tripped you up?"
+					></textarea>
+				</label>
+
+				<label class="notes-label">
+					AI takeaway (editable)
+					<textarea
+						name="aiSummary"
+						bind:value={aiSummary}
+						rows="5"
+						placeholder="Click 'AI summarise my approach' to generate a 3-bullet takeaway."
+					></textarea>
+				</label>
+
+				<div class="notes-actions">
+					<button type="submit">Save notes</button>
+					<button
+						type="button"
+						onclick={generateSummary}
+						disabled={summarizing}
+					>
+						{summarizing ? 'Summarising…' : 'AI summarise my approach'}
+					</button>
+				</div>
+			</form>
+		</section>
+	{/if}
 </div>
 
 <style>
@@ -363,5 +448,59 @@
 	.msg.hint {
 		background: #1a2a4d;
 		color: #9cc4f0;
+	}
+	.msg.err {
+		background: #4d1818;
+		color: #f0a0a0;
+	}
+	.notes-panel {
+		border-top: 1px solid #222;
+		padding: 1rem 1.25rem 1.5rem;
+		background: #11141a;
+	}
+	.notes-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+		flex-wrap: wrap;
+	}
+	.notes-header h2 {
+		font-size: 1rem;
+		margin: 0;
+		color: #fff;
+	}
+	.notes-form {
+		display: grid;
+		gap: 0.75rem;
+		grid-template-columns: 1fr 1fr;
+	}
+	.notes-label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		font-size: 0.8rem;
+		color: #9ab;
+	}
+	.notes-form textarea {
+		background: #0f1115;
+		color: #e6e6e6;
+		border: 1px solid #2a2f3a;
+		border-radius: 6px;
+		padding: 0.5rem 0.6rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		resize: vertical;
+		min-height: 6rem;
+	}
+	.notes-actions {
+		grid-column: 1 / -1;
+		display: flex;
+		gap: 0.5rem;
+	}
+	@media (max-width: 720px) {
+		.notes-form {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
