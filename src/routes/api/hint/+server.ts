@@ -3,6 +3,7 @@ import { eq, and, count } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { attempts, hintsUsed, problems } from '$lib/server/db/schema';
+import { looksLikeFullCode, HINT_WITHHELD_MESSAGE } from '$lib/server/hint-guardrails';
 import type { RequestHandler } from './$types';
 
 const MAX_HINTS_PER_ATTEMPT = 5;
@@ -31,16 +32,6 @@ Rules:
 - Show the SHAPE of the solution, not a copy-pasteable implementation.
 - Keep under 15 lines.`
 };
-
-const FORBIDDEN_FENCE = /```(?:javascript|typescript|js|ts|jsx|tsx|python|py)\b/i;
-const FORBIDDEN_TOKENS = /\b(?:function\s+\w+\s*\(|def\s+\w+\s*\(|class\s+\w+|console\.log|=>|import\s+|from\s+\w+\s+import)/;
-
-function looksLikeFullCode(text: string, level: 1 | 2 | 3): boolean {
-	if (FORBIDDEN_FENCE.test(text)) return true;
-	if (level < 3 && /```/.test(text)) return true;
-	if (level < 3 && FORBIDDEN_TOKENS.test(text)) return true;
-	return false;
-}
 
 function parseLevel(v: unknown): 1 | 2 | 3 {
 	const n = Number(v);
@@ -125,7 +116,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	let response = await callClaude(SYSTEM_PROMPTS[level], userPrompt);
 
 	if (looksLikeFullCode(response, level)) {
-		response = `[Hint withheld: the model attempted to emit full code. Try requesting a lower-level hint or rephrase.]`;
+		response = HINT_WITHHELD_MESSAGE;
 	}
 
 	const inserted = await db

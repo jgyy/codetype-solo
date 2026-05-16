@@ -3,10 +3,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { attempts } from '$lib/server/db/schema';
 import { updateMasteryForAttempt } from '$lib/server/mastery';
+import { isAttemptStatus, isTerminalStatus, type AttemptStatus } from '$lib/server/attempt-status';
 import type { RequestHandler } from './$types';
-
-const STATUSES = ['in_progress', 'passed', 'failed', 'abandoned'] as const;
-type Status = (typeof STATUSES)[number];
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
 	const id = Number(params.id);
@@ -21,9 +19,10 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 	const updates: Partial<typeof attempts.$inferInsert> = {};
 	if (body.status !== undefined) {
-		if (!(STATUSES as readonly string[]).includes(body.status)) throw error(400, 'Invalid status');
-		updates.status = body.status as Status;
-		if (body.status !== 'in_progress') updates.endedAt = new Date();
+		if (!isAttemptStatus(body.status)) throw error(400, 'Invalid status');
+		const next: AttemptStatus = body.status;
+		updates.status = next;
+		if (isTerminalStatus(next)) updates.endedAt = new Date();
 	}
 	if (body.code !== undefined) updates.code = body.code;
 	if (body.notes !== undefined) updates.notes = body.notes;
