@@ -1,11 +1,11 @@
 # codetype-solo
 
-**Live:** [solo.codephase.dev](https://solo.codephase.dev)
+> **Status:** The AWS deployment has been decommissioned. The app now runs locally in guest mode only; the previous `infra/` (CDK) workspace and all deploy scripts have been removed. The architecture, reflection, and demo sections below describe the system as it existed pre-teardown and are kept for historical context.
 
 A daily code-snippet typing trainer for a single developer. Pick a language, type real code against the clock, get **WPM / accuracy / streak** stats, and watch your progress over time.
 
-> **Stack:** Next.js 15 (static export) + TypeScript + Tailwind · Bun workspaces · AWS Lambda + API Gateway HTTP + DynamoDB + Cognito · S3 + CloudFront · AWS CDK (TypeScript).
-> **Cost:** sits inside the free tier for personal use (~$0/mo).
+> **Stack (local):** Next.js 15 (static export) + TypeScript + Tailwind · Bun workspaces.
+> **Original deployed stack (decommissioned):** AWS Lambda + API Gateway HTTP + DynamoDB + Cognito · S3 + CloudFront · AWS CDK (TypeScript).
 
 ---
 
@@ -92,7 +92,6 @@ Users propose new snippets via `submissions-post`; moderation happens through `s
 - **DynamoDB** single-table design (on-demand billing).
 - **Cognito User Pool** (free tier, 50k MAU).
 - **Shared domain core** (`shared/src/`): pure-TS WPM calc, streak logic (ISO-week aware), anti-cheat heuristics, blocklist, Zod schemas, `Result` type — TDD'd with 17 unit tests.
-- **Infra:** AWS CDK (TypeScript) in `infra/` provisions the whole stack.
 
 ---
 
@@ -143,10 +142,8 @@ Users propose new snippets via `submissions-post`; moderation happens through `s
 ### Prerequisites
 
 - [Bun](https://bun.sh) ≥ 1.3 (`curl -fsSL https://bun.sh/install | bash`)
-- AWS CLI configured with the profile of your choice (e.g. `aws configure --profile <your-profile>`). No profile is hardcoded — pass `--profile <your-profile>` to the CDK / AWS CLI commands below, or export `AWS_PROFILE` once per shell. Default region: `ap-southeast-1`.
-- AWS CDK is bundled as an `infra/` devDependency, so no global install is needed.
 
-### Local install + run (no AWS needed)
+### Local install + run
 
 ```bash
 bun install
@@ -154,50 +151,7 @@ bun test                          # 28 tests across shared/ + api/
 bun --filter @codetype/web dev    # http://localhost:3000 (guest mode)
 ```
 
-Without `web/.env.local`, the web app runs in **guest mode**: attempts persist to `localStorage`. Sign-in is hidden until Cognito is configured.
-
-### Deploy to AWS
-
-```bash
-# First time only — bootstrap CDK assets in BOTH regions in a single command.
-# ap-southeast-1 hosts the main stack; us-east-1 hosts the ACM cert for the
-# solo.codephase.dev CloudFront alias (CloudFront requires us-east-1 certs).
-# If you skip us-east-1 you'll see: "SSM parameter /cdk-bootstrap/hnb659fds/version not found"
-# during deploy of the codetype-solo-cert stack.
-AWS_PROFILE=<your-profile> bunx --cwd infra cdk bootstrap \
-  aws://<account-id>/ap-southeast-1 \
-  aws://<account-id>/us-east-1
-
-# Full deploy: build api → cdk deploy (both stacks) → seed → build web → S3 sync → CF invalidate.
-AWS_PROFILE=<your-profile> bun run deploy
-```
-
-Stack-only and web-only variants:
-
-```bash
-bun run deploy:stack -- --profile <your-profile>     # cdk deploy only
-AWS_PROFILE=<your-profile> bun run deploy:web        # build web → sync S3 → invalidate
-```
-
-After the first deploy, populate `web/.env.local` from stack outputs:
-
-```bash
-bun run outputs -- --profile <your-profile>   # prints ApiUrl, UserPoolId, UserPoolClientId, CloudFrontUrl, …
-```
-
-```ini
-# web/.env.local
-NEXT_PUBLIC_API_URL=https://<id>.execute-api.ap-southeast-1.amazonaws.com
-NEXT_PUBLIC_COGNITO_USER_POOL_ID=ap-southeast-1_xxx
-NEXT_PUBLIC_COGNITO_CLIENT_ID=xxx
-NEXT_PUBLIC_COGNITO_REGION=ap-southeast-1
-```
-
-Then redeploy the web layer only:
-
-```bash
-bun run deploy:web
-```
+The web app runs in **guest mode**: attempts persist to `localStorage`. The original AWS deployment (Cognito sign-in, DynamoDB-backed sync, leaderboard) has been decommissioned.
 
 ---
 
@@ -225,14 +179,6 @@ bun run deploy:web
 | `bun test` | All unit + handler tests (`shared/` + `api/`) |
 | `bun run dev` | Start Next.js dev server on `:3000` (guest mode) |
 | `bun run typecheck` | TypeScript across all workspaces |
-| `bun run deploy` | Full deploy: API build → `cdk deploy` → seed → web build → S3 sync → invalidate |
-| `bun run deploy:stack` | CDK only (Lambda + HTTP API + DynamoDB + Cognito + S3/CF) |
-| `bun run deploy:web` | Build + sync `web/out` to S3 + invalidate CloudFront |
-| `bun run synth` / `diff` | `cdk synth` / `cdk diff` against the deployed stack |
-| `bun run cdk <cmd>` | Forward any `cdk` subcommand to `infra/` |
-| `bun run bootstrap` | One-time `cdk bootstrap` for this account/region |
-| `bun run seed` | Seed snippets and 30-day daily-challenge pool into DynamoDB |
-| `bun run outputs` | Print CloudFormation outputs for the current stack |
 
 ### Expected behaviour examples
 
@@ -248,7 +194,7 @@ This repo uses **Bun workspaces** instead of the flat `src/` / `tests/` layout. 
 
 | B1 suggested | This repo | Notes |
 |---|---|---|
-| `src/` | `shared/src/`, `web/src/`, `api/src/`, `infra/` | Split per concern so the pure domain core (`shared/`) is testable without Next.js or AWS SDK |
+| `src/` | `shared/src/`, `web/src/`, `api/src/` | Split per concern so the pure domain core (`shared/`) is testable without Next.js or AWS SDK |
 | `tests/` | `shared/tests/`, `api/tests/` | Co-located with the workspace they test |
 | `docs/` | `docs/` | API contract (`docs/api/openapi.yaml`) + plan + specs |
 | `scripts/` | `scripts/` | Repo-wide automation (LOC counter, etc.) |
@@ -268,11 +214,9 @@ codetype-solo/
 │       ├── app/{play,history,signin,dashboard,leaderboard,submit}/
 │       ├── components/
 │       └── lib/api-client/   # generated from docs/api/openapi.yaml
-├── api/      # @codetype/api — Lambda handlers (Bun bundles to api/dist/)
+├── api/      # @codetype/api — Lambda handler source (no longer deployed)
 │   ├── src/{handlers,lib,middleware,repos}/
 │   └── tests/handlers/
-├── infra/    # @codetype/infra — AWS CDK app + deploy/seed scripts
-│   └── bin/app.ts
 ├── data/snippets/  # raw snippet JSON per language
 ├── docs/           # plan, specs, OpenAPI contract
 └── scripts/        # repo-wide tooling

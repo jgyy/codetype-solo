@@ -10,8 +10,8 @@ This repo is **codetype-solo** — the **"For individual use"** submission for t
 
 - **Scale:** Individual use. One signed-in user (plus guest mode). Do not introduce multi-tenant features, org/team concepts, or shared-resource flows — those belong to the *team/department* sibling project, not this one.
 - **Cost target:** AWS free tier, ~$0/mo. Reject suggestions that add always-on compute (Fargate, EC2, RDS, NAT gateways, Aurora) or paid auth tiers. On-demand Lambda + on-demand DynamoDB + S3 + CloudFront + Cognito free tier only.
-- **Stack:** Next.js 16 static export + TypeScript + Tailwind · Bun workspaces · AWS Lambda + API Gateway HTTP + DynamoDB + Cognito · S3 + CloudFront · AWS CDK (TypeScript). Do not add a different framework, a different cloud, or a different package manager.
-- **Workspaces:** `shared/` (pure domain), `web/` (Next.js), `api/` (Lambda handlers), `infra/` (CDK). Keep concerns separated — the pure domain core in `shared/` must remain importable without Next.js or the AWS SDK so `bun test` stays fast.
+- **Stack:** Next.js 16 static export + TypeScript + Tailwind · Bun workspaces. The AWS deployment (Lambda, API Gateway, DynamoDB, Cognito, S3, CloudFront, CDK) has been decommissioned — the codebase now targets local/guest-mode use only. Do not reintroduce IaC without an explicit ask.
+- **Workspaces:** `shared/` (pure domain), `web/` (Next.js), `api/` (Lambda handler source, no longer deployed). Keep concerns separated — the pure domain core in `shared/` must remain importable without Next.js or the AWS SDK so `bun test` stays fast.
 
 ## 2. Non-negotiable invariants
 
@@ -37,14 +37,8 @@ Use these instead of inventing new ones. Run from the repo root unless noted.
 | Run all tests (28 currently) | `bun test` |
 | Type-check all workspaces | `bun run typecheck` |
 | Web dev server (guest mode at `:3000`) | `bun --filter @codetype/web dev` |
-| Full deploy (API → CDK → seed → web → S3 → CF invalidate) | `bun run deploy` |
-| CDK only | `bun run deploy:stack` |
-| Web only | `bun run deploy:web` |
-| Inspect synth / diff | `bun run synth` / `bun run diff` |
-| Print stack outputs | `bun run outputs` |
-| Seed snippets + 30 days of challenges | `bun run seed` |
 
-When AWS commands need credentials, pass `--profile <name>` or export `AWS_PROFILE`. **Do not hardcode a profile name in source.** Default region is `ap-southeast-1`; the ACM cert stack lives in `us-east-1` because CloudFront requires it.
+Deployment commands (`deploy`, `cdk`, `synth`, `diff`, `bootstrap`, `seed`, `outputs`) and the `infra/` workspace have been removed; the AWS stack is no longer provisioned.
 
 ## 4. House style
 
@@ -62,9 +56,8 @@ Before reporting any task complete:
 
 1. `bun test` passes (currently `28 pass · 0 fail`).
 2. `bun run typecheck` is clean.
-3. For infra changes: `bun run synth` succeeds and `bun run diff` shows only the intended delta.
-4. For web changes that touch routing, auth, or the API client: load `bun --filter @codetype/web dev` and walk the affected page.
-5. For Lambda handler changes: the corresponding `api/tests/handlers/*.test.ts` is updated and passing.
+3. For web changes that touch routing, auth, or the API client: load `bun --filter @codetype/web dev` and walk the affected page.
+4. For Lambda handler changes: the corresponding `api/tests/handlers/*.test.ts` is updated and passing.
 
 If you can't actually run a verification (e.g. no AWS credentials in this environment), say so explicitly — don't claim success based on type-checking alone.
 
@@ -83,8 +76,7 @@ The B1 Builders Programme expects students to "use AI to reason, build, test, de
 codetype-solo/
 ├── shared/   # pure-TS WPM, streak, schemas, anti-cheat (TDD'd)
 ├── web/      # Next.js 16 static export
-├── api/      # 11 Lambda handlers (Bun-bundled)
-├── infra/    # AWS CDK app + deploy/seed scripts
+├── api/      # 11 Lambda handler source files (Bun-bundled, no longer deployed)
 ├── data/snippets/    # per-language snippet JSON: c, go, js, py
 ├── docs/     # plan, specs, OpenAPI contract, B1 programme doc
 └── scripts/  # repo-wide tooling (LOC counter, etc.)

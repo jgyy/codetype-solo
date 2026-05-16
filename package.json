@@ -2,20 +2,11 @@
   "name": "codetype-solo",
   "private": true,
   "version": "0.1.0",
-  "workspaces": ["shared", "web", "api", "infra"],
+  "workspaces": ["shared", "web", "api"],
   "scripts": {
     "dev": "bun --filter @codetype/web dev",
     "test": "bun test",
-    "typecheck": "bun run --filter '*' typecheck",
-    "deploy": "bun --filter @codetype/infra deploy:all",
-    "deploy:stack": "bun --filter @codetype/infra deploy:stack",
-    "deploy:web": "bun --filter @codetype/infra deploy:web",
-    "cdk": "cd infra && bun x cdk",
-    "synth": "bun --filter @codetype/infra synth",
-    "diff": "bun --filter @codetype/infra diff",
-    "bootstrap": "bun --filter @codetype/infra bootstrap",
-    "seed": "bun --filter @codetype/infra seed",
-    "outputs": "bun --filter @codetype/infra outputs"
+    "typecheck": "bun run --filter '*' typecheck"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
