@@ -39,6 +39,10 @@ export default defineConfig(
 	{
 		// Override or add rule settings here, such as:
 		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// Project uses plain string hrefs / goto() calls rather than SvelteKit's
+			// type-safe resolve() helper. Disable rather than churn every link site.
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );

@@ -1,22 +1,19 @@
 # CodeType Solo
 
-**A single-player code-typing trainer with adaptive practice and AI-guarded hints.** Drill 150 NeetCode-style snippets across multiple languages, get per-session WPM/accuracy/weakness tracking, and let Claude coach you on weak topics on a spaced-repetition schedule.
+**A single-player code-typing trainer with adaptive practice and AI-guarded hints.** Drill 150 NeetCode-style snippets, get per-session WPM/accuracy/weakness tracking, and let Claude coach you on weak topics on a spaced-repetition schedule.
 
-B1 Builders Programme — *individual use* project submission.
+### B1 Builders Programme — Project #1 of 2: _For individual use_
 
----
+> _"A project that supports **one person's personal or work-related** needs."_
 
-## Contents
+This repo is the **individual-use** submission. Companion: [`codetype-race`](../codetype-race) — the team / organisational project.
 
-- [Overview](#overview)
-- [Demo](#demo)
-- [Technology Stack](#technology-stack)
-- [Development Approach with AI](#development-approach-with-ai)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Reflection](#reflection)
-- [License](#license)
+| Axis            | This (`codetype-solo`) | Companion (`codetype-race`)   |
+| --------------- | ---------------------- | ----------------------------- |
+| Rubric scale    | Individual use         | Team / organisational use     |
+| Users           | One per install        | Many, on shared snippets      |
+| Identity        | PIN-only HMAC cookie   | Signed-in handle + scrypt PIN |
+| Shared resource | None                   | Snippets + leaderboards       |
 
 ---
 
@@ -24,21 +21,23 @@ B1 Builders Programme — *individual use* project submission.
 
 ### Problem
 
-- **Who is affected?** Developers and CS students who want to type code faster and more accurately, and who want NeetCode-style algorithm practice without the social pressure of a leaderboard.
-- **What is the issue?** General typing trainers use prose, not code. Symbols, indentation, and language structure are exactly where coders slow down — but they are underrepresented in mainstream tools. Conversely, algorithm-practice sites are cloud-only, account-gated, and rarely measure the *typing* side of fluency.
+- **Who:** Developers and CS students who want to type code faster without the social pressure of a leaderboard.
+- **Issue:** General typing trainers use prose, not code. Symbols, indentation, and language structure — where coders slow down — are underrepresented.
 
 ### Outcome
 
-- A single-player browser app that drills typing on 150 NeetCode-style problems across multiple languages, with per-session WPM, accuracy, and weakness tracking.
-- Adaptive practice and spaced-repetition surface the topics and characters that trip a user up, then schedule targeted drills.
-- Optional AI hint endpoint with guardrails (`hint-guardrails.ts`) refuses to leak full solutions, and AI summaries (`aiSummary` on `attempts`) recap each session.
-- Runs locally on SQLite or on Vercel + Turso libSQL with no per-user account — a single HMAC-signed cookie unlocked by a PIN.
+- Single-player browser app drilling 150 NeetCode-style problems, with per-session WPM/accuracy/weakness tracking.
+- Adaptive practice + SM-2 spaced repetition surface and schedule weak topics.
+- AI hint endpoint with guardrails (`hint-guardrails.ts`) that refuses to leak full solutions; AI summaries recap each session.
+- Runs locally on SQLite or on Vercel + Turso libSQL — no per-user account, one HMAC cookie unlocked by a PIN.
 
 ---
 
 ## Demo
 
-To do live during interview
+To do live during interview.
+
+**Single-user evidence:** there is no account system, no leaderboard, no shared snippet pool. Opening the app in a private window shows a fresh empty dashboard — every row in `attempts`/`topic_mastery` is owned by a single `userPseudoId`. This is the structural inverse of `codetype-race`'s multi-user demo.
 
 ---
 
@@ -46,42 +45,62 @@ To do live during interview
 
 ### Frontend components
 
-- **SvelteKit + TypeScript** — routing, server endpoints, and UI components.
-- **CodeMirror 6** — code editor surface used by the typing engine (syntax highlighting, character-level cursor tracking).
+- **SvelteKit + TypeScript** — routing, server endpoints, UI.
+- **CodeMirror 6** — code editor surface (syntax highlighting, char-level cursor tracking).
 - **Vite** — dev server and bundler.
-- **Static rendering** for landing and marketing routes; SSR for authenticated practice routes.
 
 ### Backend components
 
-- **SvelteKit server routes** (deployed as Vercel Functions in production via `@sveltejs/adapter-vercel`).
-- **Drizzle ORM over libSQL** — local SQLite file (`./data/codetype.db`) in dev, Turso-hosted libSQL in production.
-- **HMAC-signed session cookie** (`session.ts`)— `expiry.sig` token, 30-day TTL, constant-time PIN compare; no server-side session store.
-- **Anthropic Claude API** — `POST /api/hint` and per-attempt AI summary column gated by `hint-guardrails.ts`.
-- **Spaced-repetition columns** on `topic_mastery` (`ease`, `intervalDays`, `repetitions`, `nextReviewAt`)
+- **SvelteKit server routes** deployed as Vercel Functions via `@sveltejs/adapter-vercel`.
+- **Drizzle ORM over libSQL** — local SQLite in dev, Turso in prod (commit `5b429ff`).
+- **HMAC-signed session cookie** (`session.ts`, `c180601`) — 30-day TTL, constant-time PIN compare, no server-side store.
+- **Anthropic Claude API** — `POST /api/hint` (`b8176e9`) and per-attempt `aiSummary` (`3c16646`), gated by `hint-guardrails.ts` (`d976a1d`).
+- **SM-2 spaced repetition** — `ease`, `intervalDays`, `repetitions`, `nextReviewAt` on `topic_mastery` (`8da37cf`).
+
+### Claude prompt guardrails
+
+`src/lib/server/hint-guardrails.ts` validates _before_ tokens are spent and sanitises _after_:
+
+- Pre-call regex-rejects "full solution", "ignore previous instructions", oversize questions.
+- System prompt: short conceptual hints only, no full code, never reveal exact identifiers.
+- Post-call: strips long fenced code blocks, truncates runaway output.
+- Endpoint: in-memory rate limit per session.
 
 ---
 
 ## Development Approach with AI
 
-This project was built primarily with AI co-developers under human review. Each tool below played a distinct role; commits and PRs are cited as evidence.
+| Tool           | Model               | Purpose                                                    |
+| -------------- | ------------------- | ---------------------------------------------------------- |
+| Claude Code    | Opus 4.7            | Primary implementer — multi-file edits, schema, guardrails |
+| Anthropic API  | `claude-sonnet-4-6` | Runtime `/api/hint` and per-attempt `aiSummary`            |
+| ChatGPT        | GPT-5               | Design sounding board — schema critique, spec drafts       |
+| GitHub Copilot | (IDE inline)        | Small completions in components and tests                  |
+| Cursor         | (mixed)             | Whole-folder refactors and renames                         |
 
-### 1. Claude Code (Opus 4.7) — primary implementer
+**Agents / roles:**
 
-- **Role:** Pair-programmer that wrote most of the code. Multi-file edits, refactors, and schema changes.
-- **Example prompts:**
-  1. *"Define a Drizzle schema for `problems`, `attempts`, `hints_used`, `topic_mastery` with inferred TS types."* → commit `0ff246f`.
-  2. *"Swap better-sqlite3 for `@libsql/client` and `drizzle-orm/libsql` so the same code runs on Turso in prod."* → commit `5b429ff`.
-  3. *"Add `looksLikeFullCode()` and regexes that block full-solution hints; return a withheld-message constant."* → commit `d976a1d`.
-- **Review decisions:**
-  1. **Accepted** the HMAC `expiry.sig` cookie design (commit `c180601`) after confirming constant-time PIN compare — chosen over a DB-backed session table to stay stateless on Vercel.
-  2. **Rejected** an initial AI hint endpoint that returned full code; required guardrails (`d976a1d`) before merging `b8176e9`.
-  3. **Accepted** spaced-repetition column additions (`8da37cf`) but **deferred** the scheduler UI to a later milestone after reviewing the SM-2 math.
+- _Implementer_ (Claude Code) — scaffold, libSQL migration, HMAC cookie, guardrails.
+- _Reviewer_ (GPT-5) — upstream design critique; SM-2 parameters; index hints.
+- _Coach_ (Sonnet, runtime) — bounded by `hint-guardrails.ts` system prompt.
 
-### Responsible-use notes
+**Key prompts:**
 
-- No production data, secrets, or PII is ever pasted into AI tools — only schema, code, and synthetic examples.
-- AI hints are rate-limited and guardrailed (`hint-guardrails.ts`) so the tool teaches rather than completes the user's work.
-- Every AI-generated diff went through human read-through and at minimum `npm run check` + `npm run lint` before commit.
+1. _"Define a Drizzle schema for `problems`, `attempts`, `hints_used`, `topic_mastery`."_ → `0ff246f`
+2. _"Swap better-sqlite3 for `@libsql/client` so the same code runs on Turso."_ → `5b429ff`
+3. _"Add regexes that block full-solution hints; return a withheld-message constant."_ → `d976a1d`
+4. _"Critique this schema; what indexes will I regret skipping?"_ (GPT-5) → composite index on `(userPseudoId, status)`.
+
+**Key review points and decisions:**
+
+- **Accepted** HMAC `expiry.sig` cookie (`c180601`) over a DB session table — chosen to stay stateless on Vercel.
+- **Rejected** initial AI hint endpoint that returned full code; required guardrails (`d976a1d`) before merging `b8176e9`.
+- **Accepted** SR columns (`8da37cf`) but **deferred** the scheduler UI after reviewing the SM-2 math.
+- **Rejected** storing hint text verbatim in `hints_used` — privacy/cost; we store only `level` and timestamp.
+- **Rejected** a Copilot completion that swallowed a `try/catch` around the libSQL client — would mask Turso auth errors.
+- **Rejected** Cursor's auto-rename that touched `drizzle/` migration files — those are immutable history.
+
+**Responsible use:** no production data, secrets, or PII pasted into AI tools. Hints rate-limited and guardrailed. Every AI diff goes through human review + `npm run check` + `npm run lint`.
 
 ---
 
@@ -89,64 +108,40 @@ This project was built primarily with AI co-developers under human review. Each 
 
 ```bash
 npm install
-cp .env.example .env   # then edit APP_PIN and SESSION_SECRET
+cp .env.example .env   # set APP_PIN and SESSION_SECRET
 npm run dev
 ```
 
-Open the printed local URL (usually http://localhost:5173). The local SQLite file is created at `./data/codetype.db` on first run and seeded from `data/seed-problems.json` (commit `f25d5e4`).
+Local SQLite is created at `./data/codetype.db` and seeded from `data/seed-problems.json` (`f25d5e4`).
 
-### Deployment (Vercel + Turso)
+**Deploy (Vercel + Turso):**
 
-This project deploys to Vercel using `@sveltejs/adapter-vercel`. Because Vercel's filesystem is ephemeral, the database lives in [Turso](https://turso.tech) (managed libSQL).
+```bash
+turso db create codetype-solo
+turso db show codetype-solo --url
+turso db tokens create codetype-solo
+DATABASE_URL=libsql://... DATABASE_AUTH_TOKEN=... npx drizzle-kit push
+```
 
-1. **Create a Turso database:**
-
-   ```bash
-   turso db create codetype-solo
-   turso db show codetype-solo --url           # → libsql://...turso.io
-   turso db tokens create codetype-solo        # → auth token
-   ```
-
-2. **Apply schema to Turso:**
-
-   ```bash
-   DATABASE_URL=libsql://<your-db>.turso.io \
-   DATABASE_AUTH_TOKEN=<token> \
-   npx drizzle-kit push
-   ```
-
-3. **Import the Vercel project** from GitHub at https://vercel.com/new and set the following Environment Variables (Production + Preview):
-
-   | Variable              | Value                                         |
-   | --------------------- | --------------------------------------------- |
-   | `DATABASE_URL`        | `libsql://<your-db>.turso.io`                 |
-   | `DATABASE_AUTH_TOKEN` | Turso auth token                              |
-   | `APP_PIN`             | A 4–8 digit PIN                               |
-   | `SESSION_SECRET`      | ≥16-char random string                        |
-   | `ANTHROPIC_API_KEY`   | Required for `/api/hint` and `/api/summarize` |
-
-4. Deploy. Preview URLs are automatic on every PR.
+Set `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `APP_PIN`, `SESSION_SECRET`, `ANTHROPIC_API_KEY` in Vercel env, then deploy.
 
 ---
 
 ## Usage
 
 ```bash
-npm run dev          # start the dev server
+npm run dev          # dev server
 npm run build        # production build
-npm run preview      # preview the production build
-npm run check        # type-check the project
+npm run check        # type-check
 npm run lint         # prettier + eslint
-npm run test:unit    # vitest unit tests
-npm run test:e2e     # playwright end-to-end tests
+npm run test:unit    # vitest
+npm run test:e2e     # playwright
 ```
 
-**Expected behaviour:**
-
-1. Open `/`, enter the `APP_PIN` — a 30-day HMAC cookie is issued.
-2. Pick a problem from the list (filter by `?q=`, `?difficulty=`, `?topic=`, `?status=` — see commit `bd11ddc`).
-3. Type the snippet. WPM and accuracy update live. Request a hint (level 1–3) at any time.
-4. Submit. The attempt is recorded, weakness data is updated, and the dashboard streak (`040b4e3`) is incremented.
+1. Open `/`, enter `APP_PIN` → 30-day HMAC cookie issued.
+2. Pick a problem (filter by `?q=`, `?difficulty=`, `?topic=`, `?status=` — `bd11ddc`).
+3. Type the snippet. WPM/accuracy update live. Request a hint (level 1–3).
+4. Submit. Attempt recorded, weakness updated, streak incremented (`040b4e3`).
 
 ---
 
@@ -154,56 +149,33 @@ npm run test:e2e     # playwright end-to-end tests
 
 ```
 codetype-solo/
-├── README.md
-├── LICENSE
-├── package.json
-├── drizzle.config.ts       # Drizzle Kit config — libSQL dialect
-├── drizzle/                # generated migration SQL
 ├── src/
-│   ├── routes/             # SvelteKit routes (UI + server endpoints)
-│   └── lib/
-│       ├── server/
-│       │   ├── db/         # schema.ts, index.ts (libSQL client)
-│       │   ├── session.ts  # HMAC cookie (c180601)
-│       │   ├── backup.ts   # export/import (e456674)
-│       │   └── hint-guardrails.ts  # AI guardrails (d976a1d)
-│       └── ...             # shared modules, imported as `$lib/...`
-├── tests/                  # Vitest + Playwright suites
-├── docs/                   # B1 spec, design notes, ADRs
-├── scripts/                # seeding + automation
-├── assets/                 # screenshots, demo gif
+│   ├── routes/                    # SvelteKit routes (UI + server endpoints)
+│   └── lib/server/
+│       ├── db/                    # schema.ts, libSQL client
+│       ├── session.ts             # HMAC cookie (c180601)
+│       ├── backup.ts              # export/import (e456674)
+│       └── hint-guardrails.ts     # AI guardrails (d976a1d)
+├── tests/                         # Vitest + Playwright
+├── docs/                          # B1 spec, design notes
+├── scripts/                       # seeding + automation
+├── assets/                        # screenshots, demo gif
 └── data/
-    ├── seed-problems.json  # 150 NeetCode-style problems (f25d5e4)
-    └── codetype.db         # local SQLite (gitignored)
+    ├── seed-problems.json         # 150 problems (f25d5e4)
+    └── codetype.db                # local SQLite (gitignored)
 ```
 
 ---
 
 ## Reflection
 
-**What worked**
+**Worked:** Claude Code owning multi-file refactors (`5b429ff`, `e456674`) with GPT-5 as upstream reviewer kept the human in the _decision_ loop. Schema-first development (`0ff246f`) gave every later AI prompt a stable contract. Guardrailing `/api/hint` (`d976a1d`) before shipping (`b8176e9`) prevented the most obvious misuse.
 
-- Letting Claude Code own multi-file refactors (e.g., the libSQL migration `5b429ff`, the `backup.ts` extraction `e456674`) while using GPT-5 as an upstream design reviewer kept the human in the *decision* loop without micromanaging keystrokes.
-- Schema-first development (commit `0ff246f`) meant every later AI prompt had a stable contract to target; AI churn dropped sharply after the schema froze.
-- Guardrailing the AI hint endpoint (`d976a1d`) before shipping it (`b8176e9`) prevented the most obvious misuse — turning the trainer into an autocomplete.
+**Failed:** Trying to keep `better-sqlite3` for local and wrap libSQL for prod was a leaky abstraction; the fix was `@libsql/client` everywhere (`5b429ff`). The first AI hint endpoint returned full solutions — caught in review, motivated `hint-guardrails.ts`. Cursor's rename touched migration files once; `drizzle/` now excluded from any AI rename scope.
 
-**What failed**
+**Changed:** Moved from a DB session table to an HMAC cookie (`c180601`) once we committed to Vercel + Turso. Added SR columns (`8da37cf`) after GPT-5's spec critique. AI summary column (`3c16646`) was added late — users wanted recap _after_ attempt rather than mid-flow hints.
 
-- An early attempt to keep `better-sqlite3` for local and "wrap" libSQL for prod produced a leaky abstraction; the cleaner fix was to use `@libsql/client` everywhere (`5b429ff`). Lesson: don't let local-vs-prod parity slip even one layer.
-- The first AI-suggested hint endpoint happily returned full solutions. Caught in review — became the motivation for `hint-guardrails.ts`.
-- Cursor's whole-folder rename touched migration files once; we now exclude `drizzle/` from any AI rename scope.
-
-**What changed and why**
-
-- Moved from a DB-backed session table to an HMAC cookie (`c180601`) once we committed to Vercel + Turso — the original design assumed a writable local FS.
-- Added spaced-repetition columns (`8da37cf`) after GPT-5's spec critique; deferred the matching UI to the next milestone to keep this README's scope honest.
-- AI summary column (`3c16646`) was added late, after observing that users wanted a recap *after* the attempt rather than mid-flow hints.
-
-**For the next iteration**
-
-- Replace placeholder screenshots in `assets/` with refreshed captures once the new dashboard ships.
-- Expose the SM-2 scheduler in the UI (currently only stored, not surfaced).
-- Add a public read-only demo PIN for reviewers.
+**Next:** Refresh screenshots in `assets/`. Surface the SM-2 scheduler in the UI. Add a read-only demo PIN.
 
 ---
 

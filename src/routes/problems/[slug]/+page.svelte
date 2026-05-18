@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { marked } from 'marked';
 	// Force synchronous parse so `{@html}` never sees a Promise stringified
@@ -24,11 +24,17 @@
 		marked.parse(data.problem.descriptionMd || '*No description provided yet.*') as string
 	);
 
-	let language: Language = $state((data.activeAttempt?.language as Language) ?? 'javascript');
-	let code: string = $state(
-		data.activeAttempt?.code ?? STARTERS[(data.activeAttempt?.language as Language) ?? 'javascript']
+	let language: Language = $state(
+		untrack(() => (data.activeAttempt?.language as Language) ?? 'javascript')
 	);
-	let attemptId: number | null = $state(data.activeAttempt?.id ?? null);
+	let code: string = $state(
+		untrack(
+			() =>
+				data.activeAttempt?.code ??
+				STARTERS[(data.activeAttempt?.language as Language) ?? 'javascript']
+		)
+	);
+	let attemptId: number | null = $state(untrack(() => data.activeAttempt?.id ?? null));
 
 	let timerStartMs: number | null = $state(null);
 	let elapsedMs: number = $state(0);
@@ -37,9 +43,9 @@
 	let hintMessage: string | null = $state(null);
 	let submitMessage: string | null = $state(null);
 
-	let solvedAttemptId: number | null = $state(data.lastSolvedAttempt?.id ?? null);
-	let notes: string = $state(data.lastSolvedAttempt?.notes ?? '');
-	let aiSummary: string = $state(data.lastSolvedAttempt?.aiSummary ?? '');
+	let solvedAttemptId: number | null = $state(untrack(() => data.lastSolvedAttempt?.id ?? null));
+	let notes: string = $state(untrack(() => data.lastSolvedAttempt?.notes ?? ''));
+	let aiSummary: string = $state(untrack(() => data.lastSolvedAttempt?.aiSummary ?? ''));
 	let notesStatus: string | null = $state(null);
 	let summarizing = $state(false);
 	let summarizeError: string | null = $state(null);
@@ -161,7 +167,7 @@
 		<h1>{problem.title}</h1>
 		<span class="badge badge-{problem.difficulty}">{problem.difficulty}</span>
 		<div class="topics">
-			{#each problem.topics as topic}
+			{#each problem.topics as topic (topic)}
 				<span class="topic">{topic}</span>
 			{/each}
 		</div>
@@ -184,7 +190,7 @@
 						onchange={(e) =>
 							onLanguageChange((e.currentTarget as HTMLSelectElement).value as Language)}
 					>
-						{#each LANGUAGES as lang}
+						{#each LANGUAGES as lang (lang)}
 							<option value={lang}>{lang}</option>
 						{/each}
 					</select>

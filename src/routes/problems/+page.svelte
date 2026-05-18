@@ -8,10 +8,10 @@
 	const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
 	const STATUSES = ['unsolved', 'attempted', 'solved'] as const;
 
-	let q = $state('');
-	$effect(() => {
-		q = data.filters.q;
-	});
+	// Writable $derived: tracks data.filters.q from the loader, but local
+	// reassignments (typing in the search box, clearAll) take precedence until
+	// the dependency changes again.
+	let q = $derived(data.filters.q);
 
 	function buildUrl(mutate: (params: URLSearchParams) => void) {
 		const params = new URLSearchParams(page.url.searchParams);
