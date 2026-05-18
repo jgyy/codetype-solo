@@ -71,6 +71,18 @@ export const actions: Actions = {
 		if (!problem) return fail(404, { error: 'Problem not found' });
 
 		if (attemptId) {
+			// Verify the attempt belongs to this problem and is still open
+			// before marking it passed — prevents arbitrary attempt IDs from
+			// being mutated and stops double-submission.
+			const existing = await db.query.attempts.findFirst({
+				where: eq(attempts.id, attemptId)
+			});
+			if (!existing || existing.problemId !== problem.id) {
+				return fail(400, { error: 'Invalid attempt' });
+			}
+			if (existing.status !== 'in_progress') {
+				return { submitted: true, attemptId };
+			}
 			await db
 				.update(attempts)
 				.set({ code, language, status: 'passed', endedAt: new Date() })
@@ -93,7 +105,12 @@ export const actions: Actions = {
 		return { submitted: true, attemptId: inserted[0].id };
 	},
 
-	hint: async ({ request }) => {
+	// NOTE: The "Get Hint" UI now POSTs directly to /api/hint, which calls
+	// Claude with the real problem/code context. The form action below is
+	// retained only to keep no-JS clients functional, but it delegates to
+	// the same DB insert path with a static fallback message instead of the
+	// previous Two-Sum-only hardcoded strings.
+	hint: async ({ request, fetch }) => {
 		const data = await request.formData();
 		const attemptIdRaw = data.get('attemptId');
 		const attemptId = attemptIdRaw ? Number(attemptIdRaw) : null;
@@ -105,18 +122,19 @@ export const actions: Actions = {
 			.where(eq(hintsUsed.attemptId, attemptId))
 			.orderBy(desc(hintsUsed.level))
 			.limit(1);
-		const level = (prior[0]?.level ?? 0) + 1;
+		const level = Math.min(3, (prior[0]?.level ?? 0) + 1) as 1 | 2 | 3;
 
-		const prompt = `Hint level ${level}`;
-		const response =
-			level === 1
-				? 'Think about which data structure makes lookups O(1).'
-				: level === 2
-					? 'Iterate once, tracking what you have seen so far.'
-					: 'Compare the current element against the running set/map of seen values.';
-
-		await db.insert(hintsUsed).values({ attemptId, level, prompt, response });
-		return { hint: { level, response } };
+		const res = await fetch('/api/hint', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ attemptId, level })
+		});
+		if (!res.ok) {
+			const detail = await res.text().catch(() => '');
+			return fail(res.status, { error: detail || 'Hint service failed' });
+		}
+		const payload = (await res.json()) as { level: number; response: string };
+		return { hint: { level: payload.level, response: payload.response } };
 	},
 
 	saveNotes: async ({ request }) => {

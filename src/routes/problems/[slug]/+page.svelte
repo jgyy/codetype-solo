@@ -2,6 +2,10 @@
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { marked } from 'marked';
+	// Force synchronous parse so `{@html}` never sees a Promise stringified
+	// to "[object Promise]". Problem descriptions are short enough that
+	// async parsing has no benefit here.
+	marked.use({ async: false });
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import type { PageData, ActionData } from './$types';
 
@@ -17,7 +21,7 @@
 
 	const problem = $derived(data.problem);
 	const descriptionHtml = $derived(
-		marked.parse(data.problem.descriptionMd || '*No description provided yet.*')
+		marked.parse(data.problem.descriptionMd || '*No description provided yet.*') as string
 	);
 
 	let language: Language = $state((data.activeAttempt?.language as Language) ?? 'javascript');

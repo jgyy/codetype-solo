@@ -1,5 +1,25 @@
 # CodeType Solo
 
+**A single-player code-typing trainer with adaptive practice and AI-guarded hints.** Drill 150 NeetCode-style snippets across multiple languages, get per-session WPM/accuracy/weakness tracking, and let Claude coach you on weak topics on a spaced-repetition schedule.
+
+B1 Builders Programme — *individual use* project submission.
+
+---
+
+## Contents
+
+- [Overview](#overview)
+- [Demo](#demo)
+- [Technology Stack](#technology-stack)
+- [Development Approach with AI](#development-approach-with-ai)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Reflection](#reflection)
+- [License](#license)
+
+---
+
 ## Overview
 
 ### Problem
@@ -18,13 +38,7 @@
 
 ## Demo
 
-**Live:** https://codetype-solo.vercel.app
-
-**Screenshots:** `assets/` contains the landing page, practice view, and dashboard captures.
-
-**60-second walkthrough:** `assets/demo.gif` shows: enter PIN → pick a problem → type → submit → request hint → review weakness widget.
-
-> _Screenshots and clip are committed alongside this README; replace with refreshed captures after any UI change._
+To do live during interview
 
 ---
 
@@ -40,10 +54,10 @@
 ### Backend components
 
 - **SvelteKit server routes** (deployed as Vercel Functions in production via `@sveltejs/adapter-vercel`).
-- **Drizzle ORM over libSQL** — local SQLite file (`./data/codetype.db`) in dev, Turso-hosted libSQL in production. See commit `5b429ff` for the better-sqlite3 → `@libsql/client` migration.
-- **HMAC-signed session cookie** (`session.ts`, commit `c180601`) — `expiry.sig` token, 30-day TTL, constant-time PIN compare; no server-side session store.
-- **Anthropic Claude API** — `POST /api/hint` (commit `b8176e9`) and per-attempt AI summary column (`3c16646`), gated by `hint-guardrails.ts` (commit `d976a1d`).
-- **Spaced-repetition columns** on `topic_mastery` (`ease`, `intervalDays`, `repetitions`, `nextReviewAt`) — commit `8da37cf`.
+- **Drizzle ORM over libSQL** — local SQLite file (`./data/codetype.db`) in dev, Turso-hosted libSQL in production.
+- **HMAC-signed session cookie** (`session.ts`)— `expiry.sig` token, 30-day TTL, constant-time PIN compare; no server-side session store.
+- **Anthropic Claude API** — `POST /api/hint` and per-attempt AI summary column gated by `hint-guardrails.ts`.
+- **Spaced-repetition columns** on `topic_mastery` (`ease`, `intervalDays`, `repetitions`, `nextReviewAt`)
 
 ---
 
@@ -62,42 +76,6 @@ This project was built primarily with AI co-developers under human review. Each 
   1. **Accepted** the HMAC `expiry.sig` cookie design (commit `c180601`) after confirming constant-time PIN compare — chosen over a DB-backed session table to stay stateless on Vercel.
   2. **Rejected** an initial AI hint endpoint that returned full code; required guardrails (`d976a1d`) before merging `b8176e9`.
   3. **Accepted** spaced-repetition column additions (`8da37cf`) but **deferred** the scheduler UI to a later milestone after reviewing the SM-2 math.
-
-### 2. ChatGPT / GPT-5 — design sounding board
-
-- **Role:** Architecture review, schema critique, spec drafting before code was written.
-- **Example prompts:**
-  1. *"Critique this Drizzle schema for a single-player NeetCode trainer; what indexes will I regret skipping?"*
-  2. *"Compare HMAC-signed cookie vs DB session table for a Vercel + Turso single-user app."*
-  3. *"Draft a B1 deliverable spec for adaptive practice with SM-2 spaced repetition."* → docs/specs 013 (`b52c170`).
-- **Review decisions:**
-  1. **Accepted** the recommendation to add a composite index on `(userPseudoId, status)` for the attempts list query.
-  2. **Rejected** a suggestion to store hint text verbatim in `hints_used` — privacy/cost concerns; we store only `level` and timestamp.
-  3. **Accepted** the SM-2 ease/interval parameters as the starting point for `topic_mastery` (commit `8da37cf`).
-
-### 3. GitHub Copilot — inline completion
-
-- **Role:** Small completions inside Svelte components and test files; boilerplate JSDoc and import statements.
-- **Example prompts (inline triggers):**
-  1. *Component prop destructuring + default values in `+page.svelte` typing view.*
-  2. *Vitest table-driven cases for `hint-guardrails.ts` regexes.*
-  3. *Drizzle migration boilerplate triggered by typing `export const up =`.*
-- **Review decisions:**
-  1. **Rejected** a completion that swallowed a `try/catch` around the libSQL client — would have masked Turso auth errors.
-  2. **Accepted** Copilot's filled-in Playwright selectors after verifying they matched the actual `data-testid` attributes.
-  3. **Edited** suggested ESLint disables to specific rules instead of file-wide disables.
-
-### 4. Cursor — refactor + multi-file edit
-
-- **Role:** Used selectively for whole-folder refactors and renaming across the SvelteKit route tree.
-- **Example prompts:**
-  1. *"Rename `practice` → `problems` across `src/routes/**` and update all imports and tests."*
-  2. *"Extract the export/import logic out of two route handlers into a shared `backup.ts` with transactional destructive replace."* → commit `e456674`.
-  3. *"Walk back from today, count consecutive days with ≥1 attempt, return the streak."* → commit `040b4e3` (`page.server.ts`).
-- **Review decisions:**
-  1. **Accepted** the `backup.ts` extraction once the transactional boundary was verified to wrap both delete + insert.
-  2. **Rejected** an automated rename that touched `drizzle/` migration files — those are immutable history.
-  3. **Accepted** the streak loader (`040b4e3`) only after adding a tz-aware "today" boundary in review.
 
 ### Responsible-use notes
 
@@ -226,3 +204,9 @@ codetype-solo/
 - Replace placeholder screenshots in `assets/` with refreshed captures once the new dashboard ships.
 - Expose the SM-2 scheduler in the UI (currently only stored, not surfaced).
 - Add a public read-only demo PIN for reviewers.
+
+---
+
+## License
+
+MIT — see `LICENSE`.

@@ -48,6 +48,9 @@ export function nextSchedule(
 	const q = qualityFor(outcome);
 
 	// SM-2 ease update: EF' = EF + (0.1 - (5-q)*(0.08 + (5-q)*0.02))
+	// Per SM-2, the *previous* ease is used to compute the next interval;
+	// the updated ease only applies from the *next* review onward.
+	const prevEase = state.ease;
 	let ease = state.ease + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
 	if (ease < MIN_EASE) ease = MIN_EASE;
 
@@ -64,7 +67,7 @@ export function nextSchedule(
 		repetitions = state.repetitions + 1;
 		if (repetitions === 1) intervalDays = 1;
 		else if (repetitions === 2) intervalDays = 6;
-		else intervalDays = Math.round(state.intervalDays * ease);
+		else intervalDays = Math.round(state.intervalDays * prevEase);
 		scoreDelta = outcome === 'unaided' ? 1 : 0;
 	}
 

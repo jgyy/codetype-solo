@@ -19,10 +19,18 @@ export function getPin(): string {
 }
 
 export function verifyPin(input: string): boolean {
+	// Avoid leaking PIN length via early-return timing. Compare equal-length
+	// padded buffers and AND in the length check so total work is constant
+	// across mismatching lengths.
 	const expected = Buffer.from(getPin());
 	const got = Buffer.from(input ?? '');
-	if (expected.length !== got.length) return false;
-	return timingSafeEqual(expected, got);
+	const len = Math.max(expected.length, got.length, 1);
+	const a = Buffer.alloc(len);
+	const b = Buffer.alloc(len);
+	expected.copy(a);
+	got.copy(b);
+	const equal = timingSafeEqual(a, b);
+	return equal && expected.length === got.length;
 }
 
 function sign(payload: string): string {
