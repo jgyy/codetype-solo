@@ -4,6 +4,7 @@ import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { attempts, hintsUsed, problems } from '$lib/server/db/schema';
 import { looksLikeFullCode, HINT_WITHHELD_MESSAGE } from '$lib/server/hint-guardrails';
+import { take } from '$lib/server/rate-limit';
 import type { RequestHandler } from './$types';
 
 const MAX_HINTS_PER_ATTEMPT = 5;
@@ -69,7 +70,16 @@ async function callClaude(systemPrompt: string, userPrompt: string): Promise<str
 	return text;
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, getClientAddress }) => {
+	let ip = 'unknown';
+	try {
+		ip = getClientAddress();
+	} catch {
+		const fwd = request.headers.get('x-forwarded-for');
+		if (fwd) ip = fwd.split(',')[0].trim();
+	}
+	if (!take(`hint:${ip}`, 10, 60_000)) throw error(429, 'Too many hint requests, slow down.');
+
 	const body = (await request.json().catch(() => null)) as {
 		attemptId?: number;
 		level?: number;

@@ -137,11 +137,23 @@ export const actions: Actions = {
 		return { hint: { level: payload.level, response: payload.response } };
 	},
 
-	saveNotes: async ({ request }) => {
+	saveNotes: async ({ request, params }) => {
 		const data = await request.formData();
 		const attemptIdRaw = data.get('attemptId');
 		const attemptId = attemptIdRaw ? Number(attemptIdRaw) : null;
 		if (!attemptId) return fail(400, { error: 'No attempt to attach notes to.' });
+
+		const problem = await db.query.problems.findFirst({
+			where: eq(problems.slug, params.slug)
+		});
+		if (!problem) return fail(404, { error: 'Problem not found' });
+		const existing = await db.query.attempts.findFirst({
+			where: eq(attempts.id, attemptId)
+		});
+		if (!existing || existing.problemId !== problem.id) {
+			return fail(400, { error: 'Invalid attempt' });
+		}
+
 		const notes = String(data.get('notes') ?? '');
 		const aiSummaryRaw = data.get('aiSummary');
 		const updates: { notes: string; aiSummary?: string | null } = { notes };

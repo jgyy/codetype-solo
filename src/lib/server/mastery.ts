@@ -38,7 +38,9 @@ export async function updateMasteryForAttempt(attemptId: number): Promise<void> 
 			: null;
 
 		const next = nextSchedule(prevState, outcome, now);
-		const newScore = (existing?.score ?? 0) + next.scoreDelta;
+		// Floor at 0 — negative scores aren't a defined concept in the dashboard
+		// and would persist indefinitely once a topic has had many lapses.
+		const newScore = Math.max(0, (existing?.score ?? 0) + next.scoreDelta);
 
 		await db
 			.insert(topicMastery)

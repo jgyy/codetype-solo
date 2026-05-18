@@ -70,13 +70,10 @@ To do live during interview.
 
 ## Development Approach with AI
 
-| Tool           | Model               | Purpose                                                    |
-| -------------- | ------------------- | ---------------------------------------------------------- |
-| Claude Code    | Opus 4.7            | Primary implementer — multi-file edits, schema, guardrails |
-| Anthropic API  | `claude-sonnet-4-6` | Runtime `/api/hint` and per-attempt `aiSummary`            |
-| ChatGPT        | GPT-5               | Design sounding board — schema critique, spec drafts       |
-| GitHub Copilot | (IDE inline)        | Small completions in components and tests                  |
-| Cursor         | (mixed)             | Whole-folder refactors and renames                         |
+| Tool          | Model               | Purpose                                                    |
+| ------------- | ------------------- | ---------------------------------------------------------- |
+| Claude Code   | Opus 4.7            | Primary implementer — multi-file edits, schema, guardrails |
+| Anthropic API | `claude-sonnet-4-6` | Runtime `/api/hint` and per-attempt `aiSummary`            |
 
 **Agents / roles:**
 
@@ -86,9 +83,9 @@ To do live during interview.
 
 **Key prompts:**
 
-1. _"Define a Drizzle schema for `problems`, `attempts`, `hints_used`, `topic_mastery`."
-2. _"Swap better-sqlite3 for `@libsql/client` so the same code runs on Turso."
-3. _"Add regexes that block full-solution hints; return a withheld-message constant."
+1. \_"Define a Drizzle schema for `problems`, `attempts`, `hints_used`, `topic_mastery`."
+2. \_"Swap better-sqlite3 for `@libsql/client` so the same code runs on Turso."
+3. \_"Add regexes that block full-solution hints; return a withheld-message constant."
 4. _"Critique this schema; what indexes will I regret skipping?"_ (GPT-5) → composite index on `(userPseudoId, status)`.
 
 **Key review points and decisions:**

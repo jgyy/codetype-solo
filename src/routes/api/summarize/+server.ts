@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { attempts, problems } from '$lib/server/db/schema';
+import { take } from '$lib/server/rate-limit';
 import type { RequestHandler } from './$types';
 
 const MODEL = 'claude-haiku-4-5';
@@ -45,7 +46,17 @@ async function callClaude(userPrompt: string): Promise<string> {
 	return text;
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, getClientAddress }) => {
+	let ip = 'unknown';
+	try {
+		ip = getClientAddress();
+	} catch {
+		const fwd = request.headers.get('x-forwarded-for');
+		if (fwd) ip = fwd.split(',')[0].trim();
+	}
+	if (!take(`summarize:${ip}`, 6, 60_000))
+		throw error(429, 'Too many summary requests, slow down.');
+
 	const body = (await request.json().catch(() => null)) as { attemptId?: number } | null;
 	if (!body?.attemptId) throw error(400, 'attemptId required');
 

@@ -27,7 +27,6 @@ const ALLOWED_COLUMNS: Record<TableName, ReadonlySet<string>> = {
 		'interval_days',
 		'repetitions',
 		'last_reviewed_at',
-		'next_reviewed_at',
 		'next_review_at'
 	])
 };

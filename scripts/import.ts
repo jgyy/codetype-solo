@@ -16,4 +16,7 @@ async function main() {
 	console.log('Row counts:', counts);
 }
 
-main();
+main().catch((e) => {
+	console.error(e);
+	process.exit(1);
+});

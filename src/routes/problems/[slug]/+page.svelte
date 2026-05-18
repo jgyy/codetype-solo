@@ -1,11 +1,27 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { marked } from 'marked';
+	import { marked, type Tokens } from 'marked';
 	// Force synchronous parse so `{@html}` never sees a Promise stringified
-	// to "[object Promise]". Problem descriptions are short enough that
-	// async parsing has no benefit here.
-	marked.use({ async: false });
+	// to "[object Promise]". Also strip raw HTML tokens at both the block and
+	// inline level — `descriptionMd` is writable through the backup-import
+	// flow, so allowing `<script>` or `<img onerror=...>` through to
+	// `{@html}` would be an XSS sink. The `renderer.html` hook only fires for
+	// block-level html tokens; inline HTML uses a separate token path, which
+	// the walkTokens hook below neutralizes before rendering.
+	marked.use({
+		async: false,
+		walkTokens(token) {
+			if (token.type === 'html') {
+				const t = token as Tokens.HTML | Tokens.Tag;
+				t.text = '';
+				t.raw = '';
+			}
+		},
+		renderer: {
+			html: () => ''
+		}
+	});
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import type { PageData, ActionData } from './$types';
 

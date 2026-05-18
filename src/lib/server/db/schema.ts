@@ -14,21 +14,25 @@ export const problems = sqliteTable('problems', {
 	descriptionMd: text('description_md').notNull().default('')
 });
 
-export const attempts = sqliteTable('attempts', {
-	id: integer('id').primaryKey({ autoIncrement: true }),
-	problemId: integer('problem_id')
-		.notNull()
-		.references(() => problems.id, { onDelete: 'cascade' }),
-	startedAt: integer('started_at', { mode: 'timestamp_ms' })
-		.notNull()
-		.default(sql`(unixepoch() * 1000)`),
-	endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
-	language: text('language').notNull(),
-	status: text('status', { enum: ['in_progress', 'passed', 'failed', 'abandoned'] }).notNull(),
-	code: text('code').notNull().default(''),
-	notes: text('notes'),
-	aiSummary: text('ai_summary')
-});
+export const attempts = sqliteTable(
+	'attempts',
+	{
+		id: integer('id').primaryKey({ autoIncrement: true }),
+		problemId: integer('problem_id')
+			.notNull()
+			.references(() => problems.id, { onDelete: 'cascade' }),
+		startedAt: integer('started_at', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(unixepoch() * 1000)`),
+		endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
+		language: text('language').notNull(),
+		status: text('status', { enum: ['in_progress', 'passed', 'failed', 'abandoned'] }).notNull(),
+		code: text('code').notNull().default(''),
+		notes: text('notes'),
+		aiSummary: text('ai_summary')
+	},
+	(t) => [index('attempts_problem_id_idx').on(t.problemId)]
+);
 
 export const hintsUsed = sqliteTable('hints_used', {
 	id: integer('id').primaryKey({ autoIncrement: true }),

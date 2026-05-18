@@ -6,6 +6,7 @@ import {
 	verifyPin,
 	verifyToken
 } from '$lib/server/session';
+import { clearPinFailures, pinBackoffMs, recordPinFailure } from '$lib/server/rate-limit';
 import type { PageServerLoad } from './$types';
 
 // Restrict post-login redirects to same-origin relative paths so a crafted
@@ -23,10 +24,26 @@ export const load: PageServerLoad = ({ cookies, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
+	default: async ({ request, cookies, url, getClientAddress }) => {
+		let key = 'unknown';
+		try {
+			key = getClientAddress();
+		} catch {
+			const fwd = request.headers.get('x-forwarded-for');
+			if (fwd) key = fwd.split(',')[0].trim();
+		}
+		const wait = pinBackoffMs(key);
+		if (wait > 0) {
+			return fail(429, { error: `Too many attempts. Wait ${Math.ceil(wait / 1000)}s.` });
+		}
+
 		const data = await request.formData();
 		const pin = String(data.get('pin') ?? '');
-		if (!verifyPin(pin)) return fail(401, { error: 'Incorrect PIN' });
+		if (!verifyPin(pin)) {
+			recordPinFailure(key);
+			return fail(401, { error: 'Incorrect PIN' });
+		}
+		clearPinFailures(key);
 
 		cookies.set(SESSION_COOKIE, issueToken(), {
 			path: '/',
