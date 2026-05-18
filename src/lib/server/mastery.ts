@@ -18,7 +18,11 @@ export async function updateMasteryForAttempt(attemptId: number): Promise<void> 
 		.from(hintsUsed)
 		.where(eq(hintsUsed.attemptId, attemptId));
 
-	const outcome: Outcome = classifyOutcome(attempt.status, Number(hintCount));
+	const hintCountNum = Number(hintCount);
+	if (!Number.isFinite(hintCountNum) || hintCountNum < 0) {
+		throw new Error(`mastery: unexpected hintCount value ${String(hintCount)}`);
+	}
+	const outcome: Outcome = classifyOutcome(attempt.status, hintCountNum);
 	const now = new Date();
 
 	for (const topic of topics) {

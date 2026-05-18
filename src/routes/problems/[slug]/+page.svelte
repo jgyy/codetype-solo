@@ -43,6 +43,21 @@
 	let hintMessage: string | null = $state(null);
 	let submitMessage: string | null = $state(null);
 
+	let starting = $state(false);
+	let hinting = $state(false);
+	let submitting = $state(false);
+	let showDescription = $state(true);
+
+	let messageTimer: ReturnType<typeof setTimeout> | undefined;
+	function clearMessagesSoon() {
+		if (messageTimer) clearTimeout(messageTimer);
+		messageTimer = setTimeout(() => {
+			hintMessage = null;
+			submitMessage = null;
+			notesStatus = null;
+		}, 6000);
+	}
+
 	let solvedAttemptId: number | null = $state(untrack(() => data.lastSolvedAttempt?.id ?? null));
 	let notes: string = $state(untrack(() => data.lastSolvedAttempt?.notes ?? ''));
 	let aiSummary: string = $state(untrack(() => data.lastSolvedAttempt?.aiSummary ?? ''));
@@ -154,6 +169,7 @@
 		if (form && 'notesSaved' in form && form.notesSaved) {
 			notesStatus = 'Notes saved.';
 		}
+		if (hintMessage || submitMessage || notesStatus) clearMessagesSoon();
 	});
 </script>
 
@@ -172,10 +188,19 @@
 			{/each}
 		</div>
 		<div class="spacer"></div>
+		<button
+			type="button"
+			class="desc-toggle"
+			onclick={() => (showDescription = !showDescription)}
+			aria-pressed={showDescription}
+			aria-label="Toggle problem description"
+		>
+			{showDescription ? 'Hide' : 'Show'} description
+		</button>
 		<div class="timer" aria-label="elapsed time">⏱ {formatElapsed(elapsedMs)}</div>
 	</header>
 
-	<div class="split">
+	<div class="split" class:hide-desc={!showDescription}>
 		<section class="description">
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			<article>{@html descriptionHtml}</article>
@@ -213,22 +238,58 @@
 			<span class="msg hint">{hintMessage}</span>
 		{/if}
 		<div class="actions">
-			<form method="POST" action="?/start" use:enhance>
+			<form
+				method="POST"
+				action="?/start"
+				use:enhance={() => {
+					starting = true;
+					return async ({ update }) => {
+						await update();
+						starting = false;
+					};
+				}}
+			>
 				<input type="hidden" name="language" value={language} />
 				<input type="hidden" name="code" value={code} />
-				<button type="submit" disabled={attemptId !== null}>Start Attempt</button>
+				<button type="submit" disabled={attemptId !== null || starting}>
+					{starting ? 'Starting…' : 'Start Attempt'}
+				</button>
 			</form>
 
-			<form method="POST" action="?/hint" use:enhance>
+			<form
+				method="POST"
+				action="?/hint"
+				use:enhance={() => {
+					hinting = true;
+					return async ({ update }) => {
+						await update();
+						hinting = false;
+					};
+				}}
+			>
 				<input type="hidden" name="attemptId" value={attemptId ?? ''} />
-				<button type="submit" disabled={attemptId === null}>Get Hint</button>
+				<button type="submit" disabled={attemptId === null || hinting}>
+					{hinting ? 'Getting hint…' : 'Get Hint'}
+				</button>
 			</form>
 
-			<form method="POST" action="?/submit" use:enhance>
+			<form
+				method="POST"
+				action="?/submit"
+				use:enhance={() => {
+					submitting = true;
+					return async ({ update }) => {
+						await update();
+						submitting = false;
+					};
+				}}
+			>
 				<input type="hidden" name="attemptId" value={attemptId ?? ''} />
 				<input type="hidden" name="language" value={language} />
 				<input type="hidden" name="code" value={code} />
-				<button type="submit" class="primary">Submit</button>
+				<button type="submit" class="primary" disabled={submitting}>
+					{submitting ? 'Submitting…' : 'Submit'}
+				</button>
 			</form>
 		</div>
 	</footer>
@@ -507,9 +568,44 @@
 		display: flex;
 		gap: 0.5rem;
 	}
+	.desc-toggle {
+		display: none;
+		background: #1a1d24;
+		color: #cdd;
+		border: 1px solid #2a2f3a;
+		padding: 0.3rem 0.6rem;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		cursor: pointer;
+	}
 	@media (max-width: 720px) {
 		.notes-form {
 			grid-template-columns: 1fr;
+		}
+		.desc-toggle {
+			display: inline-block;
+		}
+		.split {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto 1fr;
+		}
+		.split.hide-desc .description {
+			display: none;
+		}
+		.description {
+			max-height: 40vh;
+			border-right: none;
+			border-bottom: 1px solid #222;
+		}
+		.actions {
+			width: 100%;
+			justify-content: stretch;
+		}
+		.actions form {
+			flex: 1;
+		}
+		.actions button {
+			width: 100%;
 		}
 	}
 </style>

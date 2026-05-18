@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, primaryKey } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
 export const problems = sqliteTable('problems', {
@@ -54,7 +54,10 @@ export const topicMastery = sqliteTable(
 		lastReviewedAt: integer('last_reviewed_at', { mode: 'timestamp_ms' }),
 		nextReviewAt: integer('next_review_at', { mode: 'timestamp_ms' })
 	},
-	(t) => [primaryKey({ columns: [t.topic] })]
+	(t) => [
+		primaryKey({ columns: [t.topic] }),
+		index('topic_mastery_next_review_idx').on(t.nextReviewAt)
+	]
 );
 
 export type Problem = typeof problems.$inferSelect;

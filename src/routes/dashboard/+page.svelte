@@ -98,6 +98,16 @@
 	th {
 		background: #fafafa;
 		font-weight: 600;
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		box-shadow: inset 0 -1px 0 #e5e5e5;
+	}
+	tbody tr {
+		transition: background 120ms ease;
+	}
+	tbody tr:hover {
+		background: #f7f9fc;
 	}
 	.muted {
 		color: #777;

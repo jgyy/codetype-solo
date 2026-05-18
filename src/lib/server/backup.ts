@@ -3,6 +3,35 @@ import { client } from './db';
 const TABLES = ['problems', 'attempts', 'hints_used', 'topic_mastery'] as const;
 type TableName = (typeof TABLES)[number];
 
+// Whitelist of accepted column names per table. Anything else in an imported
+// backup is rejected — column names go into SQL identifiers and cannot be
+// parameterised, so the only safe option is exact-match against a fixed set.
+const ALLOWED_COLUMNS: Record<TableName, ReadonlySet<string>> = {
+	problems: new Set(['id', 'slug', 'title', 'difficulty', 'topics', 'url', 'description_md']),
+	attempts: new Set([
+		'id',
+		'problem_id',
+		'started_at',
+		'ended_at',
+		'language',
+		'status',
+		'code',
+		'notes',
+		'ai_summary'
+	]),
+	hints_used: new Set(['id', 'attempt_id', 'level', 'prompt', 'response', 'created_at']),
+	topic_mastery: new Set([
+		'topic',
+		'score',
+		'ease',
+		'interval_days',
+		'repetitions',
+		'last_reviewed_at',
+		'next_reviewed_at',
+		'next_review_at'
+	])
+};
+
 export type Backup = {
 	version: 1;
 	exportedAt: string;
@@ -42,7 +71,14 @@ export async function importBackup(backup: Backup): Promise<{ counts: Record<Tab
 		counts[t] = rows.length;
 		if (rows.length === 0) continue;
 		const cols = Object.keys(rows[0]);
+		const allowed = ALLOWED_COLUMNS[t];
+		for (const c of cols) {
+			if (!allowed.has(c)) {
+				throw new Error(`Invalid backup: tables.${t} has unknown column "${c}"`);
+			}
+		}
 		const placeholders = cols.map(() => '?').join(', ');
+		// cols are whitelisted above so identifier interpolation is safe.
 		const sql = `INSERT INTO ${t} (${cols.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`;
 		for (const row of rows) {
 			const args = cols.map((c) => {

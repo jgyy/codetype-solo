@@ -28,8 +28,16 @@ export const load: PageServerLoad = async () => {
 		.select({ topics: problems.topics, slug: problems.slug, title: problems.title })
 		.from(problems);
 
+	// Pre-compute topic→count once instead of filtering allProblems for every due row.
+	const countByTopic = new Map<string, number>();
+	for (const p of allProblems) {
+		for (const topic of p.topics ?? []) {
+			countByTopic.set(topic, (countByTopic.get(topic) ?? 0) + 1);
+		}
+	}
+
 	const dueTopics: DueTopic[] = dueRows.map((r) => {
-		const problemCount = allProblems.filter((p) => (p.topics ?? []).includes(r.topic)).length;
+		const problemCount = countByTopic.get(r.topic) ?? 0;
 		return {
 			topic: r.topic,
 			score: r.score,

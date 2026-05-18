@@ -3,7 +3,12 @@ import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { attempts } from '$lib/server/db/schema';
 import { updateMasteryForAttempt } from '$lib/server/mastery';
-import { isAttemptStatus, isTerminalStatus, type AttemptStatus } from '$lib/server/attempt-status';
+import {
+	canTransition,
+	isAttemptStatus,
+	isTerminalStatus,
+	type AttemptStatus
+} from '$lib/server/attempt-status';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ params, request }) => {

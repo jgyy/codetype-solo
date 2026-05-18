@@ -86,16 +86,16 @@ To do live during interview.
 
 **Key prompts:**
 
-1. _"Define a Drizzle schema for `problems`, `attempts`, `hints_used`, `topic_mastery`."_ → `0ff246f`
-2. _"Swap better-sqlite3 for `@libsql/client` so the same code runs on Turso."_ → `5b429ff`
-3. _"Add regexes that block full-solution hints; return a withheld-message constant."_ → `d976a1d`
+1. _"Define a Drizzle schema for `problems`, `attempts`, `hints_used`, `topic_mastery`."
+2. _"Swap better-sqlite3 for `@libsql/client` so the same code runs on Turso."
+3. _"Add regexes that block full-solution hints; return a withheld-message constant."
 4. _"Critique this schema; what indexes will I regret skipping?"_ (GPT-5) → composite index on `(userPseudoId, status)`.
 
 **Key review points and decisions:**
 
-- **Accepted** HMAC `expiry.sig` cookie (`c180601`) over a DB session table — chosen to stay stateless on Vercel.
-- **Rejected** initial AI hint endpoint that returned full code; required guardrails (`d976a1d`) before merging `b8176e9`.
-- **Accepted** SR columns (`8da37cf`) but **deferred** the scheduler UI after reviewing the SM-2 math.
+- **Accepted** HMAC `expiry.sig` cookie over a DB session table — chosen to stay stateless on Vercel.
+- **Rejected** initial AI hint endpoint that returned full code; required guardrails.
+- **Accepted** SR columns but **deferred** the scheduler UI after reviewing the SM-2 math.
 - **Rejected** storing hint text verbatim in `hints_used` — privacy/cost; we store only `level` and timestamp.
 - **Rejected** a Copilot completion that swallowed a `try/catch` around the libSQL client — would mask Turso auth errors.
 - **Rejected** Cursor's auto-rename that touched `drizzle/` migration files — those are immutable history.
@@ -112,7 +112,7 @@ cp .env.example .env   # set APP_PIN and SESSION_SECRET
 npm run dev
 ```
 
-Local SQLite is created at `./data/codetype.db` and seeded from `data/seed-problems.json` (`f25d5e4`).
+Local SQLite is created at `./data/codetype.db` and seeded from `data/seed-problems.json`
 
 **Deploy (Vercel + Turso):**
 
@@ -169,11 +169,11 @@ codetype-solo/
 
 ## Reflection
 
-**Worked:** Claude Code owning multi-file refactors (`5b429ff`, `e456674`) with GPT-5 as upstream reviewer kept the human in the _decision_ loop. Schema-first development (`0ff246f`) gave every later AI prompt a stable contract. Guardrailing `/api/hint` (`d976a1d`) before shipping (`b8176e9`) prevented the most obvious misuse.
+**Worked:** Claude Code owning multi-file refactors with Opus as upstream reviewer kept the human in the _decision_ loop. Schema-first development gave every later AI prompt a stable contract. Guardrailing `/api/hint` before shipping prevented the most obvious misuse.
 
-**Failed:** Trying to keep `better-sqlite3` for local and wrap libSQL for prod was a leaky abstraction; the fix was `@libsql/client` everywhere (`5b429ff`). The first AI hint endpoint returned full solutions — caught in review, motivated `hint-guardrails.ts`. Cursor's rename touched migration files once; `drizzle/` now excluded from any AI rename scope.
+**Failed:** Trying to keep `better-sqlite3` for local and wrap libSQL for prod was a leaky abstraction; the fix was `@libsql/client` everywhere. The first AI hint endpoint returned full solutions — caught in review, motivated `hint-guardrails.ts`. Cursor's rename touched migration files once; `drizzle/` now excluded from any AI rename scope.
 
-**Changed:** Moved from a DB session table to an HMAC cookie (`c180601`) once we committed to Vercel + Turso. Added SR columns (`8da37cf`) after GPT-5's spec critique. AI summary column (`3c16646`) was added late — users wanted recap _after_ attempt rather than mid-flow hints.
+**Changed:** Moved from a DB session table to an HMAC cookie once we committed to Vercel + Turso. Added SR columns after Claude spec critique. AI summary column was added late — users wanted recap _after_ attempt rather than mid-flow hints.
 
 **Next:** Refresh screenshots in `assets/`. Surface the SM-2 scheduler in the UI. Add a read-only demo PIN.
 
