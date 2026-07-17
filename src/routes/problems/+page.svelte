@@ -144,7 +144,7 @@
 						<td>{p.title}</td>
 						<td><span class="badge difficulty {p.difficulty}">{p.difficulty}</span></td>
 						<td class="topics-cell">{p.topics.join(', ')}</td>
-						<td><span class="badge status {p.status}">{p.status}</span></td>
+						<td><span class="badge status {p.status}">{p.status.replace('_', ' ')}</span></td>
 					</tr>
 				{/each}
 			</tbody>
@@ -155,73 +155,88 @@
 <style>
 	main {
 		max-width: 64rem;
-		margin: 2rem auto;
-		padding: 0 1.5rem;
-		font-family: system-ui, sans-serif;
+		margin: 0 auto;
+		padding: var(--space-5) var(--space-5) 4rem;
+		font-family: var(--font-sans);
 	}
 	header {
 		display: flex;
 		align-items: baseline;
 		justify-content: space-between;
-		margin-bottom: 1rem;
+		margin-bottom: var(--space-4);
 	}
 	h1 {
 		margin: 0;
+		font-size: 1.6rem;
+		letter-spacing: -0.01em;
 	}
 	.count {
-		color: #666;
+		color: var(--text-muted);
 		font-size: 0.9rem;
 	}
 	.search {
 		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
+		gap: var(--space-2);
+		margin-bottom: var(--space-4);
 	}
 	.search input {
 		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #ccc;
-		border-radius: 6px;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--border-strong);
+		border-radius: var(--radius-sm);
+		background: var(--bg-inset);
+		color: var(--text);
 	}
 	.search button {
-		padding: 0.5rem 1rem;
-		border: 1px solid #ccc;
-		background: #fafafa;
-		border-radius: 6px;
-		cursor: pointer;
+		padding: var(--space-2) var(--space-4);
+		border: 1px solid var(--border-strong);
+		background: var(--bg-elev);
+		color: var(--text);
+		border-radius: var(--radius-sm);
+	}
+	.search button:hover {
+		background: var(--bg-inset);
 	}
 	.clear {
-		color: #b00;
+		color: var(--danger);
+		border-color: var(--danger) !important;
 	}
 	.filters {
 		display: grid;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
+		gap: var(--space-4);
+		margin-bottom: var(--space-5);
 	}
 	fieldset {
-		border: 1px solid #e5e5e5;
-		border-radius: 6px;
-		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		padding: var(--space-2) var(--space-3);
 	}
 	legend {
-		font-size: 0.85rem;
-		color: #555;
-		padding: 0 0.25rem;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		padding: 0 var(--space-1);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 	.chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.2rem 0.5rem;
+		gap: var(--space-1);
+		padding: 0.2rem 0.6rem;
 		margin: 0.15rem;
-		border: 1px solid #ddd;
+		border: 1px solid var(--border-strong);
 		border-radius: 999px;
 		font-size: 0.85rem;
 		cursor: pointer;
-		background: #fff;
+		background: var(--bg-inset);
+	}
+	.chip:has(input:checked) {
+		border-color: var(--accent);
+		color: var(--accent-strong);
 	}
 	.chip input {
 		margin: 0;
+		accent-color: var(--accent);
 	}
 	.topic-list {
 		display: flex;
@@ -236,61 +251,64 @@
 	th,
 	td {
 		text-align: left;
-		padding: 0.6rem 0.5rem;
-		border-bottom: 1px solid #eee;
+		padding: var(--space-3) var(--space-2);
+		border-bottom: 1px solid var(--border);
 		font-size: 0.95rem;
 	}
 	th {
 		font-weight: 600;
-		color: #444;
-		background: #fafafa;
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 	tbody tr {
 		cursor: pointer;
+		transition: background 120ms ease;
 	}
 	tbody tr:hover,
 	tbody tr:focus {
-		background: #f5f7ff;
+		background: var(--bg-elev);
 		outline: none;
 	}
 	.topics-cell {
-		color: #666;
+		color: var(--text-muted);
 		font-size: 0.85rem;
 	}
 	.badge {
 		display: inline-block;
-		padding: 0.1rem 0.5rem;
+		padding: 0.1rem 0.55rem;
 		border-radius: 999px;
 		font-size: 0.75rem;
 		text-transform: capitalize;
 	}
 	.difficulty.easy {
-		background: #e6f6ea;
-		color: #1f7a3a;
+		background: #114d2a;
+		color: #6cf09f;
 	}
 	.difficulty.medium {
-		background: #fff4e0;
-		color: #a35a00;
+		background: #4d3a11;
+		color: #f0c66c;
 	}
 	.difficulty.hard {
-		background: #fde7e7;
-		color: #a01818;
+		background: #4d1818;
+		color: #f0806c;
 	}
 	.status.solved {
-		background: #e6f6ea;
-		color: #1f7a3a;
+		background: #114d2a;
+		color: #6cf09f;
 	}
 	.status.attempted {
-		background: #eef2ff;
-		color: #3a4dc4;
+		background: #1a2a4d;
+		color: #9cc4f0;
 	}
 	.status.unsolved {
-		background: #f0f0f0;
-		color: #555;
+		background: var(--bg-inset);
+		color: var(--text-muted);
 	}
 	.empty {
 		text-align: center;
-		color: #777;
+		color: var(--text-muted);
 		padding: 3rem 0;
 	}
 </style>

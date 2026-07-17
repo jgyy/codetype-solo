@@ -81,7 +81,6 @@
 		height: 100%;
 		min-height: 0;
 		overflow: hidden;
-		border-radius: 6px;
 	}
 	.editor :global(.cm-editor) {
 		height: 100%;

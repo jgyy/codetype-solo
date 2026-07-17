@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import MasteryRing from '$lib/components/MasteryRing.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -15,7 +16,7 @@
 </svelte:head>
 
 <main>
-	<h1>Dashboard</h1>
+	<h1>Review schedule</h1>
 
 	<section>
 		<h2>Due for review today ({data.dueTopics.length})</h2>
@@ -30,7 +31,7 @@
 				<thead>
 					<tr>
 						<th>Topic</th>
-						<th>Score</th>
+						<th>Mastery</th>
 						<th>Ease</th>
 						<th>Interval (days)</th>
 						<th>Last reviewed</th>
@@ -44,7 +45,7 @@
 							<td>
 								<a href="/problems?topic={encodeURIComponent(t.topic)}">{t.topic}</a>
 							</td>
-							<td>{t.score.toFixed(1)}</td>
+							<td><MasteryRing score={t.score} size={30} /></td>
 							<td>{t.ease.toFixed(2)}</td>
 							<td>{t.intervalDays.toFixed(1)}</td>
 							<td>{fmtDate(t.lastReviewedAt)}</td>
@@ -60,11 +61,12 @@
 	{#if data.weakest.length > 0}
 		<section>
 			<h2>Weakest topics</h2>
-			<ol>
+			<ol class="weakest">
 				{#each data.weakest as t (t.topic)}
 					<li>
+						<MasteryRing score={t.score} size={30} />
 						<a href="/problems?topic={encodeURIComponent(t.topic)}">{t.topic}</a>
-						<span class="muted">— score {t.score.toFixed(1)}, ease {t.ease.toFixed(2)}</span>
+						<span class="muted">ease {t.ease.toFixed(2)}</span>
 					</li>
 				{/each}
 			</ol>
@@ -75,15 +77,24 @@
 <style>
 	main {
 		max-width: 60rem;
-		margin: 2rem auto;
-		padding: 0 1.5rem;
-		font-family: system-ui, sans-serif;
+		margin: 0 auto;
+		padding: var(--space-5) var(--space-5) 4rem;
+		font-family: var(--font-sans);
 	}
 	h1 {
-		margin-bottom: 1rem;
+		margin: 0 0 var(--space-4);
+		font-size: 1.6rem;
+		letter-spacing: -0.01em;
 	}
 	section {
 		margin-bottom: 2.5rem;
+	}
+	h2 {
+		font-size: 1rem;
+		margin: 0 0 var(--space-3);
+		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 	table {
 		width: 100%;
@@ -92,24 +103,41 @@
 	th,
 	td {
 		text-align: left;
-		padding: 0.5rem 0.75rem;
-		border-bottom: 1px solid #eee;
+		padding: var(--space-2) var(--space-3);
+		border-bottom: 1px solid var(--border);
+		vertical-align: middle;
 	}
 	th {
-		background: #fafafa;
 		font-weight: 600;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		background: var(--bg-elev);
 		position: sticky;
-		top: 0;
+		top: var(--header-h);
 		z-index: 1;
-		box-shadow: inset 0 -1px 0 #e5e5e5;
 	}
 	tbody tr {
 		transition: background 120ms ease;
 	}
 	tbody tr:hover {
-		background: #f7f9fc;
+		background: var(--bg-elev);
+	}
+	.weakest {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.weakest li {
+		padding: var(--space-2) 0;
+		border-bottom: 1px solid var(--border);
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
 	}
 	.muted {
-		color: #777;
+		color: var(--text-muted);
+		font-size: 0.9rem;
 	}
 </style>

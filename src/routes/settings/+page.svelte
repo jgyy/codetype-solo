@@ -43,15 +43,15 @@
 </script>
 
 <svelte:head>
-	<title>Settings — codetype-solo</title>
+	<title>Settings · CodeType Solo</title>
 </svelte:head>
 
 <main>
 	<h1>Settings</h1>
 
 	<section>
-		<h2>Backup & Restore</h2>
-		<p>Export all your data to a JSON file, or import a previous backup.</p>
+		<h2>Backup & restore</h2>
+		<p class="lead">Export all your data to a JSON file, or restore a previous backup.</p>
 
 		<div class="actions">
 			<a class="btn" href="/api/backup/export" download>Export backup (JSON)</a>
@@ -76,7 +76,8 @@
 		{/if}
 
 		<p class="hint">
-			Import is destructive: existing rows in all tables are deleted before the backup is restored.
+			Importing is destructive: existing rows in every table are deleted before the backup is
+			restored.
 		</p>
 	</section>
 </main>
@@ -84,54 +85,66 @@
 <style>
 	main {
 		max-width: 720px;
-		margin: 2rem auto;
-		padding: 0 1rem;
-		font-family: system-ui, sans-serif;
+		margin: 0 auto;
+		padding: var(--space-5) var(--space-5) 4rem;
+		font-family: var(--font-sans);
 	}
 	h1 {
-		margin-bottom: 1.5rem;
+		margin: 0 0 var(--space-4);
+		font-size: 1.6rem;
+		letter-spacing: -0.01em;
 	}
 	section {
-		border: 1px solid #ddd;
-		border-radius: 8px;
-		padding: 1.25rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: var(--space-5);
+		background: var(--bg-elev);
+	}
+	h2 {
+		margin: 0 0 var(--space-2);
+		font-size: 1.1rem;
+	}
+	.lead {
+		color: var(--text-muted);
+		margin: 0;
 	}
 	.actions {
 		display: flex;
-		gap: 0.75rem;
+		gap: var(--space-3);
 		flex-wrap: wrap;
-		margin: 1rem 0;
+		margin: var(--space-4) 0;
 	}
 	.btn {
 		display: inline-block;
-		padding: 0.5rem 1rem;
-		border: 1px solid #888;
-		border-radius: 6px;
-		background: #f6f6f6;
-		color: #111;
+		padding: var(--space-2) var(--space-4);
+		border: 1px solid var(--border-strong);
+		border-radius: var(--radius-sm);
+		background: var(--bg-inset);
+		color: var(--text);
 		text-decoration: none;
 		cursor: pointer;
 		font: inherit;
+		font-size: 0.9rem;
 	}
 	.btn:hover {
-		background: #eaeaea;
+		border-color: var(--accent);
 	}
 	.btn-danger {
-		border-color: #c0392b;
-		color: #c0392b;
+		border-color: var(--danger);
+		color: var(--danger);
 	}
 	.btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
 	.ok {
-		color: #1e8449;
+		color: var(--accent);
 	}
 	.err {
-		color: #c0392b;
+		color: var(--danger);
 	}
 	.hint {
-		color: #666;
-		font-size: 0.9rem;
+		color: var(--text-muted);
+		font-size: 0.85rem;
 	}
 </style>

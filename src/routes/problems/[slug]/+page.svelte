@@ -355,20 +355,21 @@
 	.page {
 		display: flex;
 		flex-direction: column;
-		height: 100vh;
-		background: #0f1115;
-		color: #e6e6e6;
+		height: calc(100vh - var(--header-h));
+		background: var(--bg);
+		color: var(--text);
+		font-family: var(--font-sans);
 	}
 	.topbar {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		border-bottom: 1px solid #222;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border-bottom: 1px solid var(--border);
 		flex-wrap: wrap;
 	}
 	.back {
-		color: #9ab;
+		color: var(--text-muted);
 		text-decoration: none;
 		font-size: 0.875rem;
 	}
@@ -378,10 +379,11 @@
 	h1 {
 		font-size: 1.1rem;
 		margin: 0;
+		letter-spacing: -0.01em;
 	}
 	.badge {
 		font-size: 0.75rem;
-		padding: 0.15rem 0.5rem;
+		padding: 0.15rem 0.55rem;
 		border-radius: 999px;
 		text-transform: capitalize;
 	}
@@ -395,7 +397,7 @@
 	}
 	.badge-hard {
 		background: #4d1818;
-		color: #f06c6c;
+		color: #f0806c;
 	}
 	.topics {
 		display: flex;
@@ -403,20 +405,21 @@
 		flex-wrap: wrap;
 	}
 	.topic {
-		background: #1a1d24;
-		border: 1px solid #2a2f3a;
+		background: var(--bg-elev);
+		border: 1px solid var(--border);
 		padding: 0.1rem 0.45rem;
-		border-radius: 4px;
+		border-radius: var(--radius-sm);
 		font-size: 0.75rem;
-		color: #9ab;
+		color: var(--text-muted);
 	}
 	.spacer {
 		flex: 1;
 	}
 	.timer {
+		font-family: var(--font-mono);
 		font-variant-numeric: tabular-nums;
 		font-size: 0.95rem;
-		color: #cdd;
+		color: var(--accent);
 	}
 	.split {
 		flex: 1;
@@ -426,22 +429,22 @@
 	}
 	.description {
 		overflow: auto;
-		padding: 1rem 1.25rem;
-		border-right: 1px solid #222;
+		padding: var(--space-4) var(--space-5);
+		border-right: 1px solid var(--border);
 	}
 	.description :global(h1),
 	.description :global(h2),
 	.description :global(h3) {
-		color: #fff;
+		color: var(--text);
 	}
 	.description :global(pre) {
-		background: #1a1d24;
-		padding: 0.75rem;
-		border-radius: 6px;
+		background: var(--bg-elev);
+		padding: var(--space-3);
+		border-radius: var(--radius-sm);
 		overflow: auto;
 	}
 	.description :global(code) {
-		font-family: ui-monospace, monospace;
+		font-family: var(--font-mono);
 		font-size: 0.9em;
 	}
 	.editor-pane {
@@ -452,31 +455,33 @@
 	.editor-toolbar {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.5rem 0.75rem;
-		border-bottom: 1px solid #222;
+		gap: var(--space-3);
+		padding: var(--space-2) var(--space-3);
+		border-bottom: 1px solid var(--border);
 	}
 	.editor-toolbar label {
 		display: inline-flex;
 		gap: 0.4rem;
 		align-items: center;
 		font-size: 0.85rem;
-		color: #aab;
+		color: var(--text-muted);
 	}
 	.editor-toolbar select {
-		background: #1a1d24;
-		color: #e6e6e6;
-		border: 1px solid #2a2f3a;
-		border-radius: 4px;
+		background: var(--bg-elev);
+		color: var(--text);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
 		padding: 0.2rem 0.4rem;
+		font-family: inherit;
 	}
 	.attempt-pill {
 		font-size: 0.75rem;
-		background: #1a1d24;
-		border: 1px solid #2a2f3a;
+		font-family: var(--font-mono);
+		background: var(--bg-elev);
+		border: 1px solid var(--border);
 		padding: 0.15rem 0.5rem;
 		border-radius: 999px;
-		color: #9ab;
+		color: var(--text-muted);
 	}
 	.editor-wrap {
 		flex: 1;
@@ -485,47 +490,49 @@
 	.actionbar {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.6rem 1rem;
-		border-top: 1px solid #222;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border-top: 1px solid var(--border);
 		flex-wrap: wrap;
 	}
 	.actions {
 		margin-left: auto;
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 	.actionbar form {
 		display: inline;
 	}
 	button {
-		background: #1a1d24;
-		color: #e6e6e6;
-		border: 1px solid #2a2f3a;
+		background: var(--bg-elev);
+		color: var(--text);
+		border: 1px solid var(--border);
 		padding: 0.45rem 0.85rem;
-		border-radius: 6px;
+		border-radius: var(--radius-sm);
 		cursor: pointer;
 		font-size: 0.875rem;
 	}
 	button:hover:not(:disabled) {
-		background: #232733;
+		border-color: var(--border-strong);
 	}
 	button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
 	button.primary {
-		background: #2f7d4f;
-		border-color: #2f7d4f;
-		color: white;
+		background: var(--accent);
+		border-color: var(--accent);
+		color: var(--bg-inset);
+		font-weight: 600;
 	}
 	button.primary:hover:not(:disabled) {
-		background: #38935b;
+		background: var(--accent-strong);
+		border-color: var(--accent-strong);
 	}
 	.msg {
 		font-size: 0.85rem;
 		padding: 0.3rem 0.6rem;
-		border-radius: 4px;
+		border-radius: var(--radius-sm);
 	}
 	.msg.ok {
 		background: #114d2a;
@@ -540,25 +547,25 @@
 		color: #f0a0a0;
 	}
 	.notes-panel {
-		border-top: 1px solid #222;
-		padding: 1rem 1.25rem 1.5rem;
-		background: #11141a;
+		border-top: 1px solid var(--border);
+		padding: var(--space-4) var(--space-5) var(--space-5);
+		background: var(--bg-elev);
 	}
 	.notes-header {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		margin-bottom: 0.75rem;
+		gap: var(--space-3);
+		margin-bottom: var(--space-3);
 		flex-wrap: wrap;
 	}
 	.notes-header h2 {
 		font-size: 1rem;
 		margin: 0;
-		color: #fff;
+		color: var(--text);
 	}
 	.notes-form {
 		display: grid;
-		gap: 0.75rem;
+		gap: var(--space-3);
 		grid-template-columns: 1fr 1fr;
 	}
 	.notes-label {
@@ -566,14 +573,14 @@
 		flex-direction: column;
 		gap: 0.3rem;
 		font-size: 0.8rem;
-		color: #9ab;
+		color: var(--text-muted);
 	}
 	.notes-form textarea {
-		background: #0f1115;
-		color: #e6e6e6;
-		border: 1px solid #2a2f3a;
-		border-radius: 6px;
-		padding: 0.5rem 0.6rem;
+		background: var(--bg-inset);
+		color: var(--text);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		padding: var(--space-2) var(--space-3);
 		font-family: inherit;
 		font-size: 0.875rem;
 		resize: vertical;
@@ -582,15 +589,15 @@
 	.notes-actions {
 		grid-column: 1 / -1;
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 	.desc-toggle {
 		display: none;
-		background: #1a1d24;
-		color: #cdd;
-		border: 1px solid #2a2f3a;
+		background: var(--bg-elev);
+		color: var(--text-muted);
+		border: 1px solid var(--border);
 		padding: 0.3rem 0.6rem;
-		border-radius: 6px;
+		border-radius: var(--radius-sm);
 		font-size: 0.8rem;
 		cursor: pointer;
 	}
